@@ -1,0 +1,33 @@
+### Login Admin
+POST http://localhost:5000/auth/login
+Content-Type: application/json
+
+{
+    "login": "admin",
+    "password": "123456"
+}
+
+
+### Tambah Petugas
+POST http://localhost:5000/users
+Content-Type: application/json
+
+{
+    "nama": "Petugas",
+    "nip": "111",
+    "password": "123456",
+    "role": "petugas"
+}
+
+
+### Tambah User
+POST http://localhost:5000/users
+Content-Type: application/json
+
+{
+    "nama": "Budi Santoso",
+    "nip": "222",
+    "password": "123456",
+    "role": "user"
+}
+
