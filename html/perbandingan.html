@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perbandingan Periode - Sistem BKL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #2d3436;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: #ffffff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            background: linear-gradient(135deg, #0b4f6c 0%, #1a7ba0 100%);
+            color: white;
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .user-profile {
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #01baef, #0b4f6c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .user-info h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 11px;
+            color: #636e72;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            padding: 0 20px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #636e72;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #2d3436;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(11, 79, 108, 0.05);
+            border-left-color: #0b4f6c;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(11, 79, 108, 0.1) 0%, rgba(11, 79, 108, 0.02) 100%);
+            border-left-color: #0b4f6c;
+            color: #0b4f6c;
+            font-weight: 600;
+        }
+
+        .nav-item .icon {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item .text {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background: #eb3b5a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c23249;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            background: white;
+            padding: 24px 28px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .page-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 6px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #636e72;
+        }
+
+        .breadcrumb a {
+            color: #0b4f6c;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Period Selector */
+        .period-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .period-box {
+            padding: 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+
+        .period-label {
+            font-size: 12px;
+            color: #636e72;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .period-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2d3436;
+            font-size: 12px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0b4f6c;
+            box-shadow: 0 0 0 3px rgba(11, 79, 108, 0.1);
+        }
+
+        /* Program Tabs */
+        .program-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .program-tab {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #636e72;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .program-tab:hover {
+            background: #f0f0f0;
+        }
+
+        .program-tab.active {
+            background: #0b4f6c;
+            color: white;
+        }
+
+        /* Comparison Stats */
+        .comparison-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e1e8ed;
+            text-align: center;
+        }
+
+        .stat-card .icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .label {
+            font-size: 11px;
+            color: #636e72;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-values {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .stat-value {
+            text-align: center;
+        }
+
+        .stat-value .number {
+            font-size: 20px;
+            font-weight: 800;
+            color: #2d3436;
+        }
+
+        .stat-value .period {
+            font-size: 10px;
+            color: #636e72;
+            margin-top: 4px;
+        }
+
+        .stat-diff {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .stat-diff.positive {
+            color: #20bf6b;
+        }
+
+        .stat-diff.negative {
+            color: #eb3b5a;
+        }
+
+        .stat-diff.neutral {
+            color: #636e72;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #0b4f6c 0%, #1a7ba0 100%);
+        }
+
+        th {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        th.left {
+            text-align: left;
+        }
+
+        td {
+            padding: 14px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: center;
+        }
+
+        td.left {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        tbody tr:hover {
+            background: rgba(1, 186, 239, 0.03);
+        }
+
+        .period-col {
+            background: rgba(11, 79, 108, 0.03);
+        }
+
+        .diff-col {
+            font-weight: 700;
+        }
+
+        .diff-positive {
+            color: #20bf6b;
+        }
+
+        .diff-negative {
+            color: #eb3b5a;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-success {
+            background: rgba(32, 191, 107, 0.1);
+            color: #20bf6b;
+        }
+
+        .badge-danger {
+            background: rgba(235, 59, 90, 0.1);
+            color: #eb3b5a;
+        }
+
+        .badge-warning {
+            background: rgba(247, 183, 49, 0.1);
+            color: #f7b731;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0b4f6c, #1a7ba0);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 79, 108, 0.3);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #0b4f6c;
+            border: 2px solid #0b4f6c;
+        }
+
+        .btn-outline:hover {
+            background: #0b4f6c;
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, rgba(1, 186, 239, 0.05) 0%, rgba(56, 103, 214, 0.05) 100%);
+            border-left: 4px solid #3867d6;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .info-box p {
+            font-size: 13px;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Chart Placeholder */
+        .chart-container {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 2px dashed #e1e8ed;
+        }
+
+        .chart-container .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .chart-container p {
+            color: #636e72;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-260px);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .comparison-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .period-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .comparison-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>📊 Sistem BKL</h1>
+            <p>Monitoring & Evaluasi</p>
+        </div>
+
+        <div class="user-profile">
+            <div class="user-avatar">PK</div>
+            <div class="user-info">
+                <h3>Kadis Banyuwangi</h3>
+                <p>Pimpinan Dinas</p>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Menu Utama</div>
+                <a href="#" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span class="text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">📈</span>
+                    <span class="text">Analitik & Tren</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🏆</span>
+                    <span class="text">Ranking Kecamatan</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <span class="icon">🔄</span>
+                    <span class="text">Perbandingan Periode</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">📄</span>
+                    <span class="text">Laporan</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Data Management</div>
+                <a href="#" class="nav-item">
+                    <span class="icon">📥</span>
+                    <span class="text">Import Data SIGA</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🎯</span>
+                    <span class="text">Master Target</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">✓</span>
+                    <span class="text">Validasi Data</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Pengaturan</div>
+                <a href="#" class="nav-item">
+                    <span class="icon">⚙️</span>
+                    <span class="text">Setting Sistem</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <span>🚪</span>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>🔄 Perbandingan Periode</h2>
+            <div class="breadcrumb">
+                <a href="#">Dashboard</a> / Perbandingan Periode
+            </div>
+        </div>
+
+        <!-- Period Selector Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Pilih Periode yang Akan Dibandingkan</div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="compareData()">
+                        <span>🔍</span>
+                        <span>Bandingkan Data</span>
+                    </button>
+                    <button class="btn btn-outline">
+                        <span>📤</span>
+                        <span>Export PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="period-selector">
+                    <!-- Periode 1 -->
+                    <div class="period-box">
+                        <div class="period-label">📅 Periode 1</div>
+                        <div class="period-inputs">
+                            <div class="form-group">
+                                <label>Bulan</label>
+                                <select class="form-control" id="month1">
+                                    <option value="7">Juli</option>
+                                    <option value="8" selected>Agustus</option>
+                                    <option value="9">September</option>
+                                    <option value="10">Oktober</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tahun</label>
+                                <select class="form-control" id="year1">
+                                    <option value="2024">2024</option>
+                                    <option value="2025" selected>2025</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Periode 2 -->
+                    <div class="period-box">
+                        <div class="period-label">📅 Periode 2</div>
+                        <div class="period-inputs">
+                            <div class="form-group">
+                                <label>Bulan</label>
+                                <select class="form-control" id="month2">
+                                    <option value="6">Juni</option>
+                                    <option value="7" selected>Juli</option>
+                                    <option value="8">Agustus</option>
+                                    <option value="9">September</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tahun</label>
+                                <select class="form-control" id="year2">
+                                    <option value="2024">2024</option>
+                                    <option value="2025" selected>2025</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <p><strong>💡 Tips Perbandingan:</strong></p>
+                    <p>• Bandingkan bulan yang sama tahun berbeda untuk melihat tren tahunan</p>
+                    <p>• Bandingkan bulan berurutan untuk melihat perkembangan bulanan</p>
+                    <p>• Perhatikan tanda ↑ (naik) dan ↓ (turun) untuk analisis performa</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Program Tabs -->
+        <div class="card">
+            <div class="card-body" style="padding: 16px 24px 0 24px;">
+                <div class="program-tabs">
+                    <button class="program-tab active" onclick="switchProgram('bkl')">
+                        <span>👴</span>
+                        <span>BKL</span>
+                    </button>
+                    <button class="program-tab" onclick="switchProgram('bkb')">
+                        <span>👶</span>
+                        <span>BKB</span>
+                    </button>
+                    <button class="program-tab" onclick="switchProgram('bkr')">
+                        <span>🧒</span>
+                        <span>BKR</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Stats -->
+        <div class="comparison-stats">
+            <div class="stat-card">
+                <div class="icon">🏢</div>
+                <div class="label">Total Poktan</div>
+                <div class="stat-values">
+                    <div class="stat-value">
+                        <div class="number">253</div>
+                        <div class="period">Agustus</div>
+                    </div>
+                    <div style="color: #636e72;">vs</div>
+                    <div class="stat-value">
+                        <div class="number">253</div>
+                        <div class="period">Juli</div>
+                    </div>
+                </div>
+                <div class="stat-diff neutral">
+                    <span>—</span>
+                    <span>Tidak ada perubahan</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon">👥</div>
+                <div class="label">Total Anggota</div>
+                <div class="stat-values">
+                    <div class="stat-value">
+                        <div class="number">32,985</div>
+                        <div class="period">Agustus</div>
+                    </div>
+                    <div style="color: #636e72;">vs</div>
+                    <div class="stat-value">
+                        <div class="number">32,120</div>
+                        <div class="period">Juli</div>
+                    </div>
+                </div>
+                <div class="stat-diff positive">
+                    <span>↑</span>
+                    <span>+865 (+2.7%)</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon">🎯</div>
+                <div class="label">Total Capaian</div>
+                <div class="stat-values">
+                    <div class="stat-value">
+                        <div class="number">28,066</div>
+                        <div class="period">Agustus</div>
+                    </div>
+                    <div style="color: #636e72;">vs</div>
+                    <div class="stat-value">
+                        <div class="number">27,450</div>
+                        <div class="period">Juli</div>
+                    </div>
+                </div>
+                <div class="stat-diff positive">
+                    <span>↑</span>
+                    <span>+616 (+2.2%)</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon">📊</div>
+                <div class="label">% Terhadap Target</div>
+                <div class="stat-values">
+                    <div class="stat-value">
+                        <div class="number">92%</div>
+                        <div class="period">Agustus</div>
+                    </div>
+                    <div style="color: #636e72;">vs</div>
+                    <div class="stat-value">
+                        <div class="number">89%</div>
+                        <div class="period">Juli</div>
+                    </div>
+                </div>
+                <div class="stat-diff positive">
+                    <span>↑</span>
+                    <span>+3 poin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📈 Grafik Perbandingan Capaian per Kecamatan</div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <div class="icon">📊</div>
+                    <p><strong>Chart Visualization</strong></p>
+                    <p>Grafik perbandingan akan ditampilkan di sini menggunakan Chart.js</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📋 Tabel Perbandingan Detail - BKL</div>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="left">Kecamatan</th>
+                            <th colspan="3">AGUSTUS 2025</th>
+                            <th colspan="3">JULI 2025</th>
+                            <th colspan="3">PERUBAHAN</th>
+                        </tr>
+                        <tr>
+                            <th>Anggota</th>
+                            <th>Capaian</th>
+                            <th>%</th>
+                            <th>Anggota</th>
+                            <th>Capaian</th>
+                            <th>%</th>
+                            <th>Anggota</th>
+                            <th>Capaian</th>
+                            <th>%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="left">PESANGGARAN</td>
+                            <td class="period-col">966</td>
+                            <td class="period-col">838</td>
+                            <td class="period-col"><span class="badge badge-success">82%</span></td>
+                            <td>940</td>
+                            <td>810</td>
+                            <td><span class="badge badge-success">86%</span></td>
+                            <td class="diff-col diff-positive">+26</td>
+                            <td class="diff-col diff-positive">+28</td>
+                            <td class="diff-col diff-negative">-4%</td>
+                        </tr>
+                        <tr>
+                            <td class="left">BANGOREJO</td>
+                            <td class="period-col">1,388</td>
+                            <td class="period-col">1,174</td>
+                            <td class="period-col"><span class="badge badge-success">92%</span></td>
+                            <td>1,350</td>
+                            <td>1,100</td>
+                            <td><span class="badge badge-success">89%</span></td>
+                            <td class="diff-col diff-positive">+38</td>
+                            <td class="diff-col diff-positive">+74</td>
+                            <td class="diff-col diff-positive">+3%</td>
+                        </tr>
+                        <tr>
+                            <td class="left">PURWOHARJO</td>
+                            <td class="period-col">1,450</td>
+                            <td class="period-col">1,072</td>
+                            <td class="period-col"><span class="badge badge-warning">74%</span></td>
+                            <td>1,420</td>
+                            <td>1,050</td>
+                            <td><span class="badge badge-warning">75%</span></td>
+                            <td class="diff-col diff-positive">+30</td>
+                            <td class="diff-col diff-positive">+22</td>
+                            <td class="diff-col diff-negative">-1%</td>
+                        </tr>
+                        <tr>
+                            <td class="left">TEGALDLIMO</td>
+                            <td class="period-col">1,352</td>
+                            <td class="period-col">1,098</td>
+                            <td class="period-col"><span class="badge badge-warning">79%</span></td>
+                            <td>1,330</td>
+                            <td>1,080</td>
+                            <td><span class="badge badge-success">81%</span></td>
+                            <td class="diff-col diff-positive">+22</td>
+                            <td class="diff-col diff-positive">+18</td>
+                            <td class="diff-col diff-negative">-2%</td>
+                        </tr>
+                        <tr>
+                            <td class="left">MUNCAR</td>
+                            <td class="period-col">1,947</td>
+                            <td class="period-col">1,439</td>
+                            <td class="period-col"><span class="badge badge-warning">73%</span></td>
+                            <td>1,900</td>
+                            <td>1,400</td>
+                            <td><span class="badge badge-warning">74%</span></td>
+                            <td class="diff-col diff-positive">+47</td>
+                            <td class="diff-col diff-positive">+39</td>
+                            <td class="diff-col diff-negative">-1%</td>
+                        </tr>
+                        <tr>
+                            <td class="left">TEGALSARI</td>
+                            <td class="period-col">945</td>
+                            <td class="period-col">681</td>
+                            <td class="period-col"><span class="badge badge-success">80%</span></td>
+                            <td>920</td>
+                            <td>650</td>
+                            <td><span class="badge badge-warning">78%</span></td>
+                            <td class="diff-col diff-positive">+25</td>
+                            <td class="diff-col diff-positive">+31</td>
+                            <td class="diff-col diff-positive">+2%</td>
+                        </tr>
+                        <tr>
+                            <td class="left">LICIN</td>
+                            <td class="period-col">579</td>
+                            <td class="period-col">472</td>
+                            <td class="period-col"><span class="badge badge-success">84%</span></td>
+                            <td>560</td>
+                            <td>460</td>
+                            <td><span class="badge badge-success">82%</span></td>
+                            <td class="diff-col diff-positive">+19</td>
+                            <td class="diff-col diff-positive">+12</td>
+                            <td class="diff-col diff-positive">+2%</td>
+                        </tr>
+                        <tr>
+                            <td class="left">BLIMBINGSARI</td>
+                            <td class="period-col">1,157</td>
+                            <td class="period-col">1,108</td>
+                            <td class="period-col"><span class="badge badge-success">103%</span></td>
+                            <td>1,100</td>
+                            <td>1,050</td>
+                            <td><span class="badge badge-success">100%</span></td>
+                            <td class="diff-col diff-positive">+57</td>
+                            <td class="diff-col diff-positive">+58</td>
+                            <td class="diff-col diff-positive">+3%</td>
+                        </tr>
+                        <tr style="background: linear-gradient(135deg, rgba(11, 79, 108, 0.05) 0%, rgba(1, 186, 239, 0.05) 100%); font-weight: 700;">
+                            <td class="left">TOTAL</td>
+                            <td class="period-col">32,985</td>
+                            <td class="period-col">28,066</td>
+                            <td class="period-col"><span class="badge badge-success">92%</span></td>
+                            <td>32,120</td>
+                            <td>27,450</td>
+                            <td><span class="badge badge-success">89%</span></td>
+                            <td class="diff-col diff-positive">+865</td>
+                            <td class="diff-col diff-positive">+616</td>
+                            <td class="diff-col diff-positive">+3%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📝 Kesimpulan Perbandingan</div>
+            </div>
+            <div class="card-body">
+                <div style="background: linear-gradient(135deg, rgba(32, 191, 107, 0.05) 0%, rgba(32, 191, 107, 0.02) 100%); border-left: 4px solid #20bf6b; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #20bf6b; margin-bottom: 12px; font-size: 16px;">✓ Kinerja Meningkat</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Total anggota naik <strong>+865 orang (+2.7%)</strong> dari Juli ke Agustus 2025</li>
+                        <li>Total capaian meningkat <strong>+616 orang (+2.2%)</strong></li>
+                        <li>Persentase capaian terhadap target naik dari <strong>89% → 92% (+3 poin)</strong></li>
+                        <li>Kecamatan dengan peningkatan tertinggi: <strong>BANGOREJO (+74 capaian)</strong></li>
+                        <li>Kecamatan dengan performa terbaik: <strong>BLIMBINGSARI (103%)</strong></li>
+                    </ul>
+                </div>
+
+                <div style="background: linear-gradient(135deg, rgba(247, 183, 49, 0.05) 0%, rgba(247, 183, 49, 0.02) 100%); border-left: 4px solid #f7b731; padding: 20px; border-radius: 8px; margin-top: 16px;">
+                    <h4 style="color: #f7b731; margin-bottom: 12px; font-size: 16px;">⚠ Area yang Perlu Perhatian</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>MUNCAR</strong>: Meskipun jumlah anggota naik, persentase capaian turun -1%</li>
+                        <li><strong>PURWOHARJO</strong>: Capaian masih di bawah 75%, perlu strategi peningkatan</li>
+                        <li>Beberapa kecamatan mengalami penurunan persentase meskipun capaian absolut naik</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function compareData() {
+            const month1 = document.getElementById('month1').value;
+            const year1 = document.getElementById('year1').value;
+            const month2 = document.getElementById('month2').value;
+            const year2 = document.getElementById('year2').value;
+
+            alert(`Membandingkan data:\nPeriode 1: Bulan ${month1} Tahun ${year1}\nPeriode 2: Bulan ${month2} Tahun ${year2}`);
+        }
+
+        function switchProgram(program) {
+            // Remove active from all tabs
+            document.querySelectorAll('.program-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            console.log('Switched to program:', program);
+            // Here you can load different data based on selected program
+        }
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
+                alert('Logout berhasil! Anda akan diarahkan ke halaman login.');
+                // window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

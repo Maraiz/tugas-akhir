@@ -1,11 +1,15 @@
+import Layout from "../../components/layout/Layout";
+
 function Dashboard() {
 
     return (
-        <div>
+
+        <Layout>
 
             <h1>Ini Halaman Admin</h1>
 
-        </div>
+        </Layout>
+
     );
 
 }

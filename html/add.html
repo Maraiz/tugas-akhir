@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pengguna - Monitoring Poktan Dinsos PPKB Banyuwangi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f8;
+            color: #2d2d3a;
+            min-height: 100vh;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========================= */
+        /* SIDEBAR                   */
+        /* ========================= */
+
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.07);
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px;
+            height: 70px;
+            background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand-icon { font-size: 22px; flex-shrink: 0; }
+
+        .sidebar-brand-text h3 {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .sidebar-brand-text span {
+            color: rgba(255,255,255,0.7);
+            font-size: 11px;
+        }
+
+        .sidebar-profile {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #f0f0f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .profile-info h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1a1a2e;
+            line-height: 1.3;
+        }
+
+        .profile-info span {
+            font-size: 11px;
+            color: #1565c0;
+            font-weight: 500;
+        }
+
+        .sidebar-nav { flex: 1; padding: 12px 12px 8px; }
+
+        .nav-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #aab0c0;
+            padding: 14px 10px 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            color: #555668;
+            font-size: 13.5px;
+            font-weight: 500;
+            margin-bottom: 1px;
+            user-select: none;
+        }
+
+        .nav-item:hover { background: #eef3fb; color: #1565c0; }
+
+        .nav-item.active {
+            background: #e3edfa;
+            color: #1565c0;
+            font-weight: 600;
+            border-left: 3px solid #1565c0;
+            padding-left: 9px;
+        }
+
+        .nav-item .nav-icon {
+            font-size: 17px;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .nav-item.has-sub .nav-arrow {
+            margin-left: auto;
+            font-size: 12px;
+            color: #aab0c0;
+            transition: transform 0.2s;
+        }
+
+        .nav-item.has-sub.open .nav-arrow { transform: rotate(90deg); }
+        .nav-item.has-sub.open { background: #eef3fb; color: #1565c0; }
+
+        .nav-submenu { display: none; padding-left: 16px; margin-bottom: 2px; }
+        .nav-submenu.open { display: block; }
+
+        .nav-subitem {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 400;
+            margin-bottom: 1px;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-subitem::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #c8d0e0;
+            flex-shrink: 0;
+        }
+
+        .nav-subitem:hover { background: #eef3fb; color: #1565c0; }
+        .nav-subitem:hover::before { background: #1565c0; }
+
+        .nav-divider { height: 1px; background: #f0f0f5; margin: 8px 0; }
+
+        .sidebar-footer {
+            padding: 14px 12px;
+            border-top: 1px solid #f0f0f5;
+            flex-shrink: 0;
+        }
+
+        .btn-logout {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            background: linear-gradient(135deg, #e53935, #ef5350);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: opacity 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+            box-shadow: 0 3px 10px rgba(229, 57, 53, 0.3);
+        }
+
+        .btn-logout:hover {
+            opacity: 0.9;
+            box-shadow: 0 4px 14px rgba(229, 57, 53, 0.4);
+        }
+
+        /* ========================= */
+        /* MAIN AREA                 */
+        /* ========================= */
+
+        .main-area {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            height: 70px;
+            background: #ffffff;
+            border-bottom: 1px solid #e8eaf0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 36px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .header-left h2 { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+
+        .breadcrumb { font-size: 12px; color: #9090a8; margin-top: 2px; }
+        .breadcrumb span { color: #1565c0; font-weight: 500; }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .header-date {
+            font-size: 12px;
+            color: #9090a8;
+            background: #f5f7fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #e8eaf0;
+        }
+
+        .btn-notif {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid #e8eaf0;
+            background: #fff;
+            cursor: pointer;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .btn-notif:hover { background: #f5f7fc; }
+
+        .notif-badge {
+            position: absolute;
+            top: 7px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        .header-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 14px 5px 5px;
+            border: 1px solid #e8eaf0;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .header-profile:hover { background: #f5f7fc; }
+
+        .h-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .h-profile-info h4 { font-size: 12px; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
+        .h-profile-info span { font-size: 11px; color: #9090a8; }
+
+        /* ========================= */
+        /* CONTENT                   */
+        /* ========================= */
+
+        .content { flex: 1; padding: 32px 36px; }
+
+        .content-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-search {
+            position: relative;
+            flex: 1;
+            max-width: 320px;
+        }
+
+        .toolbar-search input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            border: 1px solid #e0e4ee;
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .toolbar-search input:focus { border-color: #1565c0; }
+
+        .toolbar-search .search-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #9090a8;
+        }
+
+        .btn-add-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1565c0, #1976d2);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 600;
+            font-family: inherit;
+            box-shadow: 0 3px 10px rgba(21, 101, 192, 0.3);
+            transition: opacity 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-add-user:hover {
+            opacity: 0.92;
+            box-shadow: 0 4px 14px rgba(21, 101, 192, 0.4);
+        }
+
+        .btn-add-user .plus-icon { font-size: 16px; font-weight: 700; }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-import-csv {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #ffffff;
+            color: #1565c0;
+            border: 1px solid #c7d7f0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-import-csv:hover {
+            background: #eef3fb;
+            box-shadow: 0 2px 8px rgba(21, 101, 192, 0.15);
+        }
+
+        /* ===== Import CSV Modal ===== */
+
+        .modal-box.modal-wide { max-width: 640px; }
+
+        .import-dropzone {
+            border: 2px dashed #c7d7f0;
+            border-radius: 12px;
+            padding: 28px 20px;
+            text-align: center;
+            background: #f8faff;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .import-dropzone:hover, .import-dropzone.drag-over {
+            border-color: #1565c0;
+            background: #eef3fb;
+        }
+
+        .import-dropzone .dz-icon { font-size: 30px; margin-bottom: 8px; }
+        .import-dropzone p { font-size: 13.5px; font-weight: 600; color: #2d2d3a; margin-bottom: 4px; }
+        .import-dropzone small { font-size: 11.5px; color: #9090a8; }
+
+        .import-template-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #1565c0;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .import-template-link:hover { text-decoration: underline; }
+
+        .import-preview-wrap {
+            margin-top: 18px;
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1px solid #e8eaf0;
+            border-radius: 10px;
+        }
+
+        .import-preview-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        .import-preview-wrap thead th {
+            position: sticky;
+            top: 0;
+            background: #f5f7fc;
+            padding: 9px 14px;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            border-bottom: 1px solid #e8eaf0;
+        }
+
+        .import-preview-wrap td {
+            padding: 9px 14px;
+            border-bottom: 1px solid #f0f2f8;
+            color: #2d2d3a;
+        }
+
+        .import-preview-wrap tr.row-error td { background: #fdecea; color: #c62828; }
+
+        .import-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        .import-status-bar .status-ok { color: #2e7d32; }
+        .import-status-bar .status-err { color: #e53935; }
+
+        .import-file-name {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding: 9px 14px;
+            background: #eef3fb;
+            border-radius: 8px;
+            font-size: 12.5px;
+            color: #1565c0;
+            font-weight: 600;
+        }
+
+        .import-file-name button {
+            background: none;
+            border: none;
+            color: #9090a8;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .table-card {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        thead tr { background: #f5f7fc; }
+
+        th {
+            text-align: left;
+            padding: 14px 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #6b7280;
+            border-bottom: 1px solid #e8eaf0;
+            white-space: nowrap;
+        }
+
+        th.col-actions, td.col-actions { text-align: center; }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f2f8;
+            transition: background 0.15s;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f8faff; }
+
+        td { padding: 14px 20px; color: #2d2d3a; vertical-align: middle; }
+
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12.5px;
+            flex-shrink: 0;
+        }
+
+        .user-name { font-weight: 600; color: #1a1a2e; font-size: 13.5px; }
+        .user-nip-sub { font-size: 11.5px; color: #9090a8; margin-top: 1px; }
+
+        .cell-nip { font-family: 'Courier New', monospace; font-size: 13px; color: #444; }
+
+        .password-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Courier New', monospace;
+            color: #6b7280;
+            letter-spacing: 1px;
+        }
+
+        .toggle-pass {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: #9090a8;
+            padding: 2px;
+        }
+
+        .toggle-pass:hover { color: #1565c0; }
+
+        .badge-kecamatan {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #eef3fb;
+            color: #1565c0;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid #e8eaf0;
+            background: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13.5px;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        }
+
+        .btn-icon:active { transform: scale(0.94); }
+
+        .btn-edit { color: #1565c0; }
+        .btn-edit:hover { background: #eef3fb; border-color: #1565c0; }
+
+        .btn-delete { color: #e53935; }
+        .btn-delete:hover { background: #fdecea; border-color: #e53935; }
+
+        .table-footer-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-top: 1px solid #f0f2f8;
+        }
+
+        .table-footer-info span {
+            font-size: 12px;
+            color: #9090a8;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .page-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 7px;
+            border: 1px solid #e8eaf0;
+            background: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            color: #555668;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn.active {
+            background: #1565c0;
+            color: #fff;
+            border-color: #1565c0;
+            font-weight: 600;
+        }
+
+        .page-btn:hover:not(.active) { background: #f5f7fc; }
+
+        /* ========================= */
+        /* FOOTER                    */
+        /* ========================= */
+
+        footer {
+            background: #ffffff;
+            border-top: 1px solid #e8eaf0;
+            padding: 14px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        footer p { font-size: 12px; color: #9090a8; }
+
+        .footer-version {
+            font-size: 11px;
+            color: #b0b8cc;
+            background: #f5f7fc;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* ========================= */
+        /* MODAL (Add/Edit User)     */
+        /* ========================= */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 24, 40, 0.45);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 { color: #fff; font-size: 15.5px; font-weight: 700; }
+
+        .modal-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .modal-body { padding: 22px 24px; }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #555668;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e4ee;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+            color: #2d2d3a;
+        }
+
+        .form-group input:focus, .form-group select:focus { border-color: #1565c0; }
+
+        .modal-footer {
+            padding: 16px 24px 22px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            padding: 10px 18px;
+            background: #f0f2f8;
+            color: #555668;
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1565c0, #1976d2);
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        .btn-cancel:hover { background: #e5e8f0; }
+        .btn-save:hover { opacity: 0.92; }
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">📊</div>
+            <div class="sidebar-brand-text">
+                <h3>Monitoring Poktan</h3>
+                <span>Dinsos PPKB Banyuwangi</span>
+            </div>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-avatar">AD</div>
+            <div class="profile-info">
+                <h4>Admin Dinas</h4>
+                <span>Super Administrator</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <div class="nav-section-label">Menu Utama</div>
+
+            <div class="nav-item">
+                <span class="nav-icon">📊</span>
+                Dashboard
+            </div>
+
+            <div class="nav-item has-sub" id="menuMonitoring" onclick="toggleSub('subMonitoring', this)">
+                <span class="nav-icon">▶</span>
+                Monitoring Program
+                <span class="nav-arrow">›</span>
+            </div>
+            <div class="nav-submenu" id="subMonitoring">
+                <div class="nav-subitem">BKB</div>
+                <div class="nav-subitem">BKR</div>
+                <div class="nav-subitem">BKL</div>
+                <div class="nav-subitem">PIK-R</div>
+                <div class="nav-subitem">UPPKA</div>
+            </div>
+
+            <div class="nav-divider"></div>
+            <div class="nav-section-label">Manajemen</div>
+
+            <div class="nav-item active">
+                <span class="nav-icon">👥</span>
+                Data Pengguna
+            </div>
+
+            <div class="nav-item">
+                <span class="nav-icon">📄</span>
+                Riwayat Upload
+            </div>
+
+            <div class="nav-item">
+                <span class="nav-icon">📈</span>
+                Laporan
+            </div>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout">
+                🚪 Logout
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- ===== MAIN AREA ===== -->
+    <div class="main-area">
+
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <h2>Data Pengguna</h2>
+                <div class="breadcrumb">Beranda › <span>Data Pengguna</span></div>
+            </div>
+            <div class="header-right">
+                <div class="header-date" id="headerDate"></div>
+                <button class="btn-notif">
+                    🔔
+                    <span class="notif-badge"></span>
+                </button>
+                <div class="header-profile">
+                    <div class="h-avatar">AD</div>
+                    <div class="h-profile-info">
+                        <h4>Admin Dinas</h4>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <section class="content">
+
+            <div class="content-toolbar">
+                <div class="toolbar-search">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Cari nama, NIP, atau kecamatan..." oninput="filterTable()">
+                </div>
+                <div class="toolbar-actions">
+                    <button class="btn-import-csv" onclick="openImportModal()">
+                        📥 Import CSV
+                    </button>
+                    <button class="btn-add-user" onclick="openModal()">
+                        <span class="plus-icon">+</span>
+                        Add User
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>NIP</th>
+                                <th>Nama</th>
+                                <th>Kata Sandi</th>
+                                <th>Kecamatan</th>
+                                <th class="col-actions">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer-info">
+                    <span id="footerInfo">Menampilkan 8 dari 8 pengguna</span>
+                    <div class="pagination">
+                        <button class="page-btn">‹</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">›</button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 Monitoring Poktan · Dinas Sosial PPKB Kabupaten Banyuwangi</p>
+            <span class="footer-version">v1.0.0</span>
+        </footer>
+
+    </div>
+</div>
+
+<!-- ===== MODAL Add/Edit User ===== -->
+<div class="modal-overlay" id="userModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">Tambah Pengguna</h3>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>NIP</label>
+                <input type="text" id="inputNip" placeholder="Masukkan NIP">
+            </div>
+            <div class="form-group">
+                <label>Nama</label>
+                <input type="text" id="inputNama" placeholder="Masukkan nama lengkap">
+            </div>
+            <div class="form-group">
+                <label>Kata Sandi</label>
+                <input type="password" id="inputPass" placeholder="Masukkan kata sandi">
+            </div>
+            <div class="form-group">
+                <label>Kecamatan</label>
+                <select id="inputKecamatan">
+                    <option value="">Pilih kecamatan</option>
+                    <option>Banyuwangi</option>
+                    <option>Giri</option>
+                    <option>Glagah</option>
+                    <option>Kalipuro</option>
+                    <option>Kabat</option>
+                    <option>Rogojampi</option>
+                    <option>Srono</option>
+                    <option>Genteng</option>
+                    <option>Muncar</option>
+                    <option>Songgon</option>
+                    <option>Sempu</option>
+                    <option>Gambiran</option>
+                    <option>Cluring</option>
+                    <option>Tegalsari</option>
+                    <option>Singojuruh</option>
+                    <option>Purwoharjo</option>
+                    <option>Bangorejo</option>
+                    <option>Siliragung</option>
+                    <option>Pesanggaran</option>
+                    <option>Tegaldlimo</option>
+                    <option>Wongsorejo</option>
+                    <option>Kalibaru</option>
+                    <option>Glenmore</option>
+                    <option>Licin</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Batal</button>
+            <button class="btn-save" onclick="saveUser()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL Import CSV ===== -->
+<div class="modal-overlay" id="importModal">
+    <div class="modal-box modal-wide">
+        <div class="modal-header">
+            <h3>Import Data Pengguna (CSV)</h3>
+            <button class="modal-close" onclick="closeImportModal()">✕</button>
+        </div>
+        <div class="modal-body">
+
+            <div class="import-dropzone" id="dropzone" onclick="document.getElementById('csvFileInput').click()">
+                <div class="dz-icon">📄</div>
+                <p>Klik atau seret file CSV ke sini</p>
+                <small>Format kolom: nip, nama, kata_sandi, kecamatan</small>
+            </div>
+            <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCsvFile(this.files[0])">
+
+            <a class="import-template-link" onclick="downloadTemplate()">⬇ Unduh template CSV</a>
+
+            <div id="fileNameBox" style="display:none;">
+                <div class="import-file-name">
+                    <span id="fileNameText"></span>
+                    <button onclick="resetImport()" title="Hapus file">✕</button>
+                </div>
+            </div>
+
+            <div id="importPreviewWrap" class="import-preview-wrap" style="display:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NIP</th>
+                            <th>Nama</th>
+                            <th>Kata Sandi</th>
+                            <th>Kecamatan</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="importPreviewBody"></tbody>
+                </table>
+            </div>
+
+            <div id="importStatusBar" class="import-status-bar" style="display:none;"></div>
+
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeImportModal()">Batal</button>
+            <button class="btn-save" id="btnConfirmImport" onclick="confirmImport()" disabled>Import Data</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tanggal header
+    const now = new Date();
+    document.getElementById('headerDate').textContent =
+        now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Toggle submenu
+    function toggleSub(id, el) {
+        const sub = document.getElementById(id);
+        const isOpen = sub.classList.toggle('open');
+        el.classList.toggle('open', isOpen);
+    }
+
+    // ===== Data dummy pengguna =====
+    let users = [
+        { nip: '198501012010011001', nama: 'Ahmad Fauzi', pass: 'poktan123', kecamatan: 'Banyuwangi' },
+        { nip: '198702152011012002', nama: 'Siti Nurhaliza', pass: 'bwi@2025', kecamatan: 'Rogojampi' },
+        { nip: '199003102015011003', nama: 'Budi Santoso', pass: 'srono#456', kecamatan: 'Srono' },
+        { nip: '198911202012012004', nama: 'Dewi Lestari', pass: 'genteng789', kecamatan: 'Genteng' },
+        { nip: '199205052016011005', nama: 'Rizky Ramadhan', pass: 'muncar2024', kecamatan: 'Muncar' },
+        { nip: '198808082013012006', nama: 'Nur Aisyah', pass: 'kalipuro!1', kecamatan: 'Kalipuro' },
+        { nip: '199107172014011007', nama: 'Eko Prasetyo', pass: 'glagah_08', kecamatan: 'Glagah' },
+        { nip: '198606062011012008', nama: 'Wulan Sari', pass: 'sempu2023', kecamatan: 'Sempu' }
+    ];
+
+    let editIndex = null;
+
+    function initials(name) {
+        return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    }
+
+    function maskPass(pass) {
+        return '•'.repeat(Math.min(pass.length, 10));
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        users.forEach((u, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="cell-nip">${u.nip}</td>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar">${initials(u.nama)}</div>
+                        <div>
+                            <div class="user-name">${u.nama}</div>
+                            <div class="user-nip-sub">Petugas</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="password-cell">
+                        <span class="pass-text" data-pass="${u.pass}" data-visible="false">${maskPass(u.pass)}</span>
+                        <button class="toggle-pass" onclick="togglePass(this)">👁</button>
+                    </div>
+                </td>
+                <td><span class="badge-kecamatan">${u.kecamatan}</span></td>
+                <td class="col-actions">
+                    <div class="action-buttons">
+                        <button class="btn-icon btn-edit" title="Edit" onclick="editUser(${i})">✏️</button>
+                        <button class="btn-icon btn-delete" title="Hapus" onclick="deleteUser(${i})">🗑️</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('footerInfo').textContent = `Menampilkan ${users.length} dari ${users.length} pengguna`;
+    }
+
+    function togglePass(btn) {
+        const span = btn.previousElementSibling;
+        const visible = span.getAttribute('data-visible') === 'true';
+        span.textContent = visible ? maskPass(span.dataset.pass) : span.dataset.pass;
+        span.setAttribute('data-visible', String(!visible));
+        btn.textContent = visible ? '👁' : '🙈';
+    }
+
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let visibleCount = 0;
+        rows.forEach((row, i) => {
+            const u = users[i];
+            const match = u.nama.toLowerCase().includes(q) || u.nip.includes(q) || u.kecamatan.toLowerCase().includes(q);
+            row.style.display = match ? '' : 'none';
+            if (match) visibleCount++;
+        });
+        document.getElementById('footerInfo').textContent = `Menampilkan ${visibleCount} dari ${users.length} pengguna`;
+    }
+
+    // ===== Modal handling =====
+    function openModal() {
+        editIndex = null;
+        document.getElementById('modalTitle').textContent = 'Tambah Pengguna';
+        document.getElementById('inputNip').value = '';
+        document.getElementById('inputNama').value = '';
+        document.getElementById('inputPass').value = '';
+        document.getElementById('inputKecamatan').value = '';
+        document.getElementById('userModal').classList.add('open');
+    }
+
+    function editUser(index) {
+        editIndex = index;
+        const u = users[index];
+        document.getElementById('modalTitle').textContent = 'Edit Pengguna';
+        document.getElementById('inputNip').value = u.nip;
+        document.getElementById('inputNama').value = u.nama;
+        document.getElementById('inputPass').value = u.pass;
+        document.getElementById('inputKecamatan').value = u.kecamatan;
+        document.getElementById('userModal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('userModal').classList.remove('open');
+    }
+
+    function saveUser() {
+        const nip = document.getElementById('inputNip').value.trim();
+        const nama = document.getElementById('inputNama').value.trim();
+        const pass = document.getElementById('inputPass').value.trim();
+        const kecamatan = document.getElementById('inputKecamatan').value;
+
+        if (!nip || !nama || !pass || !kecamatan) {
+            alert('Mohon lengkapi semua kolom.');
+            return;
+        }
+
+        if (editIndex === null) {
+            users.push({ nip, nama, pass, kecamatan });
+        } else {
+            users[editIndex] = { nip, nama, pass, kecamatan };
+        }
+
+        renderTable();
+        closeModal();
+    }
+
+    function deleteUser(index) {
+        if (confirm(`Hapus pengguna "${users[index].nama}"?`)) {
+            users.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    // Close modal jika klik area luar
+    document.getElementById('userModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ===== Import CSV =====
+    const KECAMATAN_LIST = [
+        'Banyuwangi', 'Giri', 'Glagah', 'Kalipuro', 'Kabat', 'Rogojampi', 'Srono',
+        'Genteng', 'Muncar', 'Songgon', 'Sempu', 'Gambiran', 'Cluring', 'Tegalsari',
+        'Singojuruh', 'Purwoharjo', 'Bangorejo', 'Siliragung', 'Pesanggaran',
+        'Tegaldlimo', 'Wongsorejo', 'Kalibaru', 'Glenmore', 'Licin'
+    ];
+
+    let parsedRows = [];
+
+    function openImportModal() {
+        resetImport();
+        document.getElementById('importModal').classList.add('open');
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModal').classList.remove('open');
+    }
+
+    function resetImport() {
+        parsedRows = [];
+        document.getElementById('csvFileInput').value = '';
+        document.getElementById('fileNameBox').style.display = 'none';
+        document.getElementById('importPreviewWrap').style.display = 'none';
+        document.getElementById('importStatusBar').style.display = 'none';
+        document.getElementById('btnConfirmImport').disabled = true;
+    }
+
+    function downloadTemplate() {
+        const header = 'nip,nama,kata_sandi,kecamatan\n';
+        const sample = '198501012010011001,Contoh Nama,contohsandi123,Banyuwangi\n';
+        const blob = new Blob([header + sample], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'template_data_pengguna.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Drag & drop
+    const dropzone = document.getElementById('dropzone');
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropzone.addEventListener(evt, e => {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+        });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        dropzone.addEventListener(evt, e => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+        });
+    });
+    dropzone.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        if (file) handleCsvFile(file);
+    });
+
+    function parseCsvLine(line) {
+        // Sederhana: split koma, dukung tanda kutip dasar
+        const result = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                inQuotes = !inQuotes;
+            } else if (ch === ',' && !inQuotes) {
+                result.push(cur.trim());
+                cur = '';
+            } else {
+                cur += ch;
+            }
+        }
+        result.push(cur.trim());
+        return result;
+    }
+
+    function handleCsvFile(file) {
+        if (!file) return;
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            alert('Mohon unggah file dengan format .csv');
+            return;
+        }
+
+        document.getElementById('fileNameText').textContent = `📄 ${file.name}`;
+        document.getElementById('fileNameBox').style.display = 'block';
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const text = e.target.result;
+            const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+            if (lines.length < 2) {
+                alert('File CSV kosong atau tidak memiliki data.');
+                return;
+            }
+
+            const header = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+            const idxNip = header.indexOf('nip');
+            const idxNama = header.indexOf('nama');
+            const idxPass = header.indexOf('kata_sandi') !== -1 ? header.indexOf('kata_sandi') : header.indexOf('password');
+            const idxKec = header.indexOf('kecamatan');
+
+            if (idxNip === -1 || idxNama === -1 || idxPass === -1 || idxKec === -1) {
+                alert('Header CSV harus memuat kolom: nip, nama, kata_sandi, kecamatan');
+                return;
+            }
+
+            parsedRows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const cols = parseCsvLine(lines[i]);
+                const row = {
+                    nip: (cols[idxNip] || '').trim(),
+                    nama: (cols[idxNama] || '').trim(),
+                    pass: (cols[idxPass] || '').trim(),
+                    kecamatan: (cols[idxKec] || '').trim()
+                };
+
+                let error = '';
+                if (!row.nip || !row.nama || !row.pass || !row.kecamatan) {
+                    error = 'Data tidak lengkap';
+                } else if (!/^\d+$/.test(row.nip)) {
+                    error = 'NIP harus angka';
+                } else if (!KECAMATAN_LIST.some(k => k.toLowerCase() === row.kecamatan.toLowerCase())) {
+                    error = 'Kecamatan tidak dikenali';
+                } else if (users.some(u => u.nip === row.nip) || parsedRows.some(r => r.nip === row.nip)) {
+                    error = 'NIP duplikat';
+                }
+
+                parsedRows.push({ ...row, error });
+            }
+
+            renderImportPreview();
+        };
+        reader.readAsText(file);
+    }
+
+    function renderImportPreview() {
+        const tbody = document.getElementById('importPreviewBody');
+        tbody.innerHTML = '';
+
+        parsedRows.forEach(r => {
+            const tr = document.createElement('tr');
+            if (r.error) tr.classList.add('row-error');
+            tr.innerHTML = `
+                <td>${r.nip || '-'}</td>
+                <td>${r.nama || '-'}</td>
+                <td>${r.pass ? '•'.repeat(Math.min(r.pass.length, 8)) : '-'}</td>
+                <td>${r.kecamatan || '-'}</td>
+                <td>${r.error ? '⚠ ' + r.error : '✓ Valid'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('importPreviewWrap').style.display = 'block';
+
+        const validCount = parsedRows.filter(r => !r.error).length;
+        const errorCount = parsedRows.length - validCount;
+
+        const statusBar = document.getElementById('importStatusBar');
+        statusBar.style.display = 'flex';
+        statusBar.innerHTML = `
+            <span class="status-ok">✓ ${validCount} data valid</span>
+            ${errorCount > 0 ? `<span class="status-err">⚠ ${errorCount} data bermasalah (akan dilewati)</span>` : ''}
+        `;
+
+        document.getElementById('btnConfirmImport').disabled = validCount === 0;
+    }
+
+    function confirmImport() {
+        const validRows = parsedRows.filter(r => !r.error);
+        if (validRows.length === 0) return;
+
+        validRows.forEach(r => {
+            users.push({ nip: r.nip, nama: r.nama, pass: r.pass, kecamatan: r.kecamatan });
+        });
+
+        renderTable();
+        closeImportModal();
+        alert(`${validRows.length} pengguna berhasil diimport.`);
+    }
+
+    // Close import modal jika klik area luar
+    document.getElementById('importModal').addEventListener('click', function (e) {
+        if (e.target === this) closeImportModal();
+    });
+
+    // Init
+    renderTable();
+</script>
+
+</body>
+</html>
