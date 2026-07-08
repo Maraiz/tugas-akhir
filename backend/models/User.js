@@ -41,6 +41,11 @@ const User = sequelize.define(
             allowNull: false,
             defaultValue: "user",
         },
+
+        kecamatan: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     },
     {
         tableName: "users",

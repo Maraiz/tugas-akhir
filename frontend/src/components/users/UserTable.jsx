@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import api from "../../services/api";
 import "../../styles/dataPengguna.css";
 
 const KECAMATAN_LIST = [
@@ -8,23 +9,21 @@ const KECAMATAN_LIST = [
     "Tegaldlimo", "Wongsorejo", "Kalibaru", "Glenmore", "Licin",
 ];
 
-const INITIAL_USERS = [
-    { nip: "198501012010011001", nama: "Ahmad Fauzi", pass: "poktan123", kecamatan: "Banyuwangi" },
-    { nip: "198702152011012002", nama: "Siti Nurhaliza", pass: "bwi@2025", kecamatan: "Rogojampi" },
-    { nip: "199003102015011003", nama: "Budi Santoso", pass: "srono#456", kecamatan: "Srono" },
-    { nip: "198911202012012004", nama: "Dewi Lestari", pass: "genteng789", kecamatan: "Genteng" },
-    { nip: "199205052016011005", nama: "Rizky Ramadhan", pass: "muncar2024", kecamatan: "Muncar" },
-    { nip: "198808082013012006", nama: "Nur Aisyah", pass: "kalipuro!1", kecamatan: "Kalipuro" },
-    { nip: "199107172014011007", nama: "Eko Prasetyo", pass: "glagah_08", kecamatan: "Glagah" },
-    { nip: "198606062011012008", nama: "Wulan Sari", pass: "sempu2023", kecamatan: "Sempu" },
+const ROLE_OPTIONS = [
+    { value: "admin", label: "Admin" },
+    { value: "petugas", label: "Petugas" },
+    { value: "user", label: "User" },
 ];
 
-function initials(name) {
-    return name.split(" ").map((w) => w[0]).join("").substring(0, 2).toUpperCase();
-}
+const ROLE_LABEL = {
+    admin: "Admin",
+    petugas: "Petugas",
+    user: "User",
+};
 
-function maskPass(pass) {
-    return "•".repeat(Math.min(pass.length, 10));
+function initials(name) {
+    if (!name) return "??";
+    return name.split(" ").map((w) => w[0]).join("").substring(0, 2).toUpperCase();
 }
 
 /* Parser CSV sederhana, dukung tanda kutip dasar */
@@ -47,77 +46,167 @@ function parseCsvLine(line) {
     return result;
 }
 
-function DataPengguna() {
-    const [users, setUsers] = useState(INITIAL_USERS);
+const EMPTY_FORM = { nama: "", username: "", nip: "", password: "", role: "petugas", kecamatan: "" };
+
+function UserTable() {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
-    const [visiblePass, setVisiblePass] = useState({}); // { [nip]: true/false }
+    const [roleFilter, setRoleFilter] = useState(""); // "" = semua role
 
     // ===== Modal Tambah/Edit =====
     const [modalOpen, setModalOpen] = useState(false);
-    const [editIndex, setEditIndex] = useState(null);
-    const [form, setForm] = useState({ nip: "", nama: "", pass: "", kecamatan: "" });
+    const [editingUser, setEditingUser] = useState(null); // null = mode tambah, object = mode edit
+    const [form, setForm] = useState(EMPTY_FORM);
+    const [formError, setFormError] = useState("");
+    const [saving, setSaving] = useState(false);
 
-    // ===== Modal Import CSV =====
+    // ===== Modal Import CSV (khusus role petugas) =====
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [dragOver, setDragOver] = useState(false);
     const [csvFileName, setCsvFileName] = useState("");
     const [parsedRows, setParsedRows] = useState([]);
+    const [importing, setImporting] = useState(false);
     const csvInputRef = useRef(null);
 
-    // ===== Filter pencarian =====
+    // ===== Ambil data dari backend =====
+    async function fetchUsers() {
+        setLoading(true);
+        setLoadError("");
+        try {
+            const params = roleFilter ? { role: roleFilter } : {};
+            const response = await api.get("/users", { params });
+            setUsers(response.data.data);
+        } catch (error) {
+            console.error(error);
+            setLoadError(
+                error.response?.data?.message || "Gagal memuat data pengguna dari server."
+            );
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchUsers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [roleFilter]);
+
+    // ===== Filter pencarian (di sisi client, tambahan dari filter role) =====
     const filteredUsers = users.filter((u) => {
         const q = searchTerm.toLowerCase();
         return (
             u.nama.toLowerCase().includes(q) ||
-            u.nip.includes(q) ||
-            u.kecamatan.toLowerCase().includes(q)
+            (u.nip || "").includes(q) ||
+            (u.username || "").toLowerCase().includes(q) ||
+            (u.kecamatan || "").toLowerCase().includes(q)
         );
     });
 
-    function togglePass(nip) {
-        setVisiblePass((prev) => ({ ...prev, [nip]: !prev[nip] }));
-    }
-
     // ===== Modal Tambah/Edit handlers =====
     function openAddModal() {
-        setEditIndex(null);
-        setForm({ nip: "", nama: "", pass: "", kecamatan: "" });
+        setEditingUser(null);
+        setForm(EMPTY_FORM);
+        setFormError("");
         setModalOpen(true);
     }
 
-    function openEditModal(index) {
-        setEditIndex(index);
-        setForm({ ...users[index] });
+    function openEditModal(user) {
+        setEditingUser(user);
+        setForm({
+            nama: user.nama || "",
+            username: user.username || "",
+            nip: user.nip || "",
+            password: "", // sengaja kosong, backend nggak pernah kirim password
+            role: user.role || "petugas",
+            kecamatan: user.kecamatan || "",
+        });
+        setFormError("");
         setModalOpen(true);
     }
 
     function closeModal() {
+        if (saving) return;
         setModalOpen(false);
     }
 
-    function saveUser() {
-        const { nip, nama, pass, kecamatan } = form;
-        if (!nip || !nama || !pass || !kecamatan) {
-            alert("Mohon lengkapi semua kolom.");
+    async function saveUser() {
+        const { nama, username, nip, password, role, kecamatan } = form;
+
+        if (!nama || !role) {
+            setFormError("Mohon lengkapi Nama dan Role.");
             return;
         }
 
-        if (editIndex === null) {
-            setUsers((prev) => [...prev, { nip, nama, pass, kecamatan }]);
-        } else {
-            setUsers((prev) => prev.map((u, i) => (i === editIndex ? { nip, nama, pass, kecamatan } : u)));
+        if (role === "admin" && !username) {
+            setFormError("Username wajib diisi untuk role Admin.");
+            return;
         }
 
-        closeModal();
-    }
+        if ((role === "petugas" || role === "user") && !nip) {
+            setFormError("NIP wajib diisi untuk role Petugas/User.");
+            return;
+        }
 
-    function deleteUser(index) {
-        if (confirm(`Hapus pengguna "${users[index].nama}"?`)) {
-            setUsers((prev) => prev.filter((_, i) => i !== index));
+        if (role === "petugas" && !kecamatan) {
+            setFormError("Kecamatan wajib diisi untuk role Petugas.");
+            return;
+        }
+
+        // Password wajib diisi hanya saat MODE TAMBAH
+        if (!editingUser && !password) {
+            setFormError("Kata sandi wajib diisi untuk pengguna baru.");
+            return;
+        }
+
+        setSaving(true);
+        setFormError("");
+
+        const payload = {
+            nama,
+            role,
+            username: role === "admin" ? username : null,
+            nip: role === "admin" ? null : nip,
+            kecamatan: role === "petugas" ? kecamatan : null,
+        };
+
+        if (password) {
+            payload.password = password;
+        }
+
+        try {
+            if (editingUser) {
+                await api.put(`/users/${editingUser.id}`, payload);
+            } else {
+                await api.post("/users", payload);
+            }
+
+            closeModal();
+            await fetchUsers();
+        } catch (error) {
+            console.error(error);
+            setFormError(
+                error.response?.data?.message || "Gagal menyimpan data pengguna."
+            );
+        } finally {
+            setSaving(false);
         }
     }
 
-    // ===== Import CSV handlers =====
+    async function deleteUser(user) {
+        if (!confirm(`Hapus pengguna "${user.nama}"?`)) return;
+
+        try {
+            await api.delete(`/users/${user.id}`);
+            setUsers((prev) => prev.filter((u) => u.id !== user.id));
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.message || "Gagal menghapus pengguna.");
+        }
+    }
+
+    // ===== Import CSV handlers (khusus untuk menambah banyak PETUGAS sekaligus) =====
     function openImportModal() {
         setCsvFileName("");
         setParsedRows([]);
@@ -125,6 +214,7 @@ function DataPengguna() {
     }
 
     function closeImportModal() {
+        if (importing) return;
         setImportModalOpen(false);
     }
 
@@ -175,12 +265,12 @@ function DataPengguna() {
                 const row = {
                     nip: (cols[idxNip] || "").trim(),
                     nama: (cols[idxNama] || "").trim(),
-                    pass: (cols[idxPass] || "").trim(),
+                    password: (cols[idxPass] || "").trim(),
                     kecamatan: (cols[idxKec] || "").trim(),
                 };
 
                 let error = "";
-                if (!row.nip || !row.nama || !row.pass || !row.kecamatan) {
+                if (!row.nip || !row.nama || !row.password || !row.kecamatan) {
                     error = "Data tidak lengkap";
                 } else if (!/^\d+$/.test(row.nip)) {
                     error = "NIP harus angka";
@@ -198,17 +288,47 @@ function DataPengguna() {
         reader.readAsText(file);
     }
 
-    function confirmImport() {
+    // Import selalu bikin role "petugas" (sesuai format CSV: nip, nama, kata_sandi, kecamatan)
+    async function confirmImport() {
         const validRows = parsedRows.filter((r) => !r.error);
         if (validRows.length === 0) return;
 
-        setUsers((prev) => [
-            ...prev,
-            ...validRows.map((r) => ({ nip: r.nip, nama: r.nama, pass: r.pass, kecamatan: r.kecamatan })),
-        ]);
+        setImporting(true);
 
-        closeImportModal();
-        alert(`${validRows.length} pengguna berhasil diimport.`);
+        let successCount = 0;
+        const failedRows = [];
+
+        for (const row of validRows) {
+            try {
+                await api.post("/users", {
+                    nama: row.nama,
+                    nip: row.nip,
+                    password: row.password,
+                    kecamatan: row.kecamatan,
+                    role: "petugas",
+                });
+                successCount++;
+            } catch (error) {
+                failedRows.push({
+                    ...row,
+                    error: error.response?.data?.message || "Gagal disimpan",
+                });
+            }
+        }
+
+        setImporting(false);
+
+        if (failedRows.length > 0) {
+            setParsedRows(failedRows);
+            alert(
+                `${successCount} pengguna berhasil diimport, ${failedRows.length} gagal (lihat tabel untuk detail).`
+            );
+        } else {
+            closeImportModal();
+            alert(`${successCount} pengguna berhasil diimport.`);
+        }
+
+        await fetchUsers();
     }
 
     const validCount = parsedRows.filter((r) => !r.error).length;
@@ -216,18 +336,32 @@ function DataPengguna() {
 
     return (
         <>
-
             <div className="content-toolbar">
-                <div className="toolbar-search">
-                    <span className="search-icon">🔍</span>
-                    <input
-                        type="text"
-                        placeholder="Cari nama, NIP, atau kecamatan..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="toolbar-left">
+                    <div className="toolbar-search">
+                        <span className="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Cari nama, NIP/username, atau kecamatan..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    <select
+                        className="role-filter-select"
+                        value={roleFilter}
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                    >
+                        <option value="">Semua Role</option>
+                        {ROLE_OPTIONS.map((r) => (
+                            <option key={r.value} value={r.value}>{r.label}</option>
+                        ))}
+                    </select>
                 </div>
+
                 <div className="toolbar-actions">
+
                     <button className="btn-import-csv" onClick={openImportModal}>
                         📥 Import CSV
                     </button>
@@ -243,47 +377,64 @@ function DataPengguna() {
                     <table>
                         <thead>
                             <tr>
-                                <th>NIP</th>
+                                <th>NIP / Username</th>
                                 <th>Nama</th>
-                                <th>Kata Sandi</th>
+                                <th>Role</th>
                                 <th>Kecamatan</th>
                                 <th className="col-actions">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredUsers.map((u) => {
-                                const realIndex = users.indexOf(u);
-                                const isVisible = !!visiblePass[u.nip];
-                                return (
-                                    <tr key={u.nip}>
-                                        <td className="cell-nip">{u.nip}</td>
-                                        <td>
-                                            <div className="user-cell">
-                                                <div className="user-avatar">{initials(u.nama)}</div>
-                                                <div>
-                                                    <div className="user-name">{u.nama}</div>
-                                                    <div className="user-nip-sub">Petugas</div>
-                                                </div>
+                            {loading && (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: "center", padding: "24px", color: "#9090a8" }}>
+                                        Memuat data pengguna...
+                                    </td>
+                                </tr>
+                            )}
+
+                            {!loading && loadError && (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: "center", padding: "24px", color: "#e53935" }}>
+                                        {loadError}
+                                        <div>
+                                            <button className="btn-cancel" style={{ marginTop: 10 }} onClick={fetchUsers}>
+                                                Coba lagi
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+
+                            {!loading && !loadError && filteredUsers.length === 0 && (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: "center", padding: "24px", color: "#9090a8" }}>
+                                        Belum ada data pengguna.
+                                    </td>
+                                </tr>
+                            )}
+
+                            {!loading && !loadError && filteredUsers.map((u) => (
+                                <tr key={u.id}>
+                                    <td className="cell-nip">{u.role === "admin" ? u.username : u.nip}</td>
+                                    <td>
+                                        <div className="user-cell">
+                                            <div className="user-avatar">{initials(u.nama)}</div>
+                                            <div>
+                                                <div className="user-name">{u.nama}</div>
                                             </div>
-                                        </td>
-                                        <td>
-                                            <div className="password-cell">
-                                                <span>{isVisible ? u.pass : maskPass(u.pass)}</span>
-                                                <button className="toggle-pass" onClick={() => togglePass(u.nip)}>
-                                                    {isVisible ? "🙈" : "👁"}
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td><span className="badge-kecamatan">{u.kecamatan}</span></td>
-                                        <td className="col-actions">
-                                            <div className="action-buttons">
-                                                <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(realIndex)}>✏️</button>
-                                                <button className="btn-icon btn-delete" title="Hapus" onClick={() => deleteUser(realIndex)}>🗑️</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                        </div>
+                                    </td>
+                                    <td><span className={`badge-role badge-role-${u.role}`}>{ROLE_LABEL[u.role] || u.role}</span></td>
+                                    <td>{u.kecamatan ? <span className="badge-kecamatan">{u.kecamatan}</span> : <span style={{ color: "#c7cbd6" }}>-</span>}</td>
+                                    <td className="col-actions">
+                                        <div className="action-buttons">
+                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(u)}>✏️</button>
+                                            <button className="btn-icon btn-delete" title="Hapus" onClick={() => deleteUser(u)}>🗑️</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -303,19 +454,31 @@ function DataPengguna() {
                 <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeModal()}>
                     <div className="modal-box">
                         <div className="modal-header">
-                            <h3>{editIndex === null ? "Tambah Pengguna" : "Edit Pengguna"}</h3>
+                            <h3>{editingUser ? "Edit Pengguna" : "Tambah Pengguna"}</h3>
                             <button className="modal-close" onClick={closeModal}>✕</button>
                         </div>
                         <div className="modal-body">
+                            {formError && (
+                                <div style={{
+                                    background: "#fdecea", color: "#c62828", padding: "10px 14px",
+                                    borderRadius: 8, fontSize: 12.5, marginBottom: 14,
+                                }}>
+                                    ⚠ {formError}
+                                </div>
+                            )}
+
                             <div className="form-group">
-                                <label>NIP</label>
-                                <input
-                                    type="text"
-                                    placeholder="Masukkan NIP"
-                                    value={form.nip}
-                                    onChange={(e) => setForm({ ...form, nip: e.target.value })}
-                                />
+                                <label>Role</label>
+                                <select
+                                    value={form.role}
+                                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                                >
+                                    {ROLE_OPTIONS.map((r) => (
+                                        <option key={r.value} value={r.value}>{r.label}</option>
+                                    ))}
+                                </select>
                             </div>
+
                             <div className="form-group">
                                 <label>Nama</label>
                                 <input
@@ -325,31 +488,59 @@ function DataPengguna() {
                                     onChange={(e) => setForm({ ...form, nama: e.target.value })}
                                 />
                             </div>
+
+                            {form.role === "admin" ? (
+                                <div className="form-group">
+                                    <label>Username</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Masukkan username"
+                                        value={form.username}
+                                        onChange={(e) => setForm({ ...form, username: e.target.value })}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="form-group">
+                                    <label>NIP</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Masukkan NIP"
+                                        value={form.nip}
+                                        onChange={(e) => setForm({ ...form, nip: e.target.value })}
+                                    />
+                                </div>
+                            )}
+
                             <div className="form-group">
-                                <label>Kata Sandi</label>
+                                <label>Kata Sandi {editingUser && <span style={{ fontWeight: 400, color: "#9090a8" }}>(kosongkan jika tidak diubah)</span>}</label>
                                 <input
                                     type="password"
-                                    placeholder="Masukkan kata sandi"
-                                    value={form.pass}
-                                    onChange={(e) => setForm({ ...form, pass: e.target.value })}
+                                    placeholder={editingUser ? "Biarkan kosong jika tidak diganti" : "Masukkan kata sandi"}
+                                    value={form.password}
+                                    onChange={(e) => setForm({ ...form, password: e.target.value })}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label>Kecamatan</label>
-                                <select
-                                    value={form.kecamatan}
-                                    onChange={(e) => setForm({ ...form, kecamatan: e.target.value })}
-                                >
-                                    <option value="">Pilih kecamatan</option>
-                                    {KECAMATAN_LIST.map((k) => (
-                                        <option key={k} value={k}>{k}</option>
-                                    ))}
-                                </select>
-                            </div>
+
+                            {form.role === "petugas" && (
+                                <div className="form-group">
+                                    <label>Kecamatan</label>
+                                    <select
+                                        value={form.kecamatan}
+                                        onChange={(e) => setForm({ ...form, kecamatan: e.target.value })}
+                                    >
+                                        <option value="">Pilih kecamatan</option>
+                                        {KECAMATAN_LIST.map((k) => (
+                                            <option key={k} value={k}>{k}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={closeModal}>Batal</button>
-                            <button className="btn-save" onClick={saveUser}>Simpan</button>
+                            <button className="btn-cancel" onClick={closeModal} disabled={saving}>Batal</button>
+                            <button className="btn-save" onClick={saveUser} disabled={saving}>
+                                {saving ? "Menyimpan..." : "Simpan"}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -360,10 +551,14 @@ function DataPengguna() {
                 <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeImportModal()}>
                     <div className="modal-box modal-wide">
                         <div className="modal-header">
-                            <h3>Import Data Pengguna (CSV)</h3>
+                            <h3>Import Data Petugas (CSV)</h3>
                             <button className="modal-close" onClick={closeImportModal}>✕</button>
                         </div>
                         <div className="modal-body">
+                            <div className="upload-hint-note">
+                                ℹ️ Import CSV cuma buat nambah pengguna dengan role <b>Petugas</b> sekaligus banyak. Buat Admin/User, tambahkan satu-satu lewat tombol "Add User".
+                            </div>
+
                             <div
                                 className={`import-dropzone ${dragOver ? "drag-over" : ""}`}
                                 onClick={() => csvInputRef.current?.click()}
@@ -406,7 +601,6 @@ function DataPengguna() {
                                                 <tr>
                                                     <th>NIP</th>
                                                     <th>Nama</th>
-                                                    <th>Kata Sandi</th>
                                                     <th>Kecamatan</th>
                                                     <th>Status</th>
                                                 </tr>
@@ -416,7 +610,6 @@ function DataPengguna() {
                                                     <tr key={i} className={r.error ? "row-error" : ""}>
                                                         <td>{r.nip || "-"}</td>
                                                         <td>{r.nama || "-"}</td>
-                                                        <td>{r.pass ? "•".repeat(Math.min(r.pass.length, 8)) : "-"}</td>
                                                         <td>{r.kecamatan || "-"}</td>
                                                         <td>{r.error ? `⚠ ${r.error}` : "✓ Valid"}</td>
                                                     </tr>
@@ -435,9 +628,9 @@ function DataPengguna() {
                             )}
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={closeImportModal}>Batal</button>
-                            <button className="btn-save" disabled={validCount === 0} onClick={confirmImport}>
-                                Import Data
+                            <button className="btn-cancel" onClick={closeImportModal} disabled={importing}>Batal</button>
+                            <button className="btn-save" disabled={validCount === 0 || importing} onClick={confirmImport}>
+                                {importing ? "Mengimport..." : "Import Data"}
                             </button>
                         </div>
                     </div>
@@ -448,4 +641,4 @@ function DataPengguna() {
     );
 }
 
-export default DataPengguna;
+export default UserTable;

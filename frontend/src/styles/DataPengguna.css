@@ -43,6 +43,14 @@
     gap: 10px;
 }
 
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
 .btn-add-user {
     display: flex;
     align-items: center;
@@ -181,6 +189,44 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+}
+
+.badge-role {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-role-admin { background: #fdecea; color: #c62828; }
+.badge-role-petugas { background: #eef3fb; color: #1565c0; }
+.badge-role-user { background: #e3f4e5; color: #2e7d32; }
+
+.role-filter-select {
+    padding: 10px 14px;
+    border: 1px solid #e0e4ee;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #ffffff;
+    color: #2d2d3a;
+    outline: none;
+    cursor: pointer;
+}
+.role-filter-select:focus { border-color: #1565c0; }
+
+.upload-hint-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #eef3fb;
+    color: #1565c0;
+    border: 1px solid #c7d7f0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    margin-bottom: 16px;
 }
 
 .action-buttons {
