@@ -1,7 +1,20 @@
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import Header from "./Header";
+import Footer from "./Footer";
 import "../../styles/layout.css";
 
-function Layout({ children }) {
+/* Judul & breadcrumb per halaman, dicocokkan dari URL.
+   Tambahkan entri baru di sini setiap kali menambah halaman baru
+   (misalnya nanti "/admin/monitoring/bkr": { title: "Data BKR", breadcrumb: "BKR" }). */
+const ROUTE_META = {
+    "/admin": { title: "Dashboard", breadcrumb: "Dashboard" },
+    "/admin/data-pengguna": { title: "Data Pengguna", breadcrumb: "Data Pengguna" },
+};
+
+function Layout() {
+    const location = useLocation();
+    const meta = ROUTE_META[location.pathname] || { title: "", breadcrumb: "" };
 
     return (
 
@@ -9,11 +22,17 @@ function Layout({ children }) {
 
             <Sidebar />
 
-            <main className="main-content">
+            <div className="main-area">
 
-                {children}
+                <Header title={meta.title} breadcrumb={meta.breadcrumb} />
 
-            </main>
+                <main className="content">
+                    <Outlet />
+                </main>
+
+                <Footer />
+
+            </div>
 
         </div>
 

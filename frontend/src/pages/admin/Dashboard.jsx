@@ -1,17 +1,7 @@
-import Layout from "../../components/layout/Layout";
+import DashboardContent from "../../components/dashboard/DashboardContent";
 
 function Dashboard() {
-
-    return (
-
-        <Layout>
-
-            <h1>Ini Halaman Admin</h1>
-
-        </Layout>
-
-    );
-
+    return <DashboardContent />;
 }
 
 export default Dashboard;

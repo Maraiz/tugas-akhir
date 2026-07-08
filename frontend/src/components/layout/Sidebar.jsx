@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "../../styles/sidebar.css";
 
 function Sidebar() {
 
     const [openMonitoring, setOpenMonitoring] = useState(false);
+    const location = useLocation();
+
+    const isActive = (path) => location.pathname === path;
 
     return (
         <aside className="sidebar">
@@ -48,10 +52,10 @@ function Sidebar() {
                     Menu Utama
                 </div>
 
-                <div className="nav-item active">
+                <Link to="/admin" className={`nav-item ${isActive("/admin") ? "active" : ""}`}>
                     <span className="nav-icon">📊</span>
                     Dashboard
-                </div>
+                </Link>
 
                 {/* Monitoring Program */}
                 <div
@@ -74,10 +78,10 @@ function Sidebar() {
                 <div className="nav-divider"></div>
                 <div className="nav-section-label">Manajemen</div>
 
-                <div className="nav-item">
+                <Link to="/admin/data-pengguna" className={`nav-item ${isActive("/admin/data-pengguna") ? "active" : ""}`}>
                     <span className="nav-icon">👥</span>
                     Data Pengguna
-                </div>
+                </Link>
 
                 <div className="nav-item">
                     <span className="nav-icon">📄</span>
