@@ -10,6 +10,7 @@ import "../../styles/layout.css";
 const ROUTE_META = {
     "/admin": { title: "Dashboard", breadcrumb: "Dashboard" },
     "/admin/data-pengguna": { title: "Data Pengguna", breadcrumb: "Data Pengguna" },
+    "/admin/monitoring/bkr": { title: "Data BKR", breadcrumb: "BKR" },
 };
 
 function Layout() {

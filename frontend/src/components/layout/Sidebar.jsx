@@ -1,13 +1,21 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../../styles/sidebar.css";
 
 function Sidebar() {
 
     const [openMonitoring, setOpenMonitoring] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
 
     const isActive = (path) => location.pathname === path;
+
+    function handleLogout() {
+        if (!confirm("Yakin ingin logout?")) return;
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/");
+    }
 
     return (
         <aside className="sidebar">
@@ -69,7 +77,7 @@ function Sidebar() {
 
                 <div className={`nav-submenu ${openMonitoring ? "open" : ""}`} style={{ display: openMonitoring ? "block" : "none" }}>
                     <div className="nav-subitem">BKB</div>
-                    <div className="nav-subitem">BKR</div>
+                    <Link to="/admin/monitoring/bkr" className={`nav-subitem ${isActive("/admin/monitoring/bkr") ? "active" : ""}`}>BKR</Link>
                     <div className="nav-subitem">BKL</div>
                     <div className="nav-subitem">PIK-R</div>
                     <div className="nav-subitem">UPPKA</div>
@@ -97,7 +105,7 @@ function Sidebar() {
 
             {/* Footer Sidebar */}
             <div className="sidebar-footer">
-                <button className="btn-logout">
+                <button className="btn-logout" onClick={handleLogout}>
                     🚪 Logout
                 </button>
             </div>

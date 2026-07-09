@@ -6,6 +6,8 @@ import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 import DashboardAdmin from "../pages/admin/Dashboard";
 import DataPengguna from "../pages/admin/DataPengguna";
+import DataBkr from "../pages/admin/DataBkr";
+import AddBkr from "../pages/admin/AddBkr";
 import DashboardPetugas from "../pages/petugas/Dashboard";
 import DashboardUser from "../pages/user/Dashboard";
 
@@ -24,12 +26,11 @@ function AppRoutes() {
 
                 <Route element={<ProtectedRoute />}>
 
-                    {/* Semua route admin di dalam sini otomatis pakai Layout
-                        (Sidebar+Header+Footer) yang cuma di-mount SEKALI —
-                        pindah halaman cuma ganti bagian <Outlet /> saja */}
                     <Route path="/admin" element={<Layout />}>
                         <Route index element={<DashboardAdmin />} />
                         <Route path="data-pengguna" element={<DataPengguna />} />
+                        <Route path="monitoring/bkr" element={<DataBkr />} />
+                        <Route path="monitoring/bkr/tambah" element={<AddBkr />} />
                     </Route>
 
                 </Route>
