@@ -113,3 +113,65 @@
     font-size: 11px;
     color: #9090a8;
 }
+
+.header-profile-wrap {
+    position: relative;
+}
+
+.header-profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e8eaf0;
+    width: 220px;
+    padding: 14px;
+    z-index: 150;
+}
+
+.dropdown-user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+}
+
+.dropdown-user-info h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.dropdown-user-info span {
+    font-size: 11px;
+    color: #9090a8;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #f0f0f5;
+    margin-bottom: 10px;
+}
+
+.dropdown-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fdecea;
+    color: #e53935;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.dropdown-logout-btn:hover {
+    background: #fbd9d5;
+}

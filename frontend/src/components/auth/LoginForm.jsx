@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logodinsos.jpg";
 import "../../styles/login.css";
 import api from "../../services/api";
@@ -11,6 +11,8 @@ function LoginForm() {
     const [remember, setRemember] = useState(true);
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const warningMessage = location.state?.message;
 
     const handleSubmit = async (e) => {
 
@@ -85,6 +87,12 @@ function LoginForm() {
                 </div>
 
                 <div className="form-panel">
+
+                    {warningMessage && (
+                        <div className="login-warning">
+                            ⚠ {warningMessage}
+                        </div>
+                    )}
 
                     <h1 className="form-title">
                         Login to your Account
