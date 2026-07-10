@@ -325,3 +325,13 @@
     font-size: 13px; font-weight: 600; font-family: inherit;
 }
 .btn-modal-delete:hover { opacity: 0.92; }
+
+
+.preview-table-wrap tfoot td {
+    padding: 12px 14px;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: #eef3fb;
+    border-top: 2px solid #1565c0;
+    border-bottom: none;
+}

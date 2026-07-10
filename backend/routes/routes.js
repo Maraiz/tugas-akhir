@@ -28,4 +28,10 @@ router.use("/auth", require("./auth"));
 
 router.use("/users", require("./users"));
 
+// ==============================
+// Monitoring BKR
+// ==============================
+
+router.use("/bkr", require("./bkr"));
+
 module.exports = router;

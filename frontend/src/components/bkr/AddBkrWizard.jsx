@@ -1,7 +1,15 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
+import api from "../../services/api";
 import "../../styles/addBkr.css";
+
+const BULAN_OPTIONS = [
+    { value: 1, label: "Januari" }, { value: 2, label: "Februari" }, { value: 3, label: "Maret" },
+    { value: 4, label: "April" }, { value: 5, label: "Mei" }, { value: 6, label: "Juni" },
+    { value: 7, label: "Juli" }, { value: 8, label: "Agustus" }, { value: 9, label: "September" },
+    { value: 10, label: "Oktober" }, { value: 11, label: "November" }, { value: 12, label: "Desember" },
+];
 
 /* ===================== FIELD DEFINITION UNTUK BKR ===================== */
 /* Mengacu pada TABEL 4A SIGA — hanya kolom 1,2,3,4,12,13 yang dipakai,
@@ -94,10 +102,13 @@ function AddBkrWizard() {
     const [dragOver, setDragOver] = useState(false);
 
     // ===== STEP 1: Upload =====
+    const [selectedFile, setSelectedFile] = useState(null); // File object asli, buat dikirim & diarsip di backend
     const [fileName, setFileName] = useState("");
     const [rawHeaders, setRawHeaders] = useState([]);
     const [rawRows, setRawRows] = useState([]);
     const [debugText, setDebugText] = useState("");
+    const [bulan, setBulan] = useState("");
+    const [tahun, setTahun] = useState(new Date().getFullYear());
 
     // ===== STEP 3: Seleksi Kolom =====
     const [colMapping, setColMapping] = useState([]); // [{ colIndex, header, checked, mappedKey, sample }]
@@ -106,6 +117,8 @@ function AddBkrWizard() {
     const [mappedData, setMappedData] = useState([]);
     const [totals, setTotals] = useState(null);
 
+    const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState("");
     const [successOpen, setSuccessOpen] = useState(false);
 
     function goToStep(n) {
@@ -114,6 +127,7 @@ function AddBkrWizard() {
 
     // ===================== STEP 1: UPLOAD =====================
     function resetUpload() {
+        setSelectedFile(null);
         setFileName("");
         setRawHeaders([]);
         setRawRows([]);
@@ -147,6 +161,7 @@ function AddBkrWizard() {
                 const headers = detected.headers;
                 const rows = json.slice(detected.dataStartIndex).filter((r) => r.some((c) => String(c).trim() !== ""));
 
+                setSelectedFile(file);
                 setRawHeaders(headers);
                 setRawRows(rows);
                 setFileName(`📄 ${file.name} — ${rows.length} baris data terdeteksi`);
@@ -260,19 +275,44 @@ function AddBkrWizard() {
         setTotals({ totalAda, totalLapor, totalAnggota, totalHadir, totalPctLapor, totalPctHadir });
     }
 
-    function saveMonitoring() {
-        // TODO: sambungkan ke backend (POST /bkr atau semacamnya) kalau endpointnya sudah ada.
-        // Untuk sekarang cuma tampilkan overlay sukses, sama seperti versi HTML sebelumnya.
-        setSuccessOpen(true);
+    async function saveMonitoring() {
+        setSaveError("");
+        setSaving(true);
+
+        try {
+            const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+            formData.append("bulan", bulan);
+            formData.append("tahun", tahun);
+            formData.append("rows", JSON.stringify(mappedData));
+            formData.append("uploadedBy", storedUser?.nama || "-");
+            if (storedUser?.id) formData.append("uploadedById", storedUser.id);
+
+            await api.post("/bkr", formData, {
+                headers: { "Content-Type": undefined }, // biar browser yang generate boundary multipart, override default axios instance kalau ada
+            });
+
+            setSuccessOpen(true);
+        } catch (error) {
+            console.error(error);
+            setSaveError(error.response?.data?.message || "Gagal menyimpan data ke server.");
+        } finally {
+            setSaving(false);
+        }
     }
 
     function handleTambahLagi() {
         setSuccessOpen(false);
         setCurrentStep(1);
         resetUpload();
+        setBulan("");
+        setTahun(new Date().getFullYear());
         setColMapping([]);
         setMappedData([]);
         setTotals(null);
+        setSaveError("");
     }
 
     return (
@@ -298,6 +338,28 @@ function AddBkrWizard() {
                     <div className="panel-head">
                         <h3>Upload File Excel SIGA</h3>
                         <p>Unggah hasil unduhan data BKR dari aplikasi SIGA dalam format Excel (.xlsx / .xls / .csv)</p>
+                    </div>
+
+                    <div className="periode-select-row">
+                        <div className="form-group">
+                            <label>Bulan</label>
+                            <select value={bulan} onChange={(e) => setBulan(e.target.value)}>
+                                <option value="">Pilih bulan</option>
+                                {BULAN_OPTIONS.map((b) => (
+                                    <option key={b.value} value={b.value}>{b.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Tahun</label>
+                            <input
+                                type="number"
+                                value={tahun}
+                                onChange={(e) => setTahun(e.target.value)}
+                                min="2000"
+                                max="2100"
+                            />
+                        </div>
                     </div>
 
                     <div
@@ -344,7 +406,7 @@ function AddBkrWizard() {
                         <span></span>
                         <button
                             className="btn-nav next"
-                            disabled={!fileName}
+                            disabled={!fileName || !bulan || !tahun}
                             onClick={() => goToStep(2)}
                         >
                             Lanjut ke Validasi →
@@ -535,9 +597,17 @@ function AddBkrWizard() {
                         </table>
                     </div>
 
+                    {saveError && (
+                        <div className="upload-hint-box" style={{ background: "#fdecea", borderColor: "#f5c6c2", color: "#c62828", marginBottom: 16 }}>
+                            ⚠ {saveError}
+                        </div>
+                    )}
+
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(3)}>← Kembali</button>
-                        <button className="btn-nav save" onClick={saveMonitoring}>💾 Simpan Data Monitoring</button>
+                        <button className="btn-nav back" onClick={() => goToStep(3)} disabled={saving}>← Kembali</button>
+                        <button className="btn-nav save" onClick={saveMonitoring} disabled={saving}>
+                            {saving ? "Menyimpan..." : "💾 Simpan Data Monitoring"}
+                        </button>
                     </div>
                 </div>
             )}

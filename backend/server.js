@@ -18,6 +18,10 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
+// Supaya file excel yang diarsip (uploads/bkr/...) bisa diakses/didownload
+// lewat URL, misal http://localhost:5000/uploads/bkr/namafile.xlsx
+app.use("/uploads", express.static("uploads"));
+
 // =====================================
 // Routes
 // =====================================
