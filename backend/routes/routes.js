@@ -34,4 +34,10 @@ router.use("/users", require("./users"));
 
 router.use("/bkr", require("./bkr"));
 
+// ==============================
+// Monitoring BKB
+// ==============================
+
+router.use("/bkb", require("./bkb"));
+
 module.exports = router;

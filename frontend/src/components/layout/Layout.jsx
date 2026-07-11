@@ -6,11 +6,13 @@ import "../../styles/layout.css";
 
 /* Judul & breadcrumb per halaman, dicocokkan dari URL.
    Tambahkan entri baru di sini setiap kali menambah halaman baru
-   (misalnya nanti "/admin/monitoring/bkr": { title: "Data BKR", breadcrumb: "BKR" }). */
+   (misalnya nanti "/admin/monitoring/bkl": { title: "Data BKL", breadcrumb: "BKL" }). */
 const ROUTE_META = {
     "/admin": { title: "Dashboard", breadcrumb: "Dashboard" },
     "/admin/data-pengguna": { title: "Data Pengguna", breadcrumb: "Data Pengguna" },
+    "/admin/monitoring/bkb": { title: "Data BKB", breadcrumb: "BKB" },
     "/admin/monitoring/bkr": { title: "Data BKR", breadcrumb: "BKR" },
+    "/admin/monitoring/bkb/tambah": { title: "Tambah Data BKB", breadcrumb: "Tambah BKB" },
 };
 
 function Layout() {
