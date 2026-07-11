@@ -1,4 +1,4 @@
-import BkrTable from "../../components/bkr/BkrTable";
+import BkrTable from "../../components/admin/bkr/BkrTable";
 
 function DataBkr() {
     return <BkrTable />;

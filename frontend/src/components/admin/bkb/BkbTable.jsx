@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import api from "../../services/api";
-import "../../styles/dataBkr.css";
+import api from "../../../services/api";
+import "../../../styles/dataBkb.css";
 
 function initials(name) {
     if (!name) return "??";
@@ -19,10 +19,9 @@ function mapPeriodeFromApi(p) {
     const created = new Date(p.createdAt);
     return {
         id: p.id,
-        periode: p.periode, // sudah diformat backend, mis. "Maret 2026"
+        periode: p.periode, // sudah diformat backend, mis. "Desember 2025"
         tahun: p.tahun,
-        fileName: p.namaFile,
-        pathFile: p.pathFile,
+        fileName: `${p.namaFile1} + ${p.namaFile2}`,
         tanggalUpload: created.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }),
         jamUpload: created.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB",
         jumlahKecamatan: p.jumlahKecamatan,
@@ -31,7 +30,7 @@ function mapPeriodeFromApi(p) {
     };
 }
 
-function BkrTable() {
+function BkbTable() {
     const [periods, setPeriods] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState("");
@@ -52,11 +51,11 @@ function BkrTable() {
         setLoading(true);
         setLoadError("");
         try {
-            const response = await api.get("/bkr");
+            const response = await api.get("/bkb");
             setPeriods(response.data.data.map(mapPeriodeFromApi));
         } catch (error) {
             console.error(error);
-            setLoadError(error.response?.data?.message || "Gagal memuat data BKR dari server.");
+            setLoadError(error.response?.data?.message || "Gagal memuat data BKB dari server.");
         } finally {
             setLoading(false);
         }
@@ -84,13 +83,16 @@ function BkrTable() {
     const viewTotals = viewDetails.length > 0 ? {
         totalAda: viewDetails.reduce((s, d) => s + (Number(d.ada) || 0), 0),
         totalLapor: viewDetails.reduce((s, d) => s + (Number(d.lapor) || 0), 0),
+        totalTarget: viewDetails.reduce((s, d) => s + (Number(d.target) || 0), 0),
         totalAnggota: viewDetails.reduce((s, d) => s + (Number(d.jumlahAnggota) || 0), 0),
+        totalSelisih: viewDetails.reduce((s, d) => s + (Number(d.selisih) || 0), 0),
         totalHadir: viewDetails.reduce((s, d) => s + (Number(d.jumlahHadir) || 0), 0),
     } : null;
 
     if (viewTotals) {
         viewTotals.totalPctLapor = viewTotals.totalAda > 0 ? (viewTotals.totalLapor / viewTotals.totalAda) * 100 : 0;
-        viewTotals.totalPctHadir = viewTotals.totalAnggota > 0 ? (viewTotals.totalHadir / viewTotals.totalAnggota) * 100 : 0;
+        viewTotals.totalPctThdTarget = viewTotals.totalTarget > 0 ? (viewTotals.totalHadir / viewTotals.totalTarget) * 100 : 0;
+        viewTotals.totalPctThdAnggota = viewTotals.totalAnggota > 0 ? (viewTotals.totalHadir / viewTotals.totalAnggota) * 100 : 0;
     }
 
     // ===== Hapus =====
@@ -106,7 +108,7 @@ function BkrTable() {
     async function confirmDelete() {
         setDeleting(true);
         try {
-            await api.delete(`/bkr/${deleteTarget.id}`);
+            await api.delete(`/bkb/${deleteTarget.id}`);
             setPeriods((prev) => prev.filter((p) => p.id !== deleteTarget.id));
             setDeleteTarget(null);
         } catch (error) {
@@ -124,7 +126,7 @@ function BkrTable() {
         setViewError("");
         setViewLoading(true);
         try {
-            const response = await api.get(`/bkr/${period.id}`);
+            const response = await api.get(`/bkb/${period.id}`);
             setViewDetails(response.data.data.details || []);
         } catch (error) {
             console.error(error);
@@ -156,7 +158,7 @@ function BkrTable() {
                     <div className="summary-card-icon green">📈</div>
                     <div>
                         <div className="summary-card-value">{avgCapaianAll}%</div>
-                        <div className="summary-card-label">Rata-rata Capaian Terbaru</div>
+                        <div className="summary-card-label">Rata-rata % Terhadap Target Terbaru</div>
                     </div>
                 </div>
                 <div className="summary-card">
@@ -191,9 +193,9 @@ function BkrTable() {
                         ))}
                     </select>
                 </div>
-                <Link to="/admin/monitoring/bkr/tambah" className="btn-add-data">
+                <Link to="/admin/monitoring/bkb/tambah" className="btn-add-data">
                     <span className="plus-icon">+</span>
-                    Tambah Data BKR
+                    Tambah Data BKB
                 </Link>
             </div>
 
@@ -206,7 +208,7 @@ function BkrTable() {
                                 <th>Periode</th>
                                 <th>Tanggal Upload</th>
                                 <th>Jumlah Kecamatan</th>
-                                <th>Rata-rata Capaian</th>
+                                <th>Rata-rata % Thd Target</th>
                                 <th>Diupload Oleh</th>
                                 <th className="col-actions">Aksi</th>
                             </tr>
@@ -215,7 +217,7 @@ function BkrTable() {
                             {loading && (
                                 <tr>
                                     <td colSpan="6" style={{ textAlign: "center", padding: 24, color: "#9090a8" }}>
-                                        Memuat data BKR...
+                                        Memuat data BKB...
                                     </td>
                                 </tr>
                             )}
@@ -308,7 +310,7 @@ function BkrTable() {
                         <div className="modal-warn-icon">⚠️</div>
                         <h3>Hapus Data Periode Ini?</h3>
                         <p>
-                            Seluruh data monitoring BKR untuk periode <b>{deleteTarget.periode}</b> ({deleteTarget.jumlahKecamatan} kecamatan)
+                            Seluruh data monitoring BKB untuk periode <b>{deleteTarget.periode}</b> ({deleteTarget.jumlahKecamatan} kecamatan)
                             akan dihapus permanen dan tidak dapat dikembalikan.
                         </p>
                         <div className="modal-actions">
@@ -339,48 +341,68 @@ function BkrTable() {
                             )}
 
                             {!viewLoading && !viewError && (
-                                <div className="preview-table-wrap">
-                                    <table>
+                                <div className="calc-table-wrap" style={{ maxHeight: 420 }}>
+                                    <table className="calc-table">
                                         <thead>
                                             <tr>
                                                 <th rowSpan="2">Kode</th>
-                                                <th rowSpan="2">Kecamatan</th>
-                                                <th colSpan="3" style={{ textAlign: "center" }}>Jumlah Poktan</th>
-                                                <th colSpan="3" style={{ textAlign: "center" }}>Kehadiran</th>
+                                                <th rowSpan="2" style={{ textAlign: "left" }}>Kecamatan</th>
+                                                <th colSpan="3">Jumlah Poktan</th>
+                                                <th colSpan="3">Keanggotaan</th>
+                                                <th colSpan="3">Kehadiran</th>
+                                                <th rowSpan="2">% Thd<br />Target</th>
+                                                <th rowSpan="2">% Thd<br />Anggota</th>
                                             </tr>
                                             <tr>
                                                 <th>Ada</th>
                                                 <th>Lapor</th>
                                                 <th>%</th>
+                                                <th>Target</th>
+                                                <th>Anggota</th>
+                                                <th>Selisih</th>
+                                                <th>Target</th>
                                                 <th>Anggota</th>
                                                 <th>Capaian</th>
-                                                <th>%</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {viewDetails.map((d) => (
                                                 <tr key={d.id}>
                                                     <td>{d.kode ?? "-"}</td>
-                                                    <td><b>{d.kecamatan}</b></td>
+                                                    <td className="text-left"><b>{d.kecamatan}</b></td>
                                                     <td>{d.ada}</td>
                                                     <td>{d.lapor}</td>
                                                     <td>{Number(d.pctLapor).toFixed(2)}</td>
+                                                    <td>{d.target}</td>
+                                                    <td>{d.jumlahAnggota}</td>
+                                                    <td className={Number(d.selisih) >= 0 ? "selisih-pos" : "selisih-neg"}>
+                                                        {Number(d.selisih) >= 0 ? `+${d.selisih}` : d.selisih}
+                                                    </td>
+                                                    <td>{d.target}</td>
                                                     <td>{d.jumlahAnggota}</td>
                                                     <td>{d.jumlahHadir}</td>
-                                                    <td>{Number(d.pctHadir).toFixed(2)}</td>
+                                                    <td>{Number(d.pctThdTarget).toFixed(0)}</td>
+                                                    <td>{Number(d.pctThdAnggota).toFixed(0)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                         {viewTotals && (
                                             <tfoot>
                                                 <tr>
-                                                    <td colSpan="2">Jumlah Total</td>
+                                                    <td colSpan="2" className="text-left">Jumlah Total</td>
                                                     <td>{viewTotals.totalAda}</td>
                                                     <td>{viewTotals.totalLapor}</td>
                                                     <td>{viewTotals.totalPctLapor.toFixed(2)}</td>
+                                                    <td>{viewTotals.totalTarget}</td>
+                                                    <td>{viewTotals.totalAnggota}</td>
+                                                    <td className={viewTotals.totalSelisih >= 0 ? "selisih-pos" : "selisih-neg"}>
+                                                        {viewTotals.totalSelisih >= 0 ? `+${viewTotals.totalSelisih}` : viewTotals.totalSelisih}
+                                                    </td>
+                                                    <td>{viewTotals.totalTarget}</td>
                                                     <td>{viewTotals.totalAnggota}</td>
                                                     <td>{viewTotals.totalHadir}</td>
-                                                    <td>{viewTotals.totalPctHadir.toFixed(2)}</td>
+                                                    <td>{viewTotals.totalPctThdTarget.toFixed(0)}</td>
+                                                    <td>{viewTotals.totalPctThdAnggota.toFixed(0)}</td>
                                                 </tr>
                                             </tfoot>
                                         )}
@@ -399,4 +421,4 @@ function BkrTable() {
     );
 }
 
-export default BkrTable;
+export default BkbTable;

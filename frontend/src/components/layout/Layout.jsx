@@ -13,6 +13,7 @@ const ROUTE_META = {
     "/admin/monitoring/bkb": { title: "Data BKB", breadcrumb: "BKB" },
     "/admin/monitoring/bkr": { title: "Data BKR", breadcrumb: "BKR" },
     "/admin/monitoring/bkb/tambah": { title: "Tambah Data BKB", breadcrumb: "Tambah BKB" },
+    "/admin/monitoring/bkl": { title: "Data BKL", breadcrumb: "BKL" },
 };
 
 function Layout() {

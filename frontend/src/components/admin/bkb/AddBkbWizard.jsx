@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
-import api from "../../services/api";
-import "../../styles/addBkb.css";
+import api from "../../../services/api";
+import "../../../styles/addBkb.css";
 
 const BULAN_OPTIONS = [
     { value: 1, label: "Januari" }, { value: 2, label: "Februari" }, { value: 3, label: "Maret" },

@@ -78,7 +78,7 @@ function Sidebar() {
                 <div className={`nav-submenu ${openMonitoring ? "open" : ""}`} style={{ display: openMonitoring ? "block" : "none" }}>
                     <Link to="/admin/monitoring/bkb" className={`nav-subitem ${isActive("/admin/monitoring/bkb") ? "active" : ""}`}>BKB</Link>
                     <Link to="/admin/monitoring/bkr" className={`nav-subitem ${isActive("/admin/monitoring/bkr") ? "active" : ""}`}>BKR</Link>
-                    <div className="nav-subitem">BKL</div>
+                    <Link to="/admin/monitoring/bkl" className={`nav-subitem ${isActive("/admin/monitoring/bkl") ? "active" : ""}`}>BKL</Link>
                     <div className="nav-subitem">PIK-R</div>
                     <div className="nav-subitem">UPPKA</div>
                 </div>

@@ -10,6 +10,7 @@ import DataBkr from "../pages/admin/DataBkr";
 import AddBkr from "../pages/admin/AddBkr";
 import DataBkb from "../pages/admin/DataBkb";
 import AddBkb from "../pages/admin/AddBkb";
+import DataBkl from "../pages/admin/DataBkl";
 import DashboardPetugas from "../pages/petugas/Dashboard";
 import DashboardUser from "../pages/user/Dashboard";
 
@@ -35,6 +36,7 @@ function AppRoutes() {
                         <Route path="monitoring/bkb/tambah" element={<AddBkb />} />
                         <Route path="monitoring/bkr" element={<DataBkr />} />
                         <Route path="monitoring/bkr/tambah" element={<AddBkr />} />
+                        <Route path="monitoring/bkl" element={<DataBkl />} />
                     </Route>
 
                 </Route>

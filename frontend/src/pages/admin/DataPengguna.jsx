@@ -1,4 +1,4 @@
-import UserTable from "../../components/users/UserTable";
+import UserTable from "../../components/admin/users/UserTable";
 
 function DataPengguna() {
     return <UserTable />;
