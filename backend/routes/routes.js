@@ -40,4 +40,10 @@ router.use("/bkr", require("./bkr"));
 
 router.use("/bkb", require("./bkb"));
 
+// ==============================
+// Monitoring BKL
+// ==============================
+
+router.use("/bkl", require("./bkl"));
+
 module.exports = router;
