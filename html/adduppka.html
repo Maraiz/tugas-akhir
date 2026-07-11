@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Data UPPKA - Monitoring Poktan Dinsos PPKB Banyuwangi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f8;
+            color: #2d2d3a;
+            min-height: 100vh;
+        }
+
+        .app-layout { display: flex; min-height: 100vh; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 100;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.07);
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px;
+            height: 70px;
+            background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+        }
+
+        .sidebar-brand-icon { font-size: 22px; flex-shrink: 0; }
+        .sidebar-brand-text h3 { color: #ffffff; font-size: 15px; font-weight: 700; line-height: 1.3; }
+        .sidebar-brand-text span { color: rgba(255,255,255,0.7); font-size: 11px; }
+
+        .sidebar-profile {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #f0f0f5;
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .profile-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; flex-shrink: 0;
+        }
+
+        .profile-info h4 { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.3; }
+        .profile-info span { font-size: 11px; color: #1565c0; font-weight: 500; }
+
+        .sidebar-nav { flex: 1; padding: 12px 12px 8px; }
+
+        .nav-section-label {
+            font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+            text-transform: uppercase; color: #aab0c0; padding: 14px 10px 6px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            color: #555668; font-size: 13.5px; font-weight: 500;
+            margin-bottom: 1px; user-select: none;
+        }
+
+        .nav-item:hover { background: #eef3fb; color: #1565c0; }
+        .nav-item.active {
+            background: #e3edfa; color: #1565c0; font-weight: 600;
+            border-left: 3px solid #1565c0; padding-left: 9px;
+        }
+
+        .nav-item .nav-icon { font-size: 17px; width: 24px; text-align: center; flex-shrink: 0; }
+        .nav-item.has-sub .nav-arrow { margin-left: auto; font-size: 12px; color: #aab0c0; transition: transform 0.2s; }
+        .nav-item.has-sub.open .nav-arrow { transform: rotate(90deg); }
+        .nav-item.has-sub.open { background: #eef3fb; color: #1565c0; }
+
+        .nav-submenu { display: none; padding-left: 16px; margin-bottom: 2px; }
+        .nav-submenu.open { display: block; }
+
+        .nav-subitem {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; border-radius: 7px; cursor: pointer;
+            color: #6b7280; font-size: 13px; font-weight: 400;
+            margin-bottom: 1px; transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-subitem::before {
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            background: #c8d0e0; flex-shrink: 0;
+        }
+
+        .nav-subitem:hover { background: #eef3fb; color: #1565c0; }
+        .nav-subitem:hover::before { background: #1565c0; }
+        .nav-subitem.active { background: #eef3fb; color: #1565c0; font-weight: 600; }
+        .nav-subitem.active::before { background: #1565c0; }
+
+        .nav-divider { height: 1px; background: #f0f0f5; margin: 8px 0; }
+
+        .sidebar-footer { padding: 14px 12px; border-top: 1px solid #f0f0f5; flex-shrink: 0; }
+
+        .btn-logout {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 11px 16px; background: linear-gradient(135deg, #e53935, #ef5350);
+            color: #ffffff; border: none; border-radius: 8px; cursor: pointer;
+            font-size: 13.5px; font-weight: 600; transition: opacity 0.2s, box-shadow 0.2s;
+            font-family: inherit; box-shadow: 0 3px 10px rgba(229, 57, 53, 0.3);
+        }
+        .btn-logout:hover { opacity: 0.9; box-shadow: 0 4px 14px rgba(229, 57, 53, 0.4); }
+
+        /* ===== MAIN AREA ===== */
+        .main-area { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+        header {
+            height: 70px; background: #ffffff; border-bottom: 1px solid #e8eaf0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 36px; position: sticky; top: 0; z-index: 90;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .header-left h2 { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+        .breadcrumb { font-size: 12px; color: #9090a8; margin-top: 2px; }
+        .breadcrumb span { color: #1565c0; font-weight: 500; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .header-date {
+            font-size: 12px; color: #9090a8; background: #f5f7fc;
+            padding: 6px 14px; border-radius: 20px; border: 1px solid #e8eaf0;
+        }
+
+        .btn-notif {
+            width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e8eaf0;
+            background: #fff; cursor: pointer; font-size: 17px; display: flex;
+            align-items: center; justify-content: center; transition: background 0.2s; position: relative;
+        }
+        .btn-notif:hover { background: #f5f7fc; }
+
+        .notif-badge {
+            position: absolute; top: 7px; right: 8px; width: 8px; height: 8px;
+            background: #ef4444; border-radius: 50%; border: 2px solid #fff;
+        }
+
+        .header-profile {
+            display: flex; align-items: center; gap: 10px; padding: 5px 14px 5px 5px;
+            border: 1px solid #e8eaf0; border-radius: 40px; cursor: pointer; transition: background 0.2s;
+        }
+        .header-profile:hover { background: #f5f7fc; }
+
+        .h-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 13px;
+        }
+
+        .h-profile-info h4 { font-size: 12px; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
+        .h-profile-info span { font-size: 11px; color: #9090a8; }
+
+        .content { flex: 1; padding: 32px 36px; }
+
+        /* ===== STEPPER ===== */
+        .stepper-card {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 24px 30px;
+            margin-bottom: 22px;
+        }
+
+        .stepper { display: flex; align-items: flex-start; }
+
+        .step-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 17px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e5e8f0;
+            z-index: 1;
+        }
+
+        .step-item.completed:not(:last-child)::after { background: #1565c0; }
+
+        .step-circle {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: #f0f2f8; color: #9090a8;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+            border: 2px solid #e5e8f0;
+            position: relative; z-index: 2;
+            transition: all 0.2s;
+        }
+
+        .step-item.active .step-circle {
+            background: #1565c0; color: #fff; border-color: #1565c0;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.15);
+        }
+
+        .step-item.completed .step-circle {
+            background: #1565c0; color: #fff; border-color: #1565c0;
+        }
+
+        .step-label {
+            font-size: 11px; font-weight: 600; color: #9090a8;
+            margin-top: 8px; max-width: 100px; line-height: 1.3;
+        }
+
+        .step-item.active .step-label, .step-item.completed .step-label { color: #1565c0; }
+
+        /* ===== PANEL ===== */
+        .step-panel {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 30px;
+            display: none;
+        }
+
+        .step-panel.active { display: block; }
+
+        .panel-head { margin-bottom: 22px; }
+        .panel-head h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .panel-head p { font-size: 13px; color: #9090a8; }
+
+        /* Upload dropzone */
+        .upload-dropzone {
+            border: 2px dashed #c7d7f0;
+            border-radius: 14px;
+            padding: 44px 20px;
+            text-align: center;
+            background: #f8faff;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .upload-dropzone:hover, .upload-dropzone.drag-over { border-color: #1565c0; background: #eef3fb; }
+        .upload-dropzone .dz-icon { font-size: 40px; margin-bottom: 10px; }
+        .upload-dropzone p { font-size: 14.5px; font-weight: 600; color: #2d2d3a; margin-bottom: 5px; }
+        .upload-dropzone small { font-size: 12px; color: #9090a8; }
+
+        .upload-hint-box {
+            display: flex; align-items: flex-start; gap: 10px;
+            background: #fff8e1; border: 1px solid #ffe082;
+            border-radius: 10px; padding: 12px 16px; margin-top: 16px;
+            font-size: 12.5px; color: #7a5c00;
+        }
+
+        .file-loaded-box {
+            display: none;
+            align-items: center; justify-content: space-between;
+            margin-top: 16px; padding: 12px 16px;
+            background: #eef3fb; border-radius: 10px;
+            font-size: 13px; color: #1565c0; font-weight: 600;
+        }
+        .file-loaded-box button {
+            background: none; border: none; color: #9090a8; cursor: pointer; font-size: 14px;
+        }
+
+        .debug-box {
+            margin-top: 16px; padding: 12px 16px; background: #f5f7fc; border: 1px solid #e0e4ee;
+            border-radius: 10px; font-size: 11.5px; color: #555668; font-family: 'Courier New', monospace;
+            white-space: pre-wrap; word-break: break-all;
+        }
+
+        /* Validasi */
+        .validate-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+
+        .validate-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 16px; border-radius: 10px; background: #f8faff;
+            border: 1px solid #eef1f8; font-size: 13.5px;
+        }
+
+        .validate-item .v-icon {
+            width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; flex-shrink: 0; color: #fff;
+        }
+
+        .validate-item.ok .v-icon { background: #2e7d32; }
+        .validate-item.err .v-icon { background: #e53935; }
+
+        .validate-item .v-text b { color: #1a1a2e; }
+        .validate-item.err .v-text { color: #c62828; }
+
+        /* Seleksi kolom */
+        .col-select-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .col-select-table thead th {
+            text-align: left; padding: 11px 14px; background: #f5f7fc;
+            font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #6b7280; border-bottom: 1px solid #e8eaf0;
+        }
+        .col-select-table td { padding: 11px 14px; border-bottom: 1px solid #f0f2f8; vertical-align: middle; }
+        .col-select-table tr:last-child td { border-bottom: none; }
+
+        .col-check { width: 18px; height: 18px; accent-color: #1565c0; cursor: pointer; }
+
+        .col-source-name { font-weight: 600; color: #1a1a2e; }
+        .col-source-sample { font-size: 11.5px; color: #9090a8; margin-top: 2px; }
+
+        .col-select-table select {
+            padding: 7px 10px; border: 1px solid #e0e4ee; border-radius: 8px;
+            font-size: 12.5px; font-family: inherit; color: #2d2d3a; outline: none;
+            min-width: 170px;
+        }
+        .col-select-table select:focus { border-color: #1565c0; }
+        .col-select-table select:disabled { background: #f5f5f5; color: #b0b0b0; }
+
+        .tag-auto {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            background: #e3f4e5; color: #2e7d32; padding: 2px 8px; border-radius: 20px;
+            margin-left: 8px;
+        }
+        .tag-unused {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            background: #f0f2f8; color: #9090a8; padding: 2px 8px; border-radius: 20px;
+            margin-left: 8px;
+        }
+
+        /* Preview */
+        .preview-summary { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+        .summary-chip {
+            background: #f8faff; border: 1px solid #eef1f8; border-radius: 10px;
+            padding: 12px 18px; flex: 1; min-width: 140px;
+        }
+        .summary-chip .chip-value { font-size: 20px; font-weight: 700; color: #1565c0; }
+        .summary-chip .chip-label { font-size: 11.5px; color: #9090a8; margin-top: 2px; }
+
+        .preview-table-wrap {
+            max-height: 420px; overflow: auto; border: 1px solid #e8eaf0; border-radius: 10px;
+        }
+        .preview-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .preview-table-wrap thead th {
+            position: sticky; top: 0; background: #f5f7fc; padding: 10px 14px;
+            font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #6b7280; border-bottom: 1px solid #e8eaf0; white-space: nowrap;
+        }
+        .preview-table-wrap td { padding: 9px 14px; border-bottom: 1px solid #f0f2f8; white-space: nowrap; }
+
+        .preview-table-wrap tfoot td {
+            padding: 12px 14px;
+            font-weight: 700;
+            color: #1a1a2e;
+            background: #eef3fb;
+            border-top: 2px solid #1565c0;
+            border-bottom: none;
+        }
+
+        /* Panel footer nav */
+        .panel-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 26px; padding-top: 20px; border-top: 1px solid #f0f2f8;
+        }
+
+        .btn-nav {
+            padding: 11px 24px; border-radius: 10px; cursor: pointer;
+            font-size: 13.5px; font-weight: 600; font-family: inherit; border: none;
+        }
+        .btn-nav.back { background: #f0f2f8; color: #555668; }
+        .btn-nav.back:hover { background: #e5e8f0; }
+        .btn-nav.next {
+            background: linear-gradient(135deg, #1565c0, #1976d2); color: #fff;
+            box-shadow: 0 3px 10px rgba(21, 101, 192, 0.3);
+        }
+        .btn-nav.next:hover { opacity: 0.92; }
+        .btn-nav.next:disabled { background: #c7cbd6; box-shadow: none; cursor: not-allowed; opacity: 1; }
+        .btn-nav.save {
+            background: linear-gradient(135deg, #2e7d32, #43a047); color: #fff;
+            box-shadow: 0 3px 10px rgba(46, 125, 50, 0.3);
+        }
+        .btn-nav.save:hover { opacity: 0.92; }
+
+        /* Success overlay */
+        .success-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(20,24,40,0.5);
+            z-index: 300; align-items: center; justify-content: center; padding: 20px;
+        }
+        .success-overlay.open { display: flex; }
+        .success-box {
+            background: #fff; border-radius: 18px; padding: 40px 36px; text-align: center;
+            max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .success-icon {
+            width: 64px; height: 64px; border-radius: 50%; background: #e3f4e5;
+            color: #2e7d32; font-size: 30px; display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 18px;
+        }
+        .success-box h3 { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+        .success-box p { font-size: 13px; color: #9090a8; margin-bottom: 22px; line-height: 1.5; }
+        .success-box button {
+            padding: 11px 26px; border: none; border-radius: 10px; cursor: pointer;
+            background: linear-gradient(135deg, #1565c0, #1976d2); color: #fff;
+            font-size: 13.5px; font-weight: 600; font-family: inherit;
+        }
+
+        footer {
+            background: #ffffff; border-top: 1px solid #e8eaf0; padding: 14px 36px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        footer p { font-size: 12px; color: #9090a8; }
+        .footer-version {
+            font-size: 11px; color: #b0b8cc; background: #f5f7fc;
+            padding: 4px 12px; border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">📊</div>
+            <div class="sidebar-brand-text">
+                <h3>Monitoring Poktan</h3>
+                <span>Dinsos PPKB Banyuwangi</span>
+            </div>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-avatar">AD</div>
+            <div class="profile-info">
+                <h4>Admin Dinas</h4>
+                <span>Super Administrator</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Menu Utama</div>
+
+            <div class="nav-item">
+                <span class="nav-icon">📊</span>
+                Dashboard
+            </div>
+
+            <div class="nav-item has-sub open" id="menuMonitoring" onclick="toggleSub('subMonitoring', this)">
+                <span class="nav-icon">▶</span>
+                Monitoring Program
+                <span class="nav-arrow">›</span>
+            </div>
+            <div class="nav-submenu open" id="subMonitoring">
+                <div class="nav-subitem">BKB</div>
+                <div class="nav-subitem">BKR</div>
+                <div class="nav-subitem">BKL</div>
+                <div class="nav-subitem">PIK-R</div>
+                <div class="nav-subitem active">UPPKA</div>
+            </div>
+
+            <div class="nav-divider"></div>
+            <div class="nav-section-label">Manajemen</div>
+
+            <div class="nav-item">
+                <span class="nav-icon">👥</span>
+                Data Pengguna
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📄</span>
+                Riwayat Upload
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📈</span>
+                Laporan
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout">🚪 Logout</button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN AREA ===== -->
+    <div class="main-area">
+
+        <header>
+            <div class="header-left">
+                <h2>Tambah Data UPPKA</h2>
+                <div class="breadcrumb">Beranda › Monitoring Program › <span>UPPKA</span></div>
+            </div>
+            <div class="header-right">
+                <div class="header-date" id="headerDate"></div>
+                <button class="btn-notif">🔔<span class="notif-badge"></span></button>
+                <div class="header-profile">
+                    <div class="h-avatar">AD</div>
+                    <div class="h-profile-info">
+                        <h4>Admin Dinas</h4>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="content">
+
+            <!-- STEPPER -->
+            <div class="stepper-card">
+                <div class="stepper" id="stepperBar">
+                    <div class="step-item active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Upload Excel SIGA</div>
+                    </div>
+                    <div class="step-item" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Validasi Data</div>
+                    </div>
+                    <div class="step-item" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Seleksi Kolom</div>
+                    </div>
+                    <div class="step-item" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Preview & Simpan</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 1: UPLOAD -->
+            <div class="step-panel active" id="panel1">
+                <div class="panel-head">
+                    <h3>Upload File Excel SIGA</h3>
+                    <p>Unggah hasil unduhan data UPPKA (Tabel 6B) dari aplikasi SIGA dalam format Excel (.xlsx / .xls / .csv)</p>
+                </div>
+
+                <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                    <div class="dz-icon">📁</div>
+                    <p>Klik atau seret file Excel ke sini</p>
+                    <small>Format didukung: .xlsx, .xls, .csv — maks. 10MB</small>
+                </div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])">
+
+                <div class="upload-hint-box">
+                    ⚠️ Pastikan file yang diunggah adalah hasil unduhan langsung dari SIGA (Tabel 6B) tanpa diubah struktur kolomnya.
+                </div>
+
+                <div class="file-loaded-box" id="fileLoadedBox">
+                    <span id="fileLoadedText"></span>
+                    <button onclick="resetUpload()" title="Hapus file">✕</button>
+                </div>
+
+                <div class="debug-box" id="debugBox" style="display:none;"></div>
+
+                <div class="panel-footer">
+                    <span></span>
+                    <button class="btn-nav next" id="btnStep1Next" disabled onclick="goToStep(2); runValidation();">Lanjut ke Validasi →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: VALIDASI -->
+            <div class="step-panel" id="panel2">
+                <div class="panel-head">
+                    <h3>Validasi Data</h3>
+                    <p>Sistem memeriksa format dan kelengkapan kolom wajib pada file yang diunggah</p>
+                </div>
+
+                <div class="validate-list" id="validateList"></div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(1)">← Kembali</button>
+                    <button class="btn-nav next" id="btnStep2Next" disabled onclick="goToStep(3); renderColumnSelection();">Lanjut ke Seleksi Kolom →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: SELEKSI KOLOM -->
+            <div class="step-panel" id="panel3">
+                <div class="panel-head">
+                    <h3>Seleksi Kolom Otomatis</h3>
+                    <p>Sistem otomatis mendeteksi dan mencentang kolom yang dibutuhkan (kolom 1,2,3,4,6,7). Sesuaikan pemetaan kolom jika diperlukan, kolom lain akan diabaikan.</p>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="col-select-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">Pakai</th>
+                                <th>Kolom Sumber (Excel)</th>
+                                <th>Petakan ke Field Sistem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="colSelectBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(2)">← Kembali</button>
+                    <button class="btn-nav next" id="btnStep3Next" disabled onclick="goToStep(4); renderPreview();">Lanjut ke Preview →</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: PREVIEW & SIMPAN -->
+            <div class="step-panel" id="panel4">
+                <div class="panel-head">
+                    <h3>Preview Hasil Data — MONEV POKTAN UPPKA</h3>
+                    <p>Data mentah SIGA telah disaring menjadi format rekap MONEV POKTAN UPPKA: Jumlah Poktan (Ada/Lapor) dan Kehadiran (Anggota/Capaian), lengkap dengan persentase otomatis</p>
+                </div>
+
+                <div class="preview-summary" id="previewSummary"></div>
+
+                <div class="preview-table-wrap">
+                    <table id="previewTable">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Kode</th>
+                                <th rowspan="2">Kecamatan</th>
+                                <th colspan="3" style="text-align:center;">Jumlah Poktan</th>
+                                <th colspan="3" style="text-align:center;">Kehadiran</th>
+                            </tr>
+                            <tr>
+                                <th>Ada</th>
+                                <th>Lapor</th>
+                                <th>%</th>
+                                <th>Anggota</th>
+                                <th>Capaian</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewBody"></tbody>
+                        <tfoot id="previewFooter"></tfoot>
+                    </table>
+                </div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(3)">← Kembali</button>
+                    <button class="btn-nav save" onclick="saveMonitoring()">💾 Simpan Data Monitoring</button>
+                </div>
+            </div>
+
+        </section>
+
+        <footer>
+            <p>© 2026 Monitoring Poktan · Dinas Sosial PPKB Kabupaten Banyuwangi</p>
+            <span class="footer-version">v1.0.0 (UPPKA)</span>
+        </footer>
+    </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+        <div class="success-icon">✓</div>
+        <h3>Data Monitoring UPPKA Tersimpan</h3>
+        <p>Data hasil upload dan perhitungan capaian program UPPKA telah berhasil disimpan ke sistem.</p>
+        <button onclick="window.location.reload()">Tambah Data Lain</button>
+    </div>
+</div>
+
+<script>
+    const now = new Date();
+    document.getElementById('headerDate').textContent =
+        now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    function toggleSub(id, el) {
+        const sub = document.getElementById(id);
+        const isOpen = sub.classList.toggle('open');
+        el.classList.toggle('open', isOpen);
+    }
+
+    /* ===================== FIELD DEFINITION UNTUK UPPKA ===================== */
+    /* Mengacu pada TABEL 6B SIGA — hanya kolom 1,2,3,4,6,7 yang dipakai:
+       1=Kode, 2=Kecamatan, 3=Jumlah Pertemuan Penyuluhan (dipakai sbg "Ada"),
+       4=Tatap Muka (dipakai sbg "Lapor"), 6=Jumlah Keluarga Anggota UPPKA,
+       7=Jumlah Keluarga Anggota UPPKA Hadir Pertemuan.
+       Kolom lain (Virtual, Informasi Kesertaan KB, Metode Kontrasepsi, dst) diabaikan */
+    const UPPKA_FIELDS = [
+        { key: 'kode', label: 'Kode' },
+        { key: 'kecamatan', label: 'Kecamatan' },
+        { key: 'ada', label: 'Jumlah Poktan - ADA (kolom 3)' },
+        { key: 'lapor', label: 'Jumlah Poktan - LAPOR (kolom 4)' },
+        { key: 'jumlah_anggota', label: 'Kehadiran - Jml Keluarga Anggota UPPKA (kolom 6)' },
+        { key: 'jumlah_hadir', label: 'Kehadiran - Jml Anggota Hadir Pertemuan (kolom 7)' },
+        { key: 'abaikan', label: '(Tidak digunakan)' }
+    ];
+
+    /* Posisi kolom RELATIF terhadap kolom "Kecamatan" (bukan index absolut) —
+       lebih tahan terhadap pergeseran kolom (mis. ada kolom kosong di awal
+       sheet yang bikin semua kolom geser satu posisi). */
+    const OFFSET_UPPKA = { kode: -1, kecamatan: 0, ada: 1, lapor: 2, jumlah_anggota: 4, jumlah_hadir: 5 };
+
+    let rawHeaders = [];
+    let rawRows = [];
+    let colMapping = [];
+    let mappedData = [];
+
+    function matchesKeyword(header, keyword) {
+        const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return new RegExp('\\b' + escaped + '\\b', 'i').test(header);
+    }
+
+    /* ===================== STEP NAVIGATION ===================== */
+    function goToStep(n) {
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel' + n).classList.add('active');
+
+        document.querySelectorAll('.step-item').forEach(item => {
+            const s = parseInt(item.dataset.step);
+            item.classList.remove('active', 'completed');
+            if (s < n) item.classList.add('completed');
+            if (s === n) item.classList.add('active');
+        });
+    }
+
+    /* ===================== STEP 1: UPLOAD ===================== */
+    const dropzone = document.getElementById('dropzone');
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag-over'); });
+    });
+    dropzone.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    });
+
+    function findHeaderRows(json) {
+        let mainIdx = -1;
+        let kecColIdx = -1;
+        for (let i = 0; i < json.length; i++) {
+            const row = json[i] || [];
+            const idx = row.findIndex(cell => String(cell).trim().toLowerCase() === 'kecamatan');
+            if (idx !== -1) {
+                mainIdx = i;
+                kecColIdx = idx;
+                break;
+            }
+        }
+        if (mainIdx === -1) return null;
+
+        const mainRow = json[mainIdx] || [];
+        const subRow = json[mainIdx + 1] || [];
+        const maxCols = Math.max(mainRow.length, subRow.length);
+
+        const filledMain = [];
+        let lastMain = '';
+        for (let c = 0; c < maxCols; c++) {
+            const m = String(mainRow[c] ?? '').trim();
+            if (m) lastMain = m;
+            filledMain.push(lastMain);
+        }
+
+        const combined = [];
+        for (let c = 0; c < maxCols; c++) {
+            const s = String(subRow[c] ?? '').trim();
+            const m = filledMain[c];
+            combined.push(s || m);
+        }
+
+        let dataStart = mainIdx + 2;
+        const maybeNumRow = json[dataStart] || [];
+        const filledCells = maybeNumRow.filter(c => String(c).trim() !== '');
+        const looksLikeNumberRow = filledCells.length > 0 && filledCells.every(c => /^\d+(=.*)?$/.test(String(c).trim()));
+        if (looksLikeNumberRow) dataStart += 1;
+
+        /* Pengaman tambahan: kalau ternyata masih ada sisa baris "bukan
+           data" yang kelolos (nomor urut kolom, baris kosong, dsb), terus
+           maju sampai ketemu baris yang kolom Kecamatan-nya beneran berisi
+           TEKS (bukan kosong/angka doang, kayak nama kecamatan asli). */
+        let guard = 0;
+        while (dataStart < json.length && guard < 10) {
+            const candidate = json[dataStart] || [];
+            const kecVal = String(candidate[kecColIdx] ?? '').trim();
+            const looksLikeRealKecamatan = kecVal !== '' && !/^\d+(\.\d+)?$/.test(kecVal);
+            if (looksLikeRealKecamatan) break;
+            dataStart += 1;
+            guard += 1;
+        }
+
+        return { headers: combined, dataStartIndex: dataStart };
+    }
+
+    function buildPositionMapFromHeaders(headers, offsetMap) {
+        const kecIdx = headers.findIndex(h => matchesKeyword(String(h).toLowerCase(), 'kecamatan'));
+        if (kecIdx === -1) return {};
+
+        const positionMap = {};
+        Object.keys(offsetMap).forEach(field => {
+            const idx = kecIdx + offsetMap[field];
+            if (idx >= 0) positionMap[idx] = field;
+        });
+        return positionMap;
+    }
+
+    function resetUpload() {
+        rawHeaders = []; rawRows = [];
+        document.getElementById('fileInput').value = '';
+        document.getElementById('fileLoadedBox').style.display = 'none';
+        document.getElementById('debugBox').style.display = 'none';
+        document.getElementById('btnStep1Next').disabled = true;
+    }
+
+    function handleFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+                if (!json || json.length < 2) {
+                    alert('File Excel tidak memiliki data yang cukup.');
+                    return;
+                }
+
+                const detected = findHeaderRows(json);
+
+                if (!detected) {
+                    alert('Kolom "Kecamatan" tidak ditemukan di file manapun. Pastikan file adalah hasil unduhan resmi dari SIGA.');
+                    return;
+                }
+
+                rawHeaders = detected.headers;
+                rawRows = json.slice(detected.dataStartIndex).filter(r => r.some(c => String(c).trim() !== ''));
+
+                document.getElementById('fileLoadedText').textContent = `📄 ${file.name} — ${rawRows.length} baris data terdeteksi`;
+                document.getElementById('fileLoadedBox').style.display = 'flex';
+
+                const debugBox = document.getElementById('debugBox');
+                debugBox.textContent = 'Header terdeteksi: ' + rawHeaders.map((h, i) => `[${i}] "${h || '(kosong)'}"`).join('   ');
+                debugBox.style.display = 'block';
+
+                document.getElementById('btnStep1Next').disabled = false;
+            } catch (err) {
+                alert('Gagal membaca file. Pastikan format file benar (.xlsx/.xls/.csv).');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    /* ===================== STEP 2: VALIDASI ===================== */
+    function runValidation() {
+        const list = document.getElementById('validateList');
+        list.innerHTML = '';
+
+        const items = [];
+
+        items.push({ ok: rawHeaders.length > 0, text: `File berhasil dibaca dengan <b>${rawHeaders.length}</b> kolom` });
+        items.push({ ok: rawRows.length > 0, text: `Ditemukan <b>${rawRows.length}</b> baris data pada file` });
+
+        const hasKecamatan = rawHeaders.some(h => matchesKeyword(h.toLowerCase(), 'kecamatan'));
+        items.push({ ok: hasKecamatan, text: hasKecamatan ? 'Kolom <b>Kecamatan</b> ditemukan' : 'Kolom <b>Kecamatan</b> tidak ditemukan pada file' });
+
+        items.push({ ok: true, text: 'Tidak ditemukan baris yang seluruhnya kosong' });
+
+        let allOk = true;
+        items.forEach(it => {
+            if (!it.ok) allOk = false;
+            const div = document.createElement('div');
+            div.className = `validate-item ${it.ok ? 'ok' : 'err'}`;
+            div.innerHTML = `<div class="v-icon">${it.ok ? '✓' : '✕'}</div><div class="v-text">${it.text}</div>`;
+            list.appendChild(div);
+        });
+
+        document.getElementById('btnStep2Next').disabled = !allOk;
+
+        if (!allOk) {
+            const warn = document.createElement('div');
+            warn.className = 'upload-hint-box';
+            warn.style.marginTop = '14px';
+            warn.innerHTML = '⚠️ File tidak lolos validasi. Silakan kembali dan unggah ulang file Excel SIGA yang sesuai format.';
+            list.appendChild(warn);
+
+            const debug = document.createElement('div');
+            debug.className = 'debug-box';
+            debug.textContent = 'Header yang terbaca dari file: ' + rawHeaders.map((h, i) => `[${i}] "${h || '(kosong)'}"`).join('   ');
+            list.appendChild(debug);
+        }
+    }
+
+    /* ===================== STEP 3: SELEKSI KOLOM ===================== */
+    function renderColumnSelection() {
+        const positionMap = buildPositionMapFromHeaders(rawHeaders, OFFSET_UPPKA);
+
+        const claimed = new Set();
+        colMapping = rawHeaders.map((h, idx) => {
+            let guessed = positionMap[idx] !== undefined ? positionMap[idx] : 'abaikan';
+            if (guessed !== 'abaikan') {
+                if (claimed.has(guessed)) {
+                    guessed = 'abaikan';
+                } else {
+                    claimed.add(guessed);
+                }
+            }
+            const sample = rawRows[0] ? String(rawRows[0][idx] ?? '') : '';
+            return { colIndex: idx, header: h, checked: guessed !== 'abaikan', mappedKey: guessed, sample };
+        });
+
+        renderColTable();
+    }
+
+    function renderColTable() {
+        const body = document.getElementById('colSelectBody');
+        body.innerHTML = '';
+
+        colMapping.forEach((col, i) => {
+            const tr = document.createElement('tr');
+            const isAuto = col.mappedKey !== 'abaikan';
+            tr.innerHTML = `
+                <td><input type="checkbox" class="col-check" ${col.checked ? 'checked' : ''} onchange="onColCheckChange(${i}, this.checked)"></td>
+                <td>
+                    <div class="col-source-name">${col.header || '(tanpa nama)'} ${isAuto ? '<span class="tag-auto">Auto terdeteksi</span>' : '<span class="tag-unused">Tidak dipakai</span>'}</div>
+                    <div class="col-source-sample">Contoh isi: ${col.sample || '-'}</div>
+                </td>
+                <td>
+                    <select onchange="onColMapChange(${i}, this.value)" ${col.checked ? '' : 'disabled'}>
+                        ${UPPKA_FIELDS.map(f => `<option value="${f.key}" ${col.mappedKey === f.key ? 'selected' : ''}>${f.label}</option>`).join('')}
+                    </select>
+                </td>
+            `;
+            body.appendChild(tr);
+        });
+
+        validateColSelection();
+    }
+
+    function onColCheckChange(i, checked) {
+        colMapping[i].checked = checked;
+        if (!checked) {
+            colMapping[i].mappedKey = 'abaikan';
+        } else if (colMapping[i].mappedKey !== 'abaikan') {
+            unclaimFieldFromOtherColumns(i, colMapping[i].mappedKey);
+        }
+        renderColTable();
+    }
+
+    function onColMapChange(i, value) {
+        if (value !== 'abaikan') {
+            unclaimFieldFromOtherColumns(i, value);
+        }
+        colMapping[i].mappedKey = value;
+        renderColTable();
+    }
+
+    function unclaimFieldFromOtherColumns(exceptIndex, fieldKey) {
+        colMapping.forEach((c, j) => {
+            if (j !== exceptIndex && c.mappedKey === fieldKey) {
+                c.mappedKey = 'abaikan';
+                c.checked = false;
+            }
+        });
+    }
+
+    function validateColSelection() {
+        const usedKeys = colMapping.filter(c => c.checked).map(c => c.mappedKey);
+        const hasKecamatan = usedKeys.includes('kecamatan');
+        const hasAda = usedKeys.includes('ada');
+        const hasLapor = usedKeys.includes('lapor');
+        document.getElementById('btnStep3Next').disabled = !(hasKecamatan && hasAda && hasLapor);
+    }
+
+    /* ===================== STEP 4: PREVIEW & SIMPAN ===================== */
+    function renderPreview() {
+        const usedCols = colMapping.filter(c => c.checked && c.mappedKey !== 'abaikan');
+
+        mappedData = rawRows.map(row => {
+            const obj = {};
+            usedCols.forEach(c => { obj[c.mappedKey] = row[c.colIndex] ?? ''; });
+
+            const ada = Number(obj.ada) || 0;
+            const lapor = Number(obj.lapor) || 0;
+            const anggota = Number(obj.jumlah_anggota) || 0;
+            const hadir = Number(obj.jumlah_hadir) || 0;
+
+            obj.pctLapor = ada > 0 ? (lapor / ada) * 100 : 0;
+            obj.pctHadir = anggota > 0 ? (hadir / anggota) * 100 : 0;
+
+            return obj;
+        }).filter(row => String(row.kecamatan || '').trim() !== '');
+
+        const summary = document.getElementById('previewSummary');
+        const totalAda = mappedData.reduce((s, r) => s + (Number(r.ada) || 0), 0);
+        const totalLapor = mappedData.reduce((s, r) => s + (Number(r.lapor) || 0), 0);
+        summary.innerHTML = `
+            <div class="summary-chip"><div class="chip-value">${mappedData.length}</div><div class="chip-label">Kecamatan Terdeteksi</div></div>
+            <div class="summary-chip"><div class="chip-value">${totalAda} / ${totalLapor}</div><div class="chip-label">Total Poktan Ada / Lapor</div></div>
+            <div class="summary-chip"><div class="chip-value">${totalAda > 0 ? ((totalLapor/totalAda)*100).toFixed(1) : 0}%</div><div class="chip-label">Rata-rata % Pelaporan</div></div>
+        `;
+
+        const body = document.getElementById('previewBody');
+        body.innerHTML = mappedData.map(row => `
+            <tr>
+                <td>${row.kode ?? '-'}</td>
+                <td><b>${row.kecamatan ?? '-'}</b></td>
+                <td>${row.ada ?? 0}</td>
+                <td>${row.lapor ?? 0}</td>
+                <td>${row.pctLapor.toFixed(2)}</td>
+                <td>${row.jumlah_anggota ?? 0}</td>
+                <td>${row.jumlah_hadir ?? 0}</td>
+                <td>${row.pctHadir.toFixed(2)}</td>
+            </tr>
+        `).join('');
+
+        const totalAnggota = mappedData.reduce((s, r) => s + (Number(r.jumlah_anggota) || 0), 0);
+        const totalHadir = mappedData.reduce((s, r) => s + (Number(r.jumlah_hadir) || 0), 0);
+        const totalPctLapor = totalAda > 0 ? (totalLapor / totalAda) * 100 : 0;
+        const totalPctHadir = totalAnggota > 0 ? (totalHadir / totalAnggota) * 100 : 0;
+
+        const footer = document.getElementById('previewFooter');
+        footer.innerHTML = `
+            <tr>
+                <td colspan="2">Jumlah Total</td>
+                <td>${totalAda}</td>
+                <td>${totalLapor}</td>
+                <td>${totalPctLapor.toFixed(2)}</td>
+                <td>${totalAnggota}</td>
+                <td>${totalHadir}</td>
+                <td>${totalPctHadir.toFixed(2)}</td>
+            </tr>
+        `;
+    }
+
+    function saveMonitoring() {
+        document.getElementById('successOverlay').classList.add('open');
+    }
+</script>
+
+</body>
+</html>
