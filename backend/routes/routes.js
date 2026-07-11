@@ -52,4 +52,10 @@ router.use("/bkl", require("./bkl"));
 
 router.use("/pikr", require("./pikr"));
 
+// ==============================
+// Monitoring UPPKA
+// ==============================
+
+router.use("/uppka", require("./uppka"));
+
 module.exports = router;

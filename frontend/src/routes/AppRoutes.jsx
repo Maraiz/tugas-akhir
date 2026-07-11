@@ -14,6 +14,8 @@ import DataBkl from "../pages/admin/DataBkl";
 import AddBkl from "../pages/admin/AddBkl";
 import DataPikr from "../pages/admin/DataPikr";
 import AddPikr from "../pages/admin/AddPikr";
+import DataUppka from "../pages/admin/DataUppka";
+import AddUppka from "../pages/admin/AddUppka";
 import DashboardPetugas from "../pages/petugas/Dashboard";
 import DashboardUser from "../pages/user/Dashboard";
 
@@ -43,6 +45,8 @@ function AppRoutes() {
                         <Route path="monitoring/bkl/tambah" element={<AddBkl />} />
                         <Route path="monitoring/pikr" element={<DataPikr />} />
                         <Route path="monitoring/pikr/tambah" element={<AddPikr />} />
+                        <Route path="monitoring/uppka" element={<DataUppka />} />
+                        <Route path="monitoring/uppka/tambah" element={<AddUppka />} />
                     </Route>
 
                 </Route>
