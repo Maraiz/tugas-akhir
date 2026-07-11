@@ -79,7 +79,7 @@ function Sidebar() {
                     <Link to="/admin/monitoring/bkb" className={`nav-subitem ${isActive("/admin/monitoring/bkb") ? "active" : ""}`}>BKB</Link>
                     <Link to="/admin/monitoring/bkr" className={`nav-subitem ${isActive("/admin/monitoring/bkr") ? "active" : ""}`}>BKR</Link>
                     <Link to="/admin/monitoring/bkl" className={`nav-subitem ${isActive("/admin/monitoring/bkl") ? "active" : ""}`}>BKL</Link>
-                    <div className="nav-subitem">PIK-R</div>
+                    <Link to="/admin/monitoring/pikr" className={`nav-subitem ${isActive("/admin/monitoring/pikr") ? "active" : ""}`}>PIK-R</Link>
                     <div className="nav-subitem">UPPKA</div>
                 </div>
 

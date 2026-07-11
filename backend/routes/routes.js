@@ -46,4 +46,10 @@ router.use("/bkb", require("./bkb"));
 
 router.use("/bkl", require("./bkl"));
 
+// ==============================
+// Monitoring PIK-R
+// ==============================
+
+router.use("/pikr", require("./pikr"));
+
 module.exports = router;
