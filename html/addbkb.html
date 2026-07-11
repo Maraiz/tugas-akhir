@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Data BKB - Monitoring Poktan Dinsos PPKB Banyuwangi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f8;
+            color: #2d2d3a;
+            min-height: 100vh;
+        }
+
+        .app-layout { display: flex; min-height: 100vh; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 100;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.07);
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px;
+            height: 70px;
+            background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+        }
+
+        .sidebar-brand-icon { font-size: 22px; flex-shrink: 0; }
+        .sidebar-brand-text h3 { color: #ffffff; font-size: 15px; font-weight: 700; line-height: 1.3; }
+        .sidebar-brand-text span { color: rgba(255,255,255,0.7); font-size: 11px; }
+
+        .sidebar-profile {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #f0f0f5;
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .profile-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; flex-shrink: 0;
+        }
+
+        .profile-info h4 { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.3; }
+        .profile-info span { font-size: 11px; color: #1565c0; font-weight: 500; }
+
+        .sidebar-nav { flex: 1; padding: 12px 12px 8px; }
+
+        .nav-section-label {
+            font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+            text-transform: uppercase; color: #aab0c0; padding: 14px 10px 6px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            color: #555668; font-size: 13.5px; font-weight: 500;
+            margin-bottom: 1px; user-select: none;
+        }
+
+        .nav-item:hover { background: #eef3fb; color: #1565c0; }
+        .nav-item.active {
+            background: #e3edfa; color: #1565c0; font-weight: 600;
+            border-left: 3px solid #1565c0; padding-left: 9px;
+        }
+
+        .nav-item .nav-icon { font-size: 17px; width: 24px; text-align: center; flex-shrink: 0; }
+        .nav-item.has-sub .nav-arrow { margin-left: auto; font-size: 12px; color: #aab0c0; transition: transform 0.2s; }
+        .nav-item.has-sub.open .nav-arrow { transform: rotate(90deg); }
+        .nav-item.has-sub.open { background: #eef3fb; color: #1565c0; }
+
+        .nav-submenu { display: none; padding-left: 16px; margin-bottom: 2px; }
+        .nav-submenu.open { display: block; }
+
+        .nav-subitem {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; border-radius: 7px; cursor: pointer;
+            color: #6b7280; font-size: 13px; font-weight: 400;
+            margin-bottom: 1px; transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-subitem::before {
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            background: #c8d0e0; flex-shrink: 0;
+        }
+
+        .nav-subitem:hover { background: #eef3fb; color: #1565c0; }
+        .nav-subitem:hover::before { background: #1565c0; }
+        .nav-subitem.active { background: #eef3fb; color: #1565c0; font-weight: 600; }
+        .nav-subitem.active::before { background: #1565c0; }
+
+        .nav-divider { height: 1px; background: #f0f0f5; margin: 8px 0; }
+
+        .sidebar-footer { padding: 14px 12px; border-top: 1px solid #f0f0f5; flex-shrink: 0; }
+
+        .btn-logout {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 11px 16px; background: linear-gradient(135deg, #e53935, #ef5350);
+            color: #ffffff; border: none; border-radius: 8px; cursor: pointer;
+            font-size: 13.5px; font-weight: 600; transition: opacity 0.2s, box-shadow 0.2s;
+            font-family: inherit; box-shadow: 0 3px 10px rgba(229, 57, 53, 0.3);
+        }
+        .btn-logout:hover { opacity: 0.9; box-shadow: 0 4px 14px rgba(229, 57, 53, 0.4); }
+
+        /* ===== MAIN AREA ===== */
+        .main-area { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+        header {
+            height: 70px; background: #ffffff; border-bottom: 1px solid #e8eaf0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 36px; position: sticky; top: 0; z-index: 90;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .header-left h2 { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+        .breadcrumb { font-size: 12px; color: #9090a8; margin-top: 2px; }
+        .breadcrumb span { color: #1565c0; font-weight: 500; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .header-date {
+            font-size: 12px; color: #9090a8; background: #f5f7fc;
+            padding: 6px 14px; border-radius: 20px; border: 1px solid #e8eaf0;
+        }
+
+        .btn-notif {
+            width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e8eaf0;
+            background: #fff; cursor: pointer; font-size: 17px; display: flex;
+            align-items: center; justify-content: center; transition: background 0.2s; position: relative;
+        }
+        .btn-notif:hover { background: #f5f7fc; }
+
+        .notif-badge {
+            position: absolute; top: 7px; right: 8px; width: 8px; height: 8px;
+            background: #ef4444; border-radius: 50%; border: 2px solid #fff;
+        }
+
+        .header-profile {
+            display: flex; align-items: center; gap: 10px; padding: 5px 14px 5px 5px;
+            border: 1px solid #e8eaf0; border-radius: 40px; cursor: pointer; transition: background 0.2s;
+        }
+        .header-profile:hover { background: #f5f7fc; }
+
+        .h-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 13px;
+        }
+
+        .h-profile-info h4 { font-size: 12px; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
+        .h-profile-info span { font-size: 11px; color: #9090a8; }
+
+        .content { flex: 1; padding: 32px 36px; }
+
+        /* ===== STEPPER ===== */
+        .stepper-card {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 24px 30px;
+            margin-bottom: 22px;
+        }
+
+        .stepper { display: flex; align-items: flex-start; }
+
+        .step-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 17px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e5e8f0;
+            z-index: 1;
+        }
+
+        .step-item.completed:not(:last-child)::after { background: #1565c0; }
+
+        .step-circle {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: #f0f2f8; color: #9090a8;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+            border: 2px solid #e5e8f0;
+            position: relative; z-index: 2;
+            transition: all 0.2s;
+        }
+
+        .step-item.active .step-circle {
+            background: #1565c0; color: #fff; border-color: #1565c0;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.15);
+        }
+
+        .step-item.completed .step-circle {
+            background: #1565c0; color: #fff; border-color: #1565c0;
+        }
+
+        .step-label {
+            font-size: 11px; font-weight: 600; color: #9090a8;
+            margin-top: 8px; max-width: 100px; line-height: 1.3;
+        }
+
+        .step-item.active .step-label, .step-item.completed .step-label { color: #1565c0; }
+
+        /* ===== PANEL ===== */
+        .step-panel {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 30px;
+            display: none;
+        }
+
+        .step-panel.active { display: block; }
+
+        .panel-head { margin-bottom: 22px; }
+        .panel-head h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .panel-head p { font-size: 13px; color: #9090a8; }
+
+        /* Dua upload slot berdampingan */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 800px) { .upload-grid { grid-template-columns: 1fr; } }
+
+        .upload-slot-card {
+            border: 1px solid #eef1f8;
+            border-radius: 14px;
+            padding: 18px;
+            background: #fbfcff;
+        }
+        .upload-slot-title {
+            font-size: 13.5px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .upload-slot-title .slot-badge {
+            display: inline-block; width: 20px; height: 20px; border-radius: 50%;
+            background: #1565c0; color: #fff; font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .upload-slot-desc { font-size: 11.5px; color: #9090a8; margin-bottom: 14px; }
+
+        /* Upload dropzone */
+        .upload-dropzone {
+            border: 2px dashed #c7d7f0;
+            border-radius: 14px;
+            padding: 30px 16px;
+            text-align: center;
+            background: #f8faff;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .upload-dropzone:hover, .upload-dropzone.drag-over { border-color: #1565c0; background: #eef3fb; }
+        .upload-dropzone .dz-icon { font-size: 30px; margin-bottom: 8px; }
+        .upload-dropzone p { font-size: 13px; font-weight: 600; color: #2d2d3a; margin-bottom: 4px; }
+        .upload-dropzone small { font-size: 11px; color: #9090a8; }
+
+        .upload-hint-box {
+            display: flex; align-items: flex-start; gap: 10px;
+            background: #fff8e1; border: 1px solid #ffe082;
+            border-radius: 10px; padding: 12px 16px; margin-top: 16px;
+            font-size: 12.5px; color: #7a5c00;
+        }
+
+        .file-loaded-box {
+            display: none;
+            align-items: center; justify-content: space-between;
+            margin-top: 12px; padding: 10px 14px;
+            background: #eef3fb; border-radius: 10px;
+            font-size: 12.5px; color: #1565c0; font-weight: 600;
+        }
+        .file-loaded-box button {
+            background: none; border: none; color: #9090a8; cursor: pointer; font-size: 14px;
+        }
+
+        .debug-box {
+            margin-top: 12px; padding: 10px 12px; background: #f5f7fc; border: 1px solid #e0e4ee;
+            border-radius: 10px; font-size: 10.5px; color: #555668; font-family: 'Courier New', monospace;
+            white-space: pre-wrap; word-break: break-all; max-height: 100px; overflow-y: auto;
+        }
+
+        /* Validasi */
+        .validate-group-title {
+            font-size: 12.5px; font-weight: 700; color: #1565c0; margin: 18px 0 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .validate-group-title:first-child { margin-top: 0; }
+
+        .validate-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+
+        .validate-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 16px; border-radius: 10px; background: #f8faff;
+            border: 1px solid #eef1f8; font-size: 13.5px;
+        }
+
+        .validate-item .v-icon {
+            width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; flex-shrink: 0; color: #fff;
+        }
+
+        .validate-item.ok .v-icon { background: #2e7d32; }
+        .validate-item.err .v-icon { background: #e53935; }
+
+        .validate-item .v-text b { color: #1a1a2e; }
+        .validate-item.err .v-text { color: #c62828; }
+
+        /* Seleksi kolom */
+        .colselect-group-title {
+            font-size: 12.5px; font-weight: 700; color: #1565c0; margin: 20px 0 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .colselect-group-title:first-child { margin-top: 0; }
+
+        .col-select-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .col-select-table thead th {
+            text-align: left; padding: 11px 14px; background: #f5f7fc;
+            font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #6b7280; border-bottom: 1px solid #e8eaf0;
+        }
+        .col-select-table td { padding: 11px 14px; border-bottom: 1px solid #f0f2f8; vertical-align: middle; }
+        .col-select-table tr:last-child td { border-bottom: none; }
+
+        .col-check { width: 18px; height: 18px; accent-color: #1565c0; cursor: pointer; }
+
+        .col-source-name { font-weight: 600; color: #1a1a2e; }
+        .col-source-sample { font-size: 11.5px; color: #9090a8; margin-top: 2px; }
+
+        .col-select-table select {
+            padding: 7px 10px; border: 1px solid #e0e4ee; border-radius: 8px;
+            font-size: 12.5px; font-family: inherit; color: #2d2d3a; outline: none;
+            min-width: 170px;
+        }
+        .col-select-table select:focus { border-color: #1565c0; }
+        .col-select-table select:disabled { background: #f5f5f5; color: #b0b0b0; }
+
+        .tag-auto {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            background: #e3f4e5; color: #2e7d32; padding: 2px 8px; border-radius: 20px;
+            margin-left: 8px;
+        }
+        .tag-unused {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            background: #f0f2f8; color: #9090a8; padding: 2px 8px; border-radius: 20px;
+            margin-left: 8px;
+        }
+
+        /* Preview */
+        .preview-summary { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+        .summary-chip {
+            background: #f8faff; border: 1px solid #eef1f8; border-radius: 10px;
+            padding: 12px 18px; flex: 1; min-width: 140px;
+        }
+        .summary-chip .chip-value { font-size: 20px; font-weight: 700; color: #1565c0; }
+        .summary-chip .chip-label { font-size: 11.5px; color: #9090a8; margin-top: 2px; }
+
+        .preview-table-wrap {
+            max-height: 320px; overflow: auto; border: 1px solid #e8eaf0; border-radius: 10px;
+        }
+        .preview-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .preview-table-wrap thead th {
+            position: sticky; top: 0; background: #f5f7fc; padding: 10px 14px;
+            font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #6b7280; border-bottom: 1px solid #e8eaf0; white-space: nowrap;
+        }
+        .preview-table-wrap td { padding: 9px 14px; border-bottom: 1px solid #f0f2f8; white-space: nowrap; }
+        .preview-table-wrap td.warn-mismatch { color: #e53935; font-weight: 600; }
+
+        /* Target manual */
+        .target-table-wrap { max-height: 380px; overflow: auto; border: 1px solid #e8eaf0; border-radius: 10px; }
+        .target-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .target-table thead th {
+            position: sticky; top: 0; background: #f5f7fc; padding: 11px 14px;
+            font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #6b7280; border-bottom: 1px solid #e8eaf0; white-space: nowrap;
+        }
+        .target-table td { padding: 9px 14px; border-bottom: 1px solid #f0f2f8; }
+        .target-table input {
+            width: 100px; padding: 7px 10px; border: 1px solid #e0e4ee; border-radius: 8px;
+            font-size: 12.5px; font-family: inherit; outline: none; text-align: right;
+        }
+        .target-table input:focus { border-color: #1565c0; }
+        .target-kec-name { font-weight: 600; color: #1a1a2e; }
+        .realisasi-val { font-weight: 700; color: #1565c0; }
+
+        /* Perhitungan (tabel final MONEV POKTAN BKB) */
+        .calc-summary-cards { display: flex; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+        .calc-card {
+            flex: 1; min-width: 180px; background: linear-gradient(135deg, #1565c0, #1976d2);
+            border-radius: 14px; padding: 18px 20px; color: #fff;
+        }
+        .calc-card.alt { background: linear-gradient(135deg, #2e7d32, #43a047); }
+        .calc-card .cc-value { font-size: 24px; font-weight: 700; }
+        .calc-card .cc-label { font-size: 11.5px; opacity: 0.85; margin-top: 4px; }
+
+        .calc-table-wrap { max-height: 420px; overflow: auto; border: 1px solid #e8eaf0; border-radius: 10px; }
+        .calc-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .calc-table thead th {
+            position: sticky; top: 0; background: #f5f7fc; padding: 10px 12px;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px;
+            color: #6b7280; border-bottom: 1px solid #e8eaf0; white-space: nowrap; text-align: center;
+        }
+        .calc-table td { padding: 9px 12px; border-bottom: 1px solid #f0f2f8; white-space: nowrap; text-align: center; }
+        .calc-table td.text-left { text-align: left; }
+        .calc-table td.selisih-pos { color: #2e7d32; font-weight: 700; }
+        .calc-table td.selisih-neg { color: #e53935; font-weight: 700; }
+
+        .calc-table-wrap tfoot td {
+            font-weight: 700; color: #1a1a2e; background: #eef3fb;
+            border-top: 2px solid #1565c0; border-bottom: none;
+        }
+
+        /* Panel footer nav */
+        .panel-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 26px; padding-top: 20px; border-top: 1px solid #f0f2f8;
+        }
+
+        .btn-nav {
+            padding: 11px 24px; border-radius: 10px; cursor: pointer;
+            font-size: 13.5px; font-weight: 600; font-family: inherit; border: none;
+        }
+        .btn-nav.back { background: #f0f2f8; color: #555668; }
+        .btn-nav.back:hover { background: #e5e8f0; }
+        .btn-nav.next {
+            background: linear-gradient(135deg, #1565c0, #1976d2); color: #fff;
+            box-shadow: 0 3px 10px rgba(21, 101, 192, 0.3);
+        }
+        .btn-nav.next:hover { opacity: 0.92; }
+        .btn-nav.next:disabled { background: #c7cbd6; box-shadow: none; cursor: not-allowed; opacity: 1; }
+        .btn-nav.save {
+            background: linear-gradient(135deg, #2e7d32, #43a047); color: #fff;
+            box-shadow: 0 3px 10px rgba(46, 125, 50, 0.3);
+        }
+        .btn-nav.save:hover { opacity: 0.92; }
+
+        /* Success overlay */
+        .success-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(20,24,40,0.5);
+            z-index: 300; align-items: center; justify-content: center; padding: 20px;
+        }
+        .success-overlay.open { display: flex; }
+        .success-box {
+            background: #fff; border-radius: 18px; padding: 40px 36px; text-align: center;
+            max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .success-icon {
+            width: 64px; height: 64px; border-radius: 50%; background: #e3f4e5;
+            color: #2e7d32; font-size: 30px; display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 18px;
+        }
+        .success-box h3 { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+        .success-box p { font-size: 13px; color: #9090a8; margin-bottom: 22px; line-height: 1.5; }
+        .success-box button {
+            padding: 11px 26px; border: none; border-radius: 10px; cursor: pointer;
+            background: linear-gradient(135deg, #1565c0, #1976d2); color: #fff;
+            font-size: 13.5px; font-weight: 600; font-family: inherit;
+        }
+
+        footer {
+            background: #ffffff; border-top: 1px solid #e8eaf0; padding: 14px 36px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        footer p { font-size: 12px; color: #9090a8; }
+        .footer-version {
+            font-size: 11px; color: #b0b8cc; background: #f5f7fc;
+            padding: 4px 12px; border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">📊</div>
+            <div class="sidebar-brand-text">
+                <h3>Monitoring Poktan</h3>
+                <span>Dinsos PPKB Banyuwangi</span>
+            </div>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-avatar">AD</div>
+            <div class="profile-info">
+                <h4>Admin Dinas</h4>
+                <span>Super Administrator</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Menu Utama</div>
+
+            <div class="nav-item">
+                <span class="nav-icon">📊</span>
+                Dashboard
+            </div>
+
+            <div class="nav-item has-sub open" id="menuMonitoring" onclick="toggleSub('subMonitoring', this)">
+                <span class="nav-icon">▶</span>
+                Monitoring Program
+                <span class="nav-arrow">›</span>
+            </div>
+            <div class="nav-submenu open" id="subMonitoring">
+                <div class="nav-subitem active">BKB</div>
+                <div class="nav-subitem">BKR</div>
+                <div class="nav-subitem">BKL</div>
+                <div class="nav-subitem">PIK-R</div>
+                <div class="nav-subitem">UPPKA</div>
+            </div>
+
+            <div class="nav-divider"></div>
+            <div class="nav-section-label">Manajemen</div>
+
+            <div class="nav-item">
+                <span class="nav-icon">👥</span>
+                Data Pengguna
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📄</span>
+                Riwayat Upload
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📈</span>
+                Laporan
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout">🚪 Logout</button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN AREA ===== -->
+    <div class="main-area">
+
+        <header>
+            <div class="header-left">
+                <h2>Tambah Data BKB</h2>
+                <div class="breadcrumb">Beranda › Monitoring Program › <span>BKB</span></div>
+            </div>
+            <div class="header-right">
+                <div class="header-date" id="headerDate"></div>
+                <button class="btn-notif">🔔<span class="notif-badge"></span></button>
+                <div class="header-profile">
+                    <div class="h-avatar">AD</div>
+                    <div class="h-profile-info">
+                        <h4>Admin Dinas</h4>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="content">
+
+            <!-- STEPPER -->
+            <div class="stepper-card">
+                <div class="stepper" id="stepperBar">
+                    <div class="step-item active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Upload Excel SIGA</div>
+                    </div>
+                    <div class="step-item" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Validasi Data</div>
+                    </div>
+                    <div class="step-item" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Seleksi Kolom</div>
+                    </div>
+                    <div class="step-item" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Preview Data</div>
+                    </div>
+                    <div class="step-item" data-step="5">
+                        <div class="step-circle">5</div>
+                        <div class="step-label">Target Program</div>
+                    </div>
+                    <div class="step-item" data-step="6">
+                        <div class="step-circle">6</div>
+                        <div class="step-label">Perhitungan & Simpan</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 1: UPLOAD (2 FILE) -->
+            <div class="step-panel active" id="panel1">
+                <div class="panel-head">
+                    <h3>Upload File Excel SIGA</h3>
+                    <p>Program BKB butuh <b>2 file Excel</b> dari SIGA: Tabel 3A (jumlah poktan) dan Tabel 3B (jumlah keluarga anggota & kehadiran)</p>
+                </div>
+
+                <div class="upload-grid">
+
+                    <!-- SLOT FILE 1 -->
+                    <div class="upload-slot-card">
+                        <div class="upload-slot-title"><span class="slot-badge">1</span> Tabel 3A BKB</div>
+                        <div class="upload-slot-desc">Jumlah BKB Yang Melakukan Penyuluhan — dipakai kolom Ada & Lapor</div>
+
+                        <div class="upload-dropzone" id="dropzone1" onclick="document.getElementById('fileInput1').click()">
+                            <div class="dz-icon">📁</div>
+                            <p>Klik atau seret file Tabel 3A</p>
+                            <small>.xlsx, .xls, .csv — maks. 10MB</small>
+                        </div>
+                        <input type="file" id="fileInput1" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(1, this.files[0])">
+
+                        <div class="file-loaded-box" id="fileLoadedBox1">
+                            <span id="fileLoadedText1"></span>
+                            <button onclick="resetUpload(1)" title="Hapus file">✕</button>
+                        </div>
+
+                        <div class="debug-box" id="debugBox1" style="display:none;"></div>
+                    </div>
+
+                    <!-- SLOT FILE 2 -->
+                    <div class="upload-slot-card">
+                        <div class="upload-slot-title"><span class="slot-badge">2</span> Tabel 3B BKB</div>
+                        <div class="upload-slot-desc">Jumlah Keluarga Anggota BKB Hadir Pertemuan — dipakai kolom Anggota & Capaian</div>
+
+                        <div class="upload-dropzone" id="dropzone2" onclick="document.getElementById('fileInput2').click()">
+                            <div class="dz-icon">📁</div>
+                            <p>Klik atau seret file Tabel 3B</p>
+                            <small>.xlsx, .xls, .csv — maks. 10MB</small>
+                        </div>
+                        <input type="file" id="fileInput2" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(2, this.files[0])">
+
+                        <div class="file-loaded-box" id="fileLoadedBox2">
+                            <span id="fileLoadedText2"></span>
+                            <button onclick="resetUpload(2)" title="Hapus file">✕</button>
+                        </div>
+
+                        <div class="debug-box" id="debugBox2" style="display:none;"></div>
+                    </div>
+
+                </div>
+
+                <div class="upload-hint-box">
+                    ⚠️ Pastikan kedua file adalah hasil unduhan langsung dari SIGA untuk <b>periode (bulan) yang sama</b>, tanpa diubah struktur kolomnya.
+                </div>
+
+                <div class="panel-footer">
+                    <span></span>
+                    <button class="btn-nav next" id="btnStep1Next" disabled onclick="goToStep(2); runValidation();">Lanjut ke Validasi →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: VALIDASI -->
+            <div class="step-panel" id="panel2">
+                <div class="panel-head">
+                    <h3>Validasi Data</h3>
+                    <p>Sistem memeriksa format dan kelengkapan kolom wajib pada kedua file yang diunggah</p>
+                </div>
+
+                <div class="validate-group-title">📄 Tabel 3A BKB</div>
+                <div class="validate-list" id="validateList1"></div>
+
+                <div class="validate-group-title">📄 Tabel 3B BKB</div>
+                <div class="validate-list" id="validateList2"></div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(1)">← Kembali</button>
+                    <button class="btn-nav next" id="btnStep2Next" disabled onclick="goToStep(3); renderColumnSelection();">Lanjut ke Seleksi Kolom →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: SELEKSI KOLOM -->
+            <div class="step-panel" id="panel3">
+                <div class="panel-head">
+                    <h3>Seleksi Kolom Otomatis</h3>
+                    <p>Sistem otomatis mendeteksi dan mencentang kolom yang dibutuhkan dari masing-masing file. Sesuaikan pemetaan kolom jika diperlukan.</p>
+                </div>
+
+                <div class="colselect-group-title">📄 Tabel 3A BKB (kolom 1,2,3,4)</div>
+                <div style="overflow-x:auto;">
+                    <table class="col-select-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">Pakai</th>
+                                <th>Kolom Sumber (Excel)</th>
+                                <th>Petakan ke Field Sistem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="colSelectBody1"></tbody>
+                    </table>
+                </div>
+
+                <div class="colselect-group-title">📄 Tabel 3B BKB (kolom 1,2,6,7)</div>
+                <div style="overflow-x:auto;">
+                    <table class="col-select-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">Pakai</th>
+                                <th>Kolom Sumber (Excel)</th>
+                                <th>Petakan ke Field Sistem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="colSelectBody2"></tbody>
+                    </table>
+                </div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(2)">← Kembali</button>
+                    <button class="btn-nav next" id="btnStep3Next" disabled onclick="goToStep(4); renderPreview();">Lanjut ke Preview →</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: PREVIEW -->
+            <div class="step-panel" id="panel4">
+                <div class="panel-head">
+                    <h3>Preview Hasil Data (Gabungan 2 File)</h3>
+                    <p>Data dari Tabel 3A dan 3B digabung berdasarkan nama kecamatan yang sama</p>
+                </div>
+
+                <div class="preview-summary" id="previewSummary"></div>
+
+                <div class="preview-table-wrap">
+                    <table id="previewTable">
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>Kecamatan</th>
+                                <th>Ada</th>
+                                <th>Lapor</th>
+                                <th>%</th>
+                                <th>Anggota Yg Ada</th>
+                                <th>Capaian (Hadir)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(3)">← Kembali</button>
+                    <button class="btn-nav next" onclick="goToStep(5); renderTargetForm();">Lanjut Input Target →</button>
+                </div>
+            </div>
+
+            <!-- STEP 5: TARGET MANUAL -->
+            <div class="step-panel" id="panel5">
+                <div class="panel-head">
+                    <h3>Input Target Program BKB (Manual)</h3>
+                    <p>Jumlah Anggota Yang Ada dan Capaian sudah terhitung otomatis dari data Excel. Masukkan Target keanggotaan yang ditetapkan Dinas untuk tiap kecamatan pada periode ini.</p>
+                </div>
+
+                <div style="margin-bottom:20px; display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end;">
+                    <div class="summary-chip" style="flex:1; min-width:280px;">
+                        <label style="font-size:11.5px; color:#9090a8; font-weight:600; display:block; margin-bottom:6px;">Terapkan Target ke Semua Kecamatan</label>
+                        <input type="number" min="0" placeholder="cth. 1200" id="globalTarget" style="width:100%; padding:9px 12px; border:1px solid #e0e4ee; border-radius:8px; font-size:13.5px; font-family:inherit;" oninput="applyGlobalTarget()">
+                    </div>
+                    <button class="btn-nav back" style="background:#fff8e1; color:#7a5c00; border:1px solid #ffe082;" onclick="applyTestTarget()">🧪 Isi Target Testing</button>
+                </div>
+
+                <div class="target-table-wrap">
+                    <table class="target-table">
+                        <thead>
+                            <tr>
+                                <th>Kecamatan</th>
+                                <th>Anggota Yang Ada</th>
+                                <th>Capaian (Hadir)</th>
+                                <th>Target</th>
+                            </tr>
+                        </thead>
+                        <tbody id="targetBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(4)">← Kembali</button>
+                    <button class="btn-nav next" onclick="goToStep(6); runCalculation();">Hitung Capaian →</button>
+                </div>
+            </div>
+
+            <!-- STEP 6: PERHITUNGAN & SIMPAN -->
+            <div class="step-panel" id="panel6">
+                <div class="panel-head">
+                    <h3>Perhitungan Capaian — MONEV POKTAN BKB</h3>
+                    <p>Selisih = Anggota Yang Ada − Target. % Terhadap Target = Capaian ÷ Target × 100. % Terhadap Anggota Yang Ada = Capaian ÷ Anggota Yang Ada × 100.</p>
+                </div>
+
+                <div class="calc-summary-cards" id="calcSummaryCards"></div>
+
+                <div class="calc-table-wrap">
+                    <table class="calc-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Kode</th>
+                                <th rowspan="2" style="text-align:left;">Kecamatan</th>
+                                <th colspan="3">Jumlah Poktan</th>
+                                <th colspan="3">Keanggotaan</th>
+                                <th colspan="3">Kehadiran</th>
+                                <th rowspan="2">% Terhadap<br>Target</th>
+                                <th rowspan="2">% Terhadap<br>Anggota Yg Ada</th>
+                            </tr>
+                            <tr>
+                                <th>Ada</th>
+                                <th>Lapor</th>
+                                <th>%</th>
+                                <th>Target</th>
+                                <th>Anggota<br>Yg Ada</th>
+                                <th>Selisih<br>(Lebih/Kurang)</th>
+                                <th>Target</th>
+                                <th>Anggota<br>Yg Ada</th>
+                                <th>Capaian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calcBody"></tbody>
+                        <tfoot id="calcFooter"></tfoot>
+                    </table>
+                </div>
+
+                <div class="panel-footer">
+                    <button class="btn-nav back" onclick="goToStep(5)">← Kembali</button>
+                    <button class="btn-nav save" onclick="saveMonitoring()">💾 Simpan Data Monitoring</button>
+                </div>
+            </div>
+
+        </section>
+
+        <footer>
+            <p>© 2026 Monitoring Poktan · Dinas Sosial PPKB Kabupaten Banyuwangi</p>
+            <span class="footer-version">v1.0.0 (BKB)</span>
+        </footer>
+    </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+        <div class="success-icon">✓</div>
+        <h3>Data Monitoring BKB Tersimpan</h3>
+        <p>Data hasil upload, target, dan perhitungan capaian program BKB telah berhasil disimpan ke sistem.</p>
+        <button onclick="window.location.reload()">Tambah Data Lain</button>
+    </div>
+</div>
+
+<script>
+    const now = new Date();
+    document.getElementById('headerDate').textContent =
+        now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    function toggleSub(id, el) {
+        const sub = document.getElementById(id);
+        const isOpen = sub.classList.toggle('open');
+        el.classList.toggle('open', isOpen);
+    }
+
+    /* ===================== FIELD DEFINITION UNTUK BKB ===================== */
+    /* File 1 = Tabel 3A: kolom 1,2,3,4 (Kode, Kecamatan, Ada, Lapor)
+       File 2 = Tabel 3B: kolom 1,2,6,7 (Kode, Kecamatan, Jml Keluarga Anggota BKB, Jml Hadir Pertemuan) */
+    const FIELDS_FILE1 = [
+        { key: 'kode', label: 'Kode' },
+        { key: 'kecamatan', label: 'Kecamatan' },
+        { key: 'ada', label: 'Jumlah Poktan - ADA (kolom 3)' },
+        { key: 'lapor', label: 'Jumlah Poktan - LAPOR (kolom 4)' },
+        { key: 'abaikan', label: '(Tidak digunakan)' },
+    ];
+    const FIELDS_FILE2 = [
+        { key: 'kode', label: 'Kode' },
+        { key: 'kecamatan', label: 'Kecamatan' },
+        { key: 'jumlah_anggota', label: 'Anggota Yg Ada - Jml Keluarga Anggota BKB (kolom 6)' },
+        { key: 'jumlah_hadir', label: 'Capaian - Jml Hadir Pertemuan (kolom 7)' },
+        { key: 'abaikan', label: '(Tidak digunakan)' },
+    ];
+
+    /* Posisi kolom RELATIF terhadap kolom "Kecamatan" (bukan index absolut).
+       Ini lebih tahan terhadap pergeseran kolom (mis. ada kolom kosong di
+       awal sheet yang bikin semua kolom geser satu posisi) — sistem cari
+       dulu kolom mana yang beneran berisi teks "Kecamatan", baru hitung
+       kolom lain relatif dari situ, bukan asumsi kolom A/B/dst secara buta. */
+    const OFFSET_FILE1 = { kode: -1, kecamatan: 0, ada: 1, lapor: 2 };
+    const OFFSET_FILE2 = { kode: -1, kecamatan: 0, jumlah_anggota: 4, jumlah_hadir: 5 };
+
+    function buildPositionMapFromHeaders(rawHeaders, offsetMap) {
+        const kecIdx = rawHeaders.findIndex(h => matchesKeyword(String(h).toLowerCase(), 'kecamatan'));
+        if (kecIdx === -1) return {}; // nanti ke-tangkep di validasi (kolom kecamatan gak ketemu)
+
+        const positionMap = {};
+        Object.keys(offsetMap).forEach(field => {
+            const idx = kecIdx + offsetMap[field];
+            if (idx >= 0) positionMap[idx] = field;
+        });
+        return positionMap;
+    }
+
+    // State per file (1 = Tabel 3A, 2 = Tabel 3B)
+    const state = {
+        1: { rawHeaders: [], rawRows: [], colMapping: [] },
+        2: { rawHeaders: [], rawRows: [], colMapping: [] },
+    };
+
+    let mappedData = [];
+    let kecamatanAgg = {};
+    let targetInputs = {};
+
+    const TEST_TARGET_DATA = {
+        'PESANGGARAN': 2345, 'BANGOREJO': 2194, 'PURWOHARJO': 2400, 'TEGALDLIMO': 2813,
+        'MUNCAR': 5497, 'CLURING': 2522, 'GAMBIRAN': 2381, 'SRONO': 4012,
+        'GENTENG': 4144, 'GLENMORE': 2551, 'KALIBARU': 2421, 'SINGOJURUH': 2539,
+        'ROGOJAMPI': 2301, 'KABAT': 2924, 'GLAGAH': 1262, 'BANYUWANGI': 3782,
+        'GIRI': 1327, 'WONGSOREJO': 2684, 'SONGGON': 2494, 'SEMPU': 3715,
+        'KALIPURO': 3208, 'SILIRAGUNG': 2109, 'TEGALSARI': 1990, 'LICIN': 1284,
+        'BLIMBINGSARI': 1810,
+    };
+
+    function matchesKeyword(header, keyword) {
+        const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return new RegExp('\\b' + escaped + '\\b', 'i').test(header);
+    }
+
+    /* ===================== STEP NAVIGATION ===================== */
+    function goToStep(n) {
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel' + n).classList.add('active');
+
+        document.querySelectorAll('.step-item').forEach(item => {
+            const s = parseInt(item.dataset.step);
+            item.classList.remove('active', 'completed');
+            if (s < n) item.classList.add('completed');
+            if (s === n) item.classList.add('active');
+        });
+    }
+
+    /* ===================== STEP 1: UPLOAD (2 FILE) ===================== */
+    [1, 2].forEach(slot => {
+        const dz = document.getElementById('dropzone' + slot);
+        ['dragenter', 'dragover'].forEach(evt => {
+            dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.add('drag-over'); });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.remove('drag-over'); });
+        });
+        dz.addEventListener('drop', e => {
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(slot, file);
+        });
+    });
+
+    function findHeaderRows(json) {
+        let mainIdx = -1;
+        for (let i = 0; i < json.length; i++) {
+            const row = json[i] || [];
+            if (row.some(cell => String(cell).trim().toLowerCase() === 'kecamatan')) {
+                mainIdx = i;
+                break;
+            }
+        }
+        if (mainIdx === -1) return null;
+
+        const mainRow = json[mainIdx] || [];
+        const subRow = json[mainIdx + 1] || [];
+        const maxCols = Math.max(mainRow.length, subRow.length);
+
+        const filledMain = [];
+        let lastMain = '';
+        for (let c = 0; c < maxCols; c++) {
+            const m = String(mainRow[c] ?? '').trim();
+            if (m) lastMain = m;
+            filledMain.push(lastMain);
+        }
+
+        const combined = [];
+        for (let c = 0; c < maxCols; c++) {
+            const s = String(subRow[c] ?? '').trim();
+            const m = filledMain[c];
+            combined.push(s || m);
+        }
+
+        let dataStart = mainIdx + 2;
+        const maybeNumRow = json[dataStart] || [];
+        const filledCells = maybeNumRow.filter(c => String(c).trim() !== '');
+        const looksLikeNumberRow = filledCells.length > 0 && filledCells.every(c => /^\d+(=.*)?$/.test(String(c).trim()));
+        if (looksLikeNumberRow) dataStart += 1;
+
+        return { headers: combined, dataStartIndex: dataStart };
+    }
+
+    function resetUpload(slot) {
+        state[slot].rawHeaders = [];
+        state[slot].rawRows = [];
+        document.getElementById('fileInput' + slot).value = '';
+        document.getElementById('fileLoadedBox' + slot).style.display = 'none';
+        document.getElementById('debugBox' + slot).style.display = 'none';
+        updateStep1NextButton();
+    }
+
+    function updateStep1NextButton() {
+        const ready = state[1].rawHeaders.length > 0 && state[2].rawHeaders.length > 0;
+        document.getElementById('btnStep1Next').disabled = !ready;
+    }
+
+    function handleFile(slot, file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+                if (!json || json.length < 2) {
+                    alert('File Excel tidak memiliki data yang cukup.');
+                    return;
+                }
+
+                const detected = findHeaderRows(json);
+
+                if (!detected) {
+                    alert('Kolom "Kecamatan" tidak ditemukan di file manapun. Pastikan file adalah hasil unduhan resmi dari SIGA.');
+                    return;
+                }
+
+                state[slot].rawHeaders = detected.headers;
+                state[slot].rawRows = json.slice(detected.dataStartIndex).filter(r => r.some(c => String(c).trim() !== ''));
+
+                document.getElementById('fileLoadedText' + slot).textContent = `📄 ${file.name} — ${state[slot].rawRows.length} baris`;
+                document.getElementById('fileLoadedBox' + slot).style.display = 'flex';
+
+                const debugBox = document.getElementById('debugBox' + slot);
+                debugBox.textContent = 'Header: ' + state[slot].rawHeaders.map((h, i) => `[${i}] "${h || '(kosong)'}"`).join('  ');
+                debugBox.style.display = 'block';
+
+                updateStep1NextButton();
+            } catch (err) {
+                alert('Gagal membaca file. Pastikan format file benar (.xlsx/.xls/.csv).');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    /* ===================== STEP 2: VALIDASI ===================== */
+    function runValidationForSlot(slot, listElId) {
+        const list = document.getElementById(listElId);
+        list.innerHTML = '';
+
+        const rawHeaders = state[slot].rawHeaders;
+        const rawRows = state[slot].rawRows;
+
+        const items = [];
+        items.push({ ok: rawHeaders.length > 0, text: `File berhasil dibaca dengan <b>${rawHeaders.length}</b> kolom` });
+        items.push({ ok: rawRows.length > 0, text: `Ditemukan <b>${rawRows.length}</b> baris data pada file` });
+
+        const hasKecamatan = rawHeaders.some(h => matchesKeyword(h.toLowerCase(), 'kecamatan'));
+        items.push({ ok: hasKecamatan, text: hasKecamatan ? 'Kolom <b>Kecamatan</b> ditemukan' : 'Kolom <b>Kecamatan</b> tidak ditemukan' });
+
+        let allOk = true;
+        items.forEach(it => {
+            if (!it.ok) allOk = false;
+            const div = document.createElement('div');
+            div.className = `validate-item ${it.ok ? 'ok' : 'err'}`;
+            div.innerHTML = `<div class="v-icon">${it.ok ? '✓' : '✕'}</div><div class="v-text">${it.text}</div>`;
+            list.appendChild(div);
+        });
+
+        return allOk;
+    }
+
+    function runValidation() {
+        const ok1 = runValidationForSlot(1, 'validateList1');
+        const ok2 = runValidationForSlot(2, 'validateList2');
+        document.getElementById('btnStep2Next').disabled = !(ok1 && ok2);
+    }
+
+    /* ===================== STEP 3: SELEKSI KOLOM ===================== */
+    function guessMapping(colIndex, positionMap) {
+        return positionMap[colIndex] !== undefined ? positionMap[colIndex] : 'abaikan';
+    }
+
+    function buildColMapping(slot, positionMap) {
+        const claimed = new Set();
+        return state[slot].rawHeaders.map((h, idx) => {
+            let guessed = guessMapping(idx, positionMap);
+            if (guessed !== 'abaikan') {
+                if (claimed.has(guessed)) guessed = 'abaikan';
+                else claimed.add(guessed);
+            }
+            const sample = state[slot].rawRows[0] ? String(state[slot].rawRows[0][idx] ?? '') : '';
+            return { colIndex: idx, header: h, checked: guessed !== 'abaikan', mappedKey: guessed, sample };
+        });
+    }
+
+    function renderColumnSelection() {
+        const positionMap1 = buildPositionMapFromHeaders(state[1].rawHeaders, OFFSET_FILE1);
+        const positionMap2 = buildPositionMapFromHeaders(state[2].rawHeaders, OFFSET_FILE2);
+
+        state[1].colMapping = buildColMapping(1, positionMap1);
+        state[2].colMapping = buildColMapping(2, positionMap2);
+        renderColTable(1, 'colSelectBody1', FIELDS_FILE1);
+        renderColTable(2, 'colSelectBody2', FIELDS_FILE2);
+    }
+
+    function renderColTable(slot, bodyId, fieldDefs) {
+        const body = document.getElementById(bodyId);
+        body.innerHTML = '';
+
+        state[slot].colMapping.forEach((col, i) => {
+            const tr = document.createElement('tr');
+            const isAuto = col.mappedKey !== 'abaikan';
+            tr.innerHTML = `
+                <td><input type="checkbox" class="col-check" ${col.checked ? 'checked' : ''} onchange="onColCheckChange(${slot}, ${i}, this.checked, '${bodyId}')"></td>
+                <td>
+                    <div class="col-source-name">${col.header || '(tanpa nama)'} ${isAuto ? '<span class="tag-auto">Auto terdeteksi</span>' : '<span class="tag-unused">Tidak dipakai</span>'}</div>
+                    <div class="col-source-sample">Contoh isi: ${col.sample || '-'}</div>
+                </td>
+                <td>
+                    <select onchange="onColMapChange(${slot}, ${i}, this.value, '${bodyId}')" ${col.checked ? '' : 'disabled'}>
+                        ${fieldDefs.map(f => `<option value="${f.key}" ${col.mappedKey === f.key ? 'selected' : ''}>${f.label}</option>`).join('')}
+                    </select>
+                </td>
+            `;
+            body.appendChild(tr);
+        });
+
+        validateColSelection();
+    }
+
+    function onColCheckChange(slot, i, checked, bodyId) {
+        const mapping = state[slot].colMapping;
+        mapping[i].checked = checked;
+        if (!checked) {
+            mapping[i].mappedKey = 'abaikan';
+        } else if (mapping[i].mappedKey !== 'abaikan') {
+            unclaimFieldFromOtherColumns(slot, i, mapping[i].mappedKey);
+        }
+        renderColTable(slot, bodyId, slot === 1 ? FIELDS_FILE1 : FIELDS_FILE2);
+    }
+
+    function onColMapChange(slot, i, value, bodyId) {
+        if (value !== 'abaikan') {
+            unclaimFieldFromOtherColumns(slot, i, value);
+        }
+        state[slot].colMapping[i].mappedKey = value;
+        renderColTable(slot, bodyId, slot === 1 ? FIELDS_FILE1 : FIELDS_FILE2);
+    }
+
+    function unclaimFieldFromOtherColumns(slot, exceptIndex, fieldKey) {
+        state[slot].colMapping.forEach((c, j) => {
+            if (j !== exceptIndex && c.mappedKey === fieldKey) {
+                c.mappedKey = 'abaikan';
+                c.checked = false;
+            }
+        });
+    }
+
+    function validateColSelection() {
+        const used1 = state[1].colMapping.filter(c => c.checked).map(c => c.mappedKey);
+        const used2 = state[2].colMapping.filter(c => c.checked).map(c => c.mappedKey);
+
+        const ok1 = used1.includes('kecamatan') && used1.includes('ada') && used1.includes('lapor');
+        const ok2 = used2.includes('kecamatan') && used2.includes('jumlah_anggota') && used2.includes('jumlah_hadir');
+
+        document.getElementById('btnStep3Next').disabled = !(ok1 && ok2);
+    }
+
+    /* ===================== STEP 4: PREVIEW (GABUNG 2 FILE) ===================== */
+    function mapRowsForSlot(slot) {
+        const usedCols = state[slot].colMapping.filter(c => c.checked && c.mappedKey !== 'abaikan');
+        return state[slot].rawRows.map(row => {
+            const obj = {};
+            usedCols.forEach(c => { obj[c.mappedKey] = row[c.colIndex] ?? ''; });
+            return obj;
+        }).filter(row => String(row.kecamatan || '').trim() !== '');
+    }
+
+    function renderPreview() {
+        const data1 = mapRowsForSlot(1); // { kode, kecamatan, ada, lapor }
+        const data2 = mapRowsForSlot(2); // { kode, kecamatan, jumlah_anggota, jumlah_hadir }
+
+        // Normalisasi kode jadi angka (biar "01" dan "1" dianggap sama)
+        function normKode(k) {
+            const n = parseInt(String(k).replace(/\D/g, ''), 10);
+            return isNaN(n) ? null : n;
+        }
+        function normKec(k) {
+            return String(k || '').trim().toUpperCase().replace(/\s+/g, ' ');
+        }
+
+        // Index data2 berdasarkan KODE (kunci utama, lebih andal) dan nama
+        // kecamatan (fallback), soalnya kode "01".."25" jauh lebih konsisten
+        // antar file dibanding penulisan nama kecamatan.
+        const data2ByKode = {};
+        const data2ByKec = {};
+        data2.forEach(r => {
+            const nk = normKode(r.kode);
+            if (nk !== null) data2ByKode[nk] = r;
+            data2ByKec[normKec(r.kecamatan)] = r;
+        });
+
+        const unmatched = [];
+
+        mappedData = data1.map(row1 => {
+            const nk = normKode(row1.kode);
+            let row2 = (nk !== null) ? data2ByKode[nk] : null;
+            if (!row2) row2 = data2ByKec[normKec(row1.kecamatan)];
+
+            if (!row2) unmatched.push(row1.kecamatan);
+
+            const ada = Number(row1.ada) || 0;
+            const lapor = Number(row1.lapor) || 0;
+
+            return {
+                kode: row1.kode || (row2 ? row2.kode : '-'),
+                kecamatan: row1.kecamatan,
+                ada, lapor,
+                pctLapor: ada > 0 ? (lapor / ada) * 100 : 0,
+                jumlah_anggota: row2 ? Number(row2.jumlah_anggota) || 0 : 0,
+                jumlah_hadir: row2 ? Number(row2.jumlah_hadir) || 0 : 0,
+                matched: !!row2,
+            };
+        });
+
+        const summary = document.getElementById('previewSummary');
+        const totalAda = mappedData.reduce((s, r) => s + r.ada, 0);
+        const totalLapor = mappedData.reduce((s, r) => s + r.lapor, 0);
+        summary.innerHTML = `
+            <div class="summary-chip"><div class="chip-value">${mappedData.length}</div><div class="chip-label">Kecamatan Terdeteksi</div></div>
+            <div class="summary-chip"><div class="chip-value">${totalAda} / ${totalLapor}</div><div class="chip-label">Total Poktan Ada / Lapor</div></div>
+            <div class="summary-chip"><div class="chip-value">${unmatched.length}</div><div class="chip-label">Kecamatan Tidak Cocok Antar File</div></div>
+        `;
+
+        const body = document.getElementById('previewBody');
+        body.innerHTML = mappedData.map(row => `
+            <tr>
+                <td>${row.kode ?? '-'}</td>
+                <td><b>${row.kecamatan ?? '-'}</b></td>
+                <td>${row.ada}</td>
+                <td>${row.lapor}</td>
+                <td>${row.pctLapor.toFixed(2)}</td>
+                <td class="${row.matched ? '' : 'warn-mismatch'}">${row.jumlah_anggota}${row.matched ? '' : ' ⚠'}</td>
+                <td class="${row.matched ? '' : 'warn-mismatch'}">${row.jumlah_hadir}${row.matched ? '' : ' ⚠'}</td>
+            </tr>
+        `).join('');
+
+        // Panel debug: tampilkan data mentah kode+kecamatan dari kedua file
+        // biar kalau masih ada yang mismatch, langsung kelihatan penyebabnya
+        // (mis. kolom kecamatan di file 2 ternyata kebaca isi kolom lain).
+        let debugPanel = document.getElementById('preview-debug-panel');
+        if (!debugPanel) {
+            debugPanel = document.createElement('div');
+            debugPanel.id = 'preview-debug-panel';
+            debugPanel.className = 'debug-box';
+            debugPanel.style.marginTop = '16px';
+            debugPanel.style.maxHeight = '160px';
+            document.querySelector('#panel4 .preview-table-wrap').insertAdjacentElement('afterend', debugPanel);
+        }
+        debugPanel.style.display = 'block';
+        debugPanel.textContent =
+            'DEBUG — Data mentah Tabel 3A (kode | kecamatan): ' +
+            data1.map(r => `[${r.kode}|${r.kecamatan}]`).join(' ') +
+            '\n\nDEBUG — Data mentah Tabel 3B (kode | kecamatan): ' +
+            data2.map(r => `[${r.kode}|${r.kecamatan}]`).join(' ');
+
+        if (unmatched.length > 0) {
+            alert('Kecamatan berikut ada di Tabel 3A tapi tidak ditemukan di Tabel 3B (data anggota jadi 0):\n' + unmatched.join(', ') + '\n\nCek panel debug di bawah tabel preview untuk lihat data mentah kedua file.');
+        }
+
+        kecamatanAgg = {};
+        mappedData.forEach(row => {
+            const kec = String(row.kecamatan || '').trim();
+            kecamatanAgg[kec] = {
+                kode: row.kode || '-',
+                ada: row.ada,
+                lapor: row.lapor,
+                anggota: row.jumlah_anggota,
+                hadir: row.jumlah_hadir,
+                pctLapor: row.pctLapor
+            };
+        });
+    }
+
+    /* ===================== STEP 5: TARGET MANUAL ===================== */
+    function renderTargetForm() {
+        const body = document.getElementById('targetBody');
+        body.innerHTML = '';
+
+        const kecList = Object.keys(kecamatanAgg).sort();
+
+        if (kecList.length === 0) {
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#9090a8; padding:16px;">Tidak ada data kecamatan terdeteksi dari file.</td></tr>';
+            return;
+        }
+
+        kecList.forEach(kec => {
+            if (targetInputs[kec] === undefined) targetInputs[kec] = '';
+            const agg = kecamatanAgg[kec];
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="target-kec-name">${kec}</td>
+                <td class="realisasi-val">${agg.anggota}</td>
+                <td class="realisasi-val">${agg.hadir}</td>
+                <td><input type="number" min="0" placeholder="0" value="${targetInputs[kec]}" onchange="updateTarget('${kec}', this.value)"></td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    function updateTarget(kec, value) {
+        targetInputs[kec] = value;
+    }
+
+    function applyGlobalTarget() {
+        const g = document.getElementById('globalTarget').value;
+        Object.keys(kecamatanAgg).forEach(kec => {
+            if (g !== '') targetInputs[kec] = g;
+        });
+        renderTargetForm();
+    }
+
+    function applyTestTarget() {
+        const notFound = [];
+        Object.keys(kecamatanAgg).forEach(kec => {
+            const key = kec.trim().toUpperCase();
+            if (TEST_TARGET_DATA[key] !== undefined) {
+                targetInputs[kec] = TEST_TARGET_DATA[key];
+            } else {
+                notFound.push(kec);
+            }
+        });
+        renderTargetForm();
+
+        if (notFound.length > 0) {
+            alert('Kecamatan berikut tidak ada di data testing, target dibiarkan kosong:\n' + notFound.join(', '));
+        }
+    }
+
+    /* ===================== STEP 6: PERHITUNGAN ===================== */
+    function runCalculation() {
+        const kecList = Object.keys(kecamatanAgg).sort();
+        const body = document.getElementById('calcBody');
+        body.innerHTML = '';
+
+        let totalAda = 0, totalLapor = 0, totalTarget = 0, totalAnggota = 0, totalHadir = 0, totalSelisih = 0;
+
+        kecList.forEach(kec => {
+            const agg = kecamatanAgg[kec];
+            const target = Number(targetInputs[kec]) || 0;
+
+            const selisih = agg.anggota - target;
+            const pctThdTarget = target > 0 ? (agg.hadir / target) * 100 : 0;
+            const pctThdAnggota = agg.anggota > 0 ? (agg.hadir / agg.anggota) * 100 : 0;
+
+            totalAda += agg.ada;
+            totalLapor += agg.lapor;
+            totalTarget += target;
+            totalAnggota += agg.anggota;
+            totalHadir += agg.hadir;
+            totalSelisih += selisih;
+
+            const selisihClass = selisih >= 0 ? 'selisih-pos' : 'selisih-neg';
+            const selisihText = selisih >= 0 ? `+${selisih}` : `${selisih}`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${agg.kode}</td>
+                <td class="text-left"><b>${kec}</b></td>
+                <td>${agg.ada}</td>
+                <td>${agg.lapor}</td>
+                <td>${agg.pctLapor.toFixed(2)}</td>
+                <td>${target || '-'}</td>
+                <td>${agg.anggota}</td>
+                <td class="${selisihClass}">${selisihText}</td>
+                <td>${target || '-'}</td>
+                <td>${agg.anggota}</td>
+                <td>${agg.hadir}</td>
+                <td>${pctThdTarget.toFixed(0)}</td>
+                <td>${pctThdAnggota.toFixed(0)}</td>
+            `;
+            body.appendChild(tr);
+        });
+
+        const totalPctLapor = totalAda > 0 ? (totalLapor / totalAda) * 100 : 0;
+        const totalPctThdTarget = totalTarget > 0 ? (totalHadir / totalTarget) * 100 : 0;
+        const totalPctThdAnggota = totalAnggota > 0 ? (totalHadir / totalAnggota) * 100 : 0;
+        const totalSelisihClass = totalSelisih >= 0 ? 'selisih-pos' : 'selisih-neg';
+        const totalSelisihText = totalSelisih >= 0 ? `+${totalSelisih}` : `${totalSelisih}`;
+
+        const footer = document.getElementById('calcFooter');
+        footer.innerHTML = `
+            <tr>
+                <td colspan="2" class="text-left">Jumlah Total</td>
+                <td>${totalAda}</td>
+                <td>${totalLapor}</td>
+                <td>${totalPctLapor.toFixed(2)}</td>
+                <td>${totalTarget}</td>
+                <td>${totalAnggota}</td>
+                <td class="${totalSelisihClass}">${totalSelisihText}</td>
+                <td>${totalTarget}</td>
+                <td>${totalAnggota}</td>
+                <td>${totalHadir}</td>
+                <td>${totalPctThdTarget.toFixed(0)}</td>
+                <td>${totalPctThdAnggota.toFixed(0)}</td>
+            </tr>
+        `;
+
+        const cards = document.getElementById('calcSummaryCards');
+        cards.innerHTML = `
+            <div class="calc-card">
+                <div class="cc-value">${totalAnggota} / ${totalTarget}</div>
+                <div class="cc-label">Total Anggota Yg Ada / Target Kabupaten</div>
+            </div>
+            <div class="calc-card">
+                <div class="cc-value">${totalPctThdTarget.toFixed(1)}%</div>
+                <div class="cc-label">Rata-rata % Terhadap Target</div>
+            </div>
+            <div class="calc-card alt">
+                <div class="cc-value">${totalPctThdAnggota.toFixed(1)}%</div>
+                <div class="cc-label">Rata-rata % Terhadap Anggota Yg Ada</div>
+            </div>
+        `;
+    }
+
+    function saveMonitoring() {
+        document.getElementById('successOverlay').classList.add('open');
+    }
+</script>
+
+</body>
+</html>
