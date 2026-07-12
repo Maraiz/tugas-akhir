@@ -91,15 +91,15 @@ function Sidebar() {
                     Data Pengguna
                 </Link>
 
-                <div className="nav-item">
+                <Link to="/admin/riwayat-upload" className={`nav-item ${isActive("/admin/riwayat-upload") ? "active" : ""}`}>
                     <span className="nav-icon">📄</span>
                     Riwayat Upload
-                </div>
+                </Link>
 
-                <div className="nav-item">
+                <Link to="/admin/laporan" className={`nav-item ${isActive("/admin/laporan") ? "active" : ""}`}>
                     <span className="nav-icon">📈</span>
                     Laporan
-                </div>
+                </Link>
 
             </nav>
 

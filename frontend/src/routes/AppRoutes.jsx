@@ -16,6 +16,9 @@ import DataPikr from "../pages/admin/DataPikr";
 import AddPikr from "../pages/admin/AddPikr";
 import DataUppka from "../pages/admin/DataUppka";
 import AddUppka from "../pages/admin/AddUppka";
+import RiwayatUpload from "../pages/admin/RiwayatUpload";
+import Laporan from "../pages/admin/Laporan";
+
 import DashboardPetugas from "../pages/petugas/Dashboard";
 import DashboardUser from "../pages/user/Dashboard";
 
@@ -47,6 +50,8 @@ function AppRoutes() {
                         <Route path="monitoring/pikr/tambah" element={<AddPikr />} />
                         <Route path="monitoring/uppka" element={<DataUppka />} />
                         <Route path="monitoring/uppka/tambah" element={<AddUppka />} />
+                        <Route path="riwayat-upload" element={<RiwayatUpload />} />
+                        <Route path="laporan" element={<Laporan />} />
                     </Route>
 
                 </Route>

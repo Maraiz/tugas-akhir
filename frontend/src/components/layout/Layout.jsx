@@ -19,6 +19,8 @@ const ROUTE_META = {
     "/admin/monitoring/pikr/tambah": { title: "Tambah Data PIK-R", breadcrumb: "Tambah PIK-R" },
     "/admin/monitoring/uppka": { title: "Data UPPKA", breadcrumb: "UPPKA" },
     "/admin/monitoring/uppka/tambah": { title: "Tambah Data UPPKA", breadcrumb: "Tambah UPPKA" },
+    "/admin/riwayat-upload": { title: "Riwayat Upload", breadcrumb: "Riwayat Upload" },
+    "/admin/laporan": { title: "Laporan", breadcrumb: "Laporan" },
 };
 
 function Layout() {

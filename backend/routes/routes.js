@@ -58,4 +58,12 @@ router.use("/pikr", require("./pikr"));
 
 router.use("/uppka", require("./uppka"));
 
+// ==============================
+// Riwayat Upload (gabungan lintas program, read-only)
+// ==============================
+
+router.use("/riwayat-upload", require("./riwayatUpload"));
+
+router.use("/laporan", require("./laporan"));
+
 module.exports = router;

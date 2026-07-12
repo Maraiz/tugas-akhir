@@ -1,0 +1,402 @@
+.greeting {
+    margin-bottom: 22px;
+}
+
+.greeting h1 {
+    font-size: 21px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+}
+
+.greeting p {
+    font-size: 13px;
+    color: #9090a8;
+}
+
+/* ===== REMINDER BANNER ===== */
+.reminder-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #fff3e0, #ffe8cc);
+    border: 1px solid #ffcc80;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 22px;
+}
+
+.reminder-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.reminder-text {
+    flex: 1;
+}
+
+.reminder-text h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #7a4a00;
+    margin-bottom: 2px;
+}
+
+.reminder-text p {
+    font-size: 12.5px;
+    color: #93641a;
+}
+
+.reminder-text b {
+    color: #7a4a00;
+}
+
+.btn-reminder-action {
+    padding: 9px 18px;
+    background: #fff;
+    color: #ef6c00;
+    border: 1px solid #ef6c00;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.btn-reminder-action:hover {
+    background: #fff3e0;
+}
+
+/* ===== KPI CARDS ===== */
+.kpi-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+}
+
+.kpi-card {
+    flex: 1;
+    min-width: 200px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.kpi-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.kpi-icon.blue {
+    background: #eef3fb;
+}
+
+.kpi-icon.green {
+    background: #e3f4e5;
+}
+
+.kpi-icon.orange {
+    background: #fff4e5;
+}
+
+.kpi-icon.purple {
+    background: #f3e5f5;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: #9090a8;
+    margin-top: 2px;
+}
+
+/* ===== 2-COLUMN GRID ===== */
+.dash-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+@media (max-width: 1100px) {
+    .dash-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.panel-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 22px;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.panel-head h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.panel-head a {
+    font-size: 12px;
+    color: #1565c0;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Status upload list */
+.status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #f8faff;
+    border: 1px solid #eef1f8;
+}
+
+.status-program-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.status-program-badge.bkb {
+    background: #1565c0;
+}
+
+.status-program-badge.bkr {
+    background: #2e7d32;
+}
+
+.status-program-badge.bkl {
+    background: #ef6c00;
+}
+
+.status-program-badge.pikr {
+    background: #8e24aa;
+}
+
+.status-program-badge.uppka {
+    background: #c2185b;
+}
+
+.status-info {
+    flex: 1;
+}
+
+.status-info .s-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.status-info .s-sub {
+    font-size: 11.5px;
+    color: #9090a8;
+    margin-top: 1px;
+}
+
+.status-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-pill.done {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-pill.pending {
+    background: #fdecea;
+    color: #c62828;
+}
+
+/* Kecamatan perlu perhatian */
+.attention-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.attention-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fdf6f6;
+    border: 1px solid #f7dede;
+}
+
+.attention-info .a-kec {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.attention-info .a-sub {
+    font-size: 11.5px;
+    color: #9090a8;
+    margin-top: 1px;
+}
+
+.attention-pct {
+    font-size: 15px;
+    font-weight: 700;
+    color: #c62828;
+}
+
+/* Aktivitas terbaru */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 6px;
+    border-bottom: 1px solid #f0f2f8;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    background: #eef3fb;
+    color: #1565c0;
+}
+
+.activity-text {
+    flex: 1;
+    font-size: 12.5px;
+    color: #2d2d3a;
+    line-height: 1.5;
+}
+
+.activity-text b {
+    color: #1a1a2e;
+}
+
+.activity-time {
+    font-size: 11px;
+    color: #9090a8;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+
+/* Shortcut actions */
+.shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 700px) {
+    .shortcut-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.shortcut-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 10px;
+    border-radius: 12px;
+    border: 1px solid #eef1f8;
+    background: #f8faff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.shortcut-btn:hover {
+    background: #eef3fb;
+    border-color: #1565c0;
+}
+
+.shortcut-btn .sc-icon {
+    font-size: 22px;
+}
+
+.shortcut-btn .sc-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+/* Chart card */
+.chart-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+}
+
+.chart-wrap {
+    position: relative;
+    height: 280px;
+}
