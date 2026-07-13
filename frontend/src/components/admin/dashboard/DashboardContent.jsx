@@ -1,64 +1,82 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Chart from "chart.js/auto";
+import api from "../../../services/api";
 import "../../../styles/dashboard.css";
 
-/* ===================== DUMMY DATA ===================== */
-/* TODO: ganti jadi fetch dari backend — kebanyakan bisa reuse endpoint
-   yang udah ada (/riwayat-upload buat Aktivitas Terbaru, /laporan/ranking
-   buat Kecamatan Perlu Perhatian, dst) */
-const PROGRAM_STATUS = [
-    { key: "bkb", label: "BKB", nama: "Bina Keluarga Balita", done: true, info: "Diupload 10 Jul 2026, 15:10" },
-    { key: "bkr", label: "BKR", nama: "Bina Keluarga Remaja", done: true, info: "Diupload 10 Jul 2026, 10:44" },
-    { key: "bkl", label: "BKL", nama: "Bina Keluarga Lansia", done: true, info: "Diupload 10 Jul 2026, 16:20" },
-    { key: "pikr", label: "PIK-R", nama: "PIK Remaja", done: false, info: "Belum ada unggahan bulan ini" },
-    { key: "uppka", label: "UPPKA", nama: "Usaha Peningkatan Pendapatan Keluarga Akseptor", done: false, info: "Belum ada unggahan bulan ini" },
-];
+// Nama panjang tiap program buat panel "Status Upload" — backend cuma
+// ngirim label singkat (BKB, BKR, dst), nama lengkapnya statis di sini
+const PROGRAM_FULLNAME = {
+    bkb: "Bina Keluarga Balita",
+    bkr: "Bina Keluarga Remaja",
+    bkl: "Bina Keluarga Lansia",
+    pikr: "PIK Remaja",
+    uppka: "Usaha Peningkatan Pendapatan Keluarga Akseptor",
+};
 
-const ATTENTION_LIST = [
-    { kec: "Licin", ket: "BKB · Juni 2026", pct: 54 },
-    { kec: "Sempu", ket: "UPPKA · Mei 2026", pct: 58 },
-    { kec: "Kalipuro", ket: "BKL · Juni 2026", pct: 63 },
-];
-
-const ACTIVITY_LIST = [
-    { text: <><b>Admin Dinas</b> mengunggah data <b>PIK-R</b> periode Desember 2025</>, time: "10 Jul 2026, 17:40 WIB" },
-    { text: <><b>Admin Dinas</b> mengunggah data <b>UPPKA</b> periode Desember 2025</>, time: "10 Jul 2026, 17:05 WIB" },
-    { text: <><b>Admin Dinas</b> mengunggah data <b>BKL</b> periode Desember 2025</>, time: "10 Jul 2026, 16:20 WIB" },
-    { text: <><b>Admin Dinas</b> mengunggah data <b>BKB</b> periode Desember 2025</>, time: "10 Jul 2026, 15:10 WIB" },
-    { text: <><b>Admin Dinas</b> mengunggah data <b>BKR</b> periode Januari 2026</>, time: "10 Jul 2026, 10:44 WIB" },
-];
-
-const PROGRAM_CHART_DATA = [
-    { program: "BKB", pct: 88.1, color: "#1565c0" },
-    { program: "BKR", pct: 91.7, color: "#2e7d32" },
-    { program: "BKL", pct: 90.2, color: "#ef6c00" },
-    { program: "PIK-R", pct: 76.5, color: "#8e24aa" },
-    { program: "UPPKA", pct: 63.8, color: "#c2185b" },
-];
+const PROGRAM_ICON = { bkb: "📘", bkr: "📗", bkl: "📙", pikr: "📕", uppka: "📓" };
+const PROGRAM_COLOR = { bkb: "#1565c0", bkr: "#2e7d32", bkl: "#ef6c00", pikr: "#8e24aa", uppka: "#c2185b" };
 
 const SHORTCUTS = [
-    { icon: "📘", label: "BKB", to: "/admin/monitoring/bkb/tambah" },
-    { icon: "📗", label: "BKR", to: "/admin/monitoring/bkr/tambah" },
-    { icon: "📙", label: "BKL", to: "/admin/monitoring/bkl/tambah" },
-    { icon: "📕", label: "PIK-R", to: "/admin/monitoring/pikr/tambah" },
-    { icon: "📓", label: "UPPKA", to: "/admin/monitoring/uppka/tambah" },
-    { icon: "👥", label: "Pengguna", to: "/admin/data-pengguna" },
+    { key: "bkb", label: "BKB", to: "/admin/monitoring/bkb/tambah" },
+    { key: "bkr", label: "BKR", to: "/admin/monitoring/bkr/tambah" },
+    { key: "bkl", label: "BKL", to: "/admin/monitoring/bkl/tambah" },
+    { key: "pikr", label: "PIK-R", to: "/admin/monitoring/pikr/tambah" },
+    { key: "uppka", label: "UPPKA", to: "/admin/monitoring/uppka/tambah" },
+    { key: "users", label: "Pengguna", to: "/admin/data-pengguna", icon: "👥" },
 ];
+
+function formatWaktu(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    const tanggal = d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+    const jam = d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    return `${tanggal}, ${jam} WIB`;
+}
 
 function DashboardContent() {
     const canvasRef = useRef(null);
     const chartRef = useRef(null);
 
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    async function fetchDashboard() {
+        setLoading(true);
+        setError("");
+
+        try {
+            const res = await api.get("/dashboard");
+            setData(res.data.data);
+        } catch (err) {
+            console.error(err);
+            setError(err.response?.data?.message || "Gagal memuat data dashboard.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
+        fetchDashboard();
+    }, []);
+
+    // Gambar ulang grafik tiap kali data berubah
+    useEffect(() => {
+        if (!data || !canvasRef.current) return;
+
+        if (chartRef.current) chartRef.current.destroy();
+
+        const grafik = data.grafikCapaianProgram || [];
+
         chartRef.current = new Chart(canvasRef.current, {
             type: "bar",
             data: {
-                labels: PROGRAM_CHART_DATA.map((d) => d.program),
+                labels: grafik.map((d) => d.label),
                 datasets: [{
                     label: "% Capaian",
-                    data: PROGRAM_CHART_DATA.map((d) => d.pct),
-                    backgroundColor: PROGRAM_CHART_DATA.map((d) => d.color),
+                    data: grafik.map((d) => d.pct),
+                    backgroundColor: grafik.map((d) => PROGRAM_COLOR[d.program] || "#9090a8"),
                     borderRadius: 8,
                     maxBarThickness: 60,
                 }],
@@ -75,10 +93,23 @@ function DashboardContent() {
         });
 
         return () => { if (chartRef.current) chartRef.current.destroy(); };
-    }, []);
+    }, [data]);
 
-    const belumUpload = PROGRAM_STATUS.filter((p) => !p.done);
-    const sudahUpload = PROGRAM_STATUS.filter((p) => p.done);
+    if (loading) {
+        return <div style={{ textAlign: "center", padding: 60, color: "#9090a8" }}>Memuat dashboard...</div>;
+    }
+
+    if (error) {
+        return (
+            <div className="panel-card" style={{ textAlign: "center", padding: 40 }}>
+                <p style={{ color: "#c62828", marginBottom: 14 }}>⚠ {error}</p>
+                <button className="btn-reminder-action" onClick={fetchDashboard}>Coba Lagi</button>
+            </div>
+        );
+    }
+
+    const { kpi, statusUpload, kecamatanPerluPerhatian, aktivitasTerbaru, periodeBerjalan } = data;
+    const belumUpload = statusUpload.filter((p) => !p.done);
 
     return (
         <>
@@ -92,17 +123,19 @@ function DashboardContent() {
                 <div className="reminder-banner">
                     <div className="reminder-icon">⏰</div>
                     <div className="reminder-text">
-                        <h4>Ada {belumUpload.length} program yang belum upload data periode Juni 2026</h4>
+                        <h4>Ada {belumUpload.length} program yang belum upload data periode {periodeBerjalan}</h4>
                         <p>
                             {belumUpload.map((p, i) => (
-                                <span key={p.key}>
+                                <span key={p.program}>
                                     <b>{p.label}</b>{i < belumUpload.length - 1 ? (i === belumUpload.length - 2 ? " dan " : ", ") : ""}
                                 </span>
                             ))}
                             {" "}belum diupload. Batas unggah disarankan sebelum tanggal 5 tiap bulan.
                         </p>
                     </div>
-                    <button className="btn-reminder-action">Lihat Detail</button>
+                    <Link to="/admin/riwayat-upload" className="btn-reminder-action" style={{ textDecoration: "none", display: "inline-block" }}>
+                        Lihat Detail
+                    </Link>
                 </div>
             )}
 
@@ -111,28 +144,28 @@ function DashboardContent() {
                 <div className="kpi-card">
                     <div className="kpi-icon blue">🗂️</div>
                     <div>
-                        <div className="kpi-value">47</div>
-                        <div className="kpi-label">Total Periode Terekam (5 Program)</div>
+                        <div className="kpi-value">{kpi.totalPeriode}</div>
+                        <div className="kpi-label">Total Periode Terekam ({kpi.totalProgram} Program)</div>
                     </div>
                 </div>
                 <div className="kpi-card">
                     <div className="kpi-icon green">📈</div>
                     <div>
-                        <div className="kpi-value">82.1%</div>
+                        <div className="kpi-value">{kpi.rataCapaianKabupaten}%</div>
                         <div className="kpi-label">Rata-rata Capaian Kabupaten</div>
                     </div>
                 </div>
                 <div className="kpi-card">
                     <div className="kpi-icon orange">👥</div>
                     <div>
-                        <div className="kpi-value">12</div>
+                        <div className="kpi-value">{kpi.totalPengguna}</div>
                         <div className="kpi-label">Total Pengguna Terdaftar</div>
                     </div>
                 </div>
                 <div className="kpi-card">
                     <div className="kpi-icon purple">✅</div>
                     <div>
-                        <div className="kpi-value">{sudahUpload.length} / {PROGRAM_STATUS.length}</div>
+                        <div className="kpi-value">{kpi.sudahUpload} / {kpi.totalProgram}</div>
                         <div className="kpi-label">Program Sudah Upload Bulan Ini</div>
                     </div>
                 </div>
@@ -146,16 +179,18 @@ function DashboardContent() {
 
                     <div className="panel-card">
                         <div className="panel-head">
-                            <h3>Status Upload — Juni 2026</h3>
+                            <h3>Status Upload — {periodeBerjalan}</h3>
                             <Link to="/admin/riwayat-upload">Lihat Riwayat →</Link>
                         </div>
                         <div className="status-list">
-                            {PROGRAM_STATUS.map((p) => (
-                                <div className="status-item" key={p.key}>
-                                    <div className={`status-program-badge ${p.key}`}>{p.label}</div>
+                            {statusUpload.map((p) => (
+                                <div className="status-item" key={p.program}>
+                                    <div className={`status-program-badge ${p.program}`}>{p.label}</div>
                                     <div className="status-info">
-                                        <div className="s-name">{p.nama}</div>
-                                        <div className="s-sub">{p.info}</div>
+                                        <div className="s-name">{PROGRAM_FULLNAME[p.program] || p.label}</div>
+                                        <div className="s-sub">
+                                            {p.done ? `Diupload ${formatWaktu(p.waktu)}` : "Belum ada unggahan bulan ini"}
+                                        </div>
                                     </div>
                                     <span className={`status-pill ${p.done ? "done" : "pending"}`}>
                                         {p.done ? "✓ Sudah" : "⚠ Belum"}
@@ -171,11 +206,16 @@ function DashboardContent() {
                             <Link to="/admin/laporan">Lihat Laporan →</Link>
                         </div>
                         <div className="attention-list">
-                            {ATTENTION_LIST.map((a, i) => (
+                            {kecamatanPerluPerhatian.length === 0 && (
+                                <p style={{ fontSize: 12.5, color: "#9090a8", textAlign: "center", padding: "12px 0" }}>
+                                    Tidak ada kecamatan di bawah ambang batas capaian saat ini 🎉
+                                </p>
+                            )}
+                            {kecamatanPerluPerhatian.map((a, i) => (
                                 <div className="attention-item" key={i}>
                                     <div className="attention-info">
-                                        <div className="a-kec">{a.kec}</div>
-                                        <div className="a-sub">{a.ket}</div>
+                                        <div className="a-kec">{a.kecamatan}</div>
+                                        <div className="a-sub">{a.programLabel} · {a.periode}</div>
                                     </div>
                                     <div className="attention-pct">{a.pct}%</div>
                                 </div>
@@ -194,12 +234,17 @@ function DashboardContent() {
                             <Link to="/admin/riwayat-upload">Lihat Semua →</Link>
                         </div>
                         <div className="activity-list">
-                            {ACTIVITY_LIST.map((a, i) => (
+                            {aktivitasTerbaru.length === 0 && (
+                                <p style={{ fontSize: 12.5, color: "#9090a8", textAlign: "center", padding: "12px 0" }}>
+                                    Belum ada aktivitas upload tercatat
+                                </p>
+                            )}
+                            {aktivitasTerbaru.map((a, i) => (
                                 <div className="activity-item" key={i}>
-                                    <div className="activity-dot">📄</div>
+                                    <div className="activity-dot">{PROGRAM_ICON[a.program] || "📄"}</div>
                                     <div className="activity-text">
-                                        {a.text}
-                                        <div className="activity-time">{a.time}</div>
+                                        <b>{a.diuploadOleh}</b> mengunggah data <b>{a.programLabel}</b> periode {a.periode}
+                                        <div className="activity-time">{formatWaktu(a.waktu)}</div>
                                     </div>
                                 </div>
                             ))}
@@ -212,8 +257,8 @@ function DashboardContent() {
                         </div>
                         <div className="shortcut-grid">
                             {SHORTCUTS.map((s) => (
-                                <Link to={s.to} className="shortcut-btn" key={s.label}>
-                                    <span className="sc-icon">{s.icon}</span>
+                                <Link to={s.to} className="shortcut-btn" key={s.key}>
+                                    <span className="sc-icon">{s.icon || PROGRAM_ICON[s.key]}</span>
                                     <span className="sc-label">{s.label}</span>
                                 </Link>
                             ))}

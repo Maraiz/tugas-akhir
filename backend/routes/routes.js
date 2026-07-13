@@ -66,4 +66,6 @@ router.use("/riwayat-upload", require("./riwayatUpload"));
 
 router.use("/laporan", require("./laporan"));
 
+router.use("/dashboard", require("./dashboard"));
+
 module.exports = router;
