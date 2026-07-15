@@ -47,6 +47,13 @@ function BkbTable() {
     const [viewLoading, setViewLoading] = useState(false);
     const [viewError, setViewError] = useState("");
 
+    // ===== Modal Edit =====
+    const [editTarget, setEditTarget] = useState(null);
+    const [editRows, setEditRows] = useState([]);
+    const [editLoading, setEditLoading] = useState(false);
+    const [editError, setEditError] = useState("");
+    const [saving, setSaving] = useState(false);
+
     async function fetchPeriods() {
         setLoading(true);
         setLoadError("");
@@ -141,6 +148,74 @@ function BkbTable() {
         setViewDetails([]);
         setViewError("");
     }
+
+    // ===== Edit =====
+    async function openEditModal(period) {
+        setEditTarget(period);
+        setEditRows([]);
+        setEditError("");
+        setEditLoading(true);
+        try {
+            const response = await api.get(`/bkb/${period.id}`);
+            setEditRows(response.data.data.details || []);
+        } catch (error) {
+            console.error(error);
+            setEditError(error.response?.data?.message || "Gagal memuat detail periode.");
+        } finally {
+            setEditLoading(false);
+        }
+    }
+
+    function closeEditModal() {
+        if (saving) return;
+        setEditTarget(null);
+        setEditRows([]);
+        setEditError("");
+    }
+
+    function updateEditField(rowId, field, value) {
+        setEditRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, [field]: value } : r)));
+    }
+
+    async function saveEdit() {
+        setSaving(true);
+        setEditError("");
+        try {
+            const rowsPayload = editRows.map((r) => ({
+                id: r.id,
+                ada: r.ada,
+                lapor: r.lapor,
+                target: r.target,
+                jumlahAnggota: r.jumlahAnggota,
+                jumlahHadir: r.jumlahHadir,
+            }));
+
+            await api.put(`/bkb/${editTarget.id}`, { rows: rowsPayload });
+
+            closeEditModal();
+            fetchPeriods();
+        } catch (error) {
+            console.error(error);
+            setEditError(error.response?.data?.message || "Gagal menyimpan perubahan.");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    const editTotals = editRows.length > 0 ? (() => {
+        const totalAda = editRows.reduce((s, d) => s + (Number(d.ada) || 0), 0);
+        const totalLapor = editRows.reduce((s, d) => s + (Number(d.lapor) || 0), 0);
+        const totalTarget = editRows.reduce((s, d) => s + (Number(d.target) || 0), 0);
+        const totalAnggota = editRows.reduce((s, d) => s + (Number(d.jumlahAnggota) || 0), 0);
+        const totalHadir = editRows.reduce((s, d) => s + (Number(d.jumlahHadir) || 0), 0);
+        const totalSelisih = totalAnggota - totalTarget;
+        return {
+            totalAda, totalLapor, totalTarget, totalAnggota, totalHadir, totalSelisih,
+            totalPctLapor: totalAda > 0 ? (totalLapor / totalAda) * 100 : 0,
+            totalPctThdTarget: totalTarget > 0 ? (totalHadir / totalTarget) * 100 : 0,
+            totalPctThdAnggota: totalAnggota > 0 ? (totalHadir / totalAnggota) * 100 : 0,
+        };
+    })() : null;
 
     return (
         <>
@@ -283,7 +358,7 @@ function BkbTable() {
                                     <td className="col-actions">
                                         <div className="action-buttons">
                                             <button className="btn-icon btn-view" title="Lihat" onClick={() => openViewModal(p)}>👁️</button>
-                                            <button className="btn-icon btn-edit" title="Edit (segera hadir)" disabled>✏️</button>
+                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(p)}>✏️</button>
                                             <button className="btn-icon btn-delete" title="Hapus" onClick={() => openDeleteModal(p)}>🗑️</button>
                                         </div>
                                     </td>
@@ -412,6 +487,137 @@ function BkbTable() {
                         </div>
                         <div className="modal-footer">
                             <button className="btn-cancel" onClick={closeViewModal}>Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL EDIT */}
+            {editTarget && (
+                <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeEditModal()}>
+                    <div className="modal-box modal-wide">
+                        <div className="modal-header">
+                            <h3>Edit Data — {editTarget.periode}</h3>
+                            <button className="modal-close" onClick={closeEditModal}>✕</button>
+                        </div>
+                        <div className="modal-body">
+                            {editLoading && (
+                                <div style={{ textAlign: "center", padding: 24, color: "#9090a8" }}>Memuat detail...</div>
+                            )}
+
+                            {!editLoading && editError && (
+                                <div style={{ textAlign: "center", padding: 12, color: "#e53935", marginBottom: 12 }}>⚠ {editError}</div>
+                            )}
+
+                            {!editLoading && editRows.length > 0 && (
+                                <div className="calc-table-wrap" style={{ maxHeight: 420 }}>
+                                    <table className="calc-table">
+                                        <thead>
+                                            <tr>
+                                                <th rowSpan="2">Kode</th>
+                                                <th rowSpan="2" style={{ textAlign: "left" }}>Kecamatan</th>
+                                                <th colSpan="3">Jumlah Poktan</th>
+                                                <th colSpan="3">Keanggotaan</th>
+                                                <th colSpan="3">Kehadiran</th>
+                                                <th rowSpan="2">% Thd<br />Target</th>
+                                                <th rowSpan="2">% Thd<br />Anggota</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Ada</th>
+                                                <th>Lapor</th>
+                                                <th>%</th>
+                                                <th>Target</th>
+                                                <th>Anggota</th>
+                                                <th>Selisih</th>
+                                                <th>Target</th>
+                                                <th>Anggota</th>
+                                                <th>Capaian</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {editRows.map((d) => {
+                                                const ada = Number(d.ada) || 0;
+                                                const lapor = Number(d.lapor) || 0;
+                                                const target = Number(d.target) || 0;
+                                                const anggota = Number(d.jumlahAnggota) || 0;
+                                                const hadir = Number(d.jumlahHadir) || 0;
+                                                const pctLapor = ada > 0 ? (lapor / ada) * 100 : 0;
+                                                const selisih = anggota - target;
+                                                const pctThdTarget = target > 0 ? (hadir / target) * 100 : 0;
+                                                const pctThdAnggota = anggota > 0 ? (hadir / anggota) * 100 : 0;
+                                                return (
+                                                    <tr key={d.id}>
+                                                        <td>{d.kode ?? "-"}</td>
+                                                        <td className="text-left"><b>{d.kecamatan}</b></td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.ada}
+                                                                onChange={(e) => updateEditField(d.id, "ada", e.target.value)}
+                                                                style={{ width: 50, padding: "5px 6px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12 }} />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.lapor}
+                                                                onChange={(e) => updateEditField(d.id, "lapor", e.target.value)}
+                                                                style={{ width: 50, padding: "5px 6px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12 }} />
+                                                        </td>
+                                                        <td>{pctLapor.toFixed(2)}</td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.target}
+                                                                onChange={(e) => updateEditField(d.id, "target", e.target.value)}
+                                                                style={{ width: 60, padding: "5px 6px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12 }} />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.jumlahAnggota}
+                                                                onChange={(e) => updateEditField(d.id, "jumlahAnggota", e.target.value)}
+                                                                style={{ width: 60, padding: "5px 6px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12 }} />
+                                                        </td>
+                                                        <td className={selisih >= 0 ? "selisih-pos" : "selisih-neg"}>{selisih >= 0 ? `+${selisih}` : selisih}</td>
+                                                        <td>{target || "-"}</td>
+                                                        <td>{anggota}</td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.jumlahHadir}
+                                                                onChange={(e) => updateEditField(d.id, "jumlahHadir", e.target.value)}
+                                                                style={{ width: 60, padding: "5px 6px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12 }} />
+                                                        </td>
+                                                        <td>{pctThdTarget.toFixed(0)}</td>
+                                                        <td>{pctThdAnggota.toFixed(0)}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                        {editTotals && (
+                                            <tfoot>
+                                                <tr>
+                                                    <td colSpan="2" className="text-left">Jumlah Total</td>
+                                                    <td>{editTotals.totalAda}</td>
+                                                    <td>{editTotals.totalLapor}</td>
+                                                    <td>{editTotals.totalPctLapor.toFixed(2)}</td>
+                                                    <td>{editTotals.totalTarget}</td>
+                                                    <td>{editTotals.totalAnggota}</td>
+                                                    <td className={editTotals.totalSelisih >= 0 ? "selisih-pos" : "selisih-neg"}>
+                                                        {editTotals.totalSelisih >= 0 ? `+${editTotals.totalSelisih}` : editTotals.totalSelisih}
+                                                    </td>
+                                                    <td>{editTotals.totalTarget}</td>
+                                                    <td>{editTotals.totalAnggota}</td>
+                                                    <td>{editTotals.totalHadir}</td>
+                                                    <td>{editTotals.totalPctThdTarget.toFixed(0)}</td>
+                                                    <td>{editTotals.totalPctThdAnggota.toFixed(0)}</td>
+                                                </tr>
+                                            </tfoot>
+                                        )}
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-cancel" onClick={closeEditModal} disabled={saving}>Batal</button>
+                            <button
+                                className="btn-modal-delete"
+                                style={{ background: "linear-gradient(135deg, #2e7d32, #43a047)" }}
+                                onClick={saveEdit}
+                                disabled={saving || editLoading}
+                            >
+                                {saving ? "Menyimpan..." : "💾 Simpan Perubahan"}
+                            </button>
                         </div>
                     </div>
                 </div>

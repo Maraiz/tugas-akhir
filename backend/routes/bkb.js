@@ -67,6 +67,7 @@ const uploadTwoFiles = upload.fields([
 router.get("/", BkbController.index);
 router.get("/:id", BkbController.show);
 router.post("/", uploadTwoFiles, BkbController.store);
+router.put("/:id", BkbController.update);
 router.delete("/:id", BkbController.destroy);
 
 module.exports = router;

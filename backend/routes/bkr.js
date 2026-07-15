@@ -60,6 +60,7 @@ const upload = multer({
 router.get("/", BkrController.index);
 router.get("/:id", BkrController.show);
 router.post("/", upload.single("file"), BkrController.store);
+router.put("/:id", BkrController.update);
 router.delete("/:id", BkrController.destroy);
 
 module.exports = router;

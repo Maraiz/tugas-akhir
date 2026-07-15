@@ -325,6 +325,108 @@ class BkrController {
 
     }
 
+    // ===========================
+    // PUT /bkr/:id - update data per-kecamatan yang sudah tersimpan
+    //
+    // Body JSON:
+    // - rows : array baris yang diedit, tiap elemen:
+    //          { id, ada, lapor, jumlahAnggota, jumlahHadir }
+    //          (id = id baris BkrDetail, dipakai buat cari baris yang mau diupdate)
+    // ===========================
+    static async update(req, res) {
+
+        try {
+
+            const { id } = req.params;
+            const { rows } = req.body;
+
+            const periode = await BkrPeriode.findByPk(id);
+
+            if (!periode) {
+
+                return res.status(404).json({
+
+                    success: false,
+                    message: "Data periode tidak ditemukan.",
+
+                });
+
+            }
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+
+                return res.status(400).json({
+
+                    success: false,
+                    message: "Data rows tidak boleh kosong.",
+
+                });
+
+            }
+
+            // Update tiap baris kecamatan satu-satu (hitung ulang % otomatis
+            // dari angka Ada/Lapor/Anggota/Hadir yang baru)
+            for (const r of rows) {
+
+                const detail = await BkrDetail.findOne({
+
+                    where: { id: r.id, periodeId: id },
+
+                });
+
+                if (!detail) continue; // lewati kalau id-nya nggak cocok/nggak ketemu
+
+                const ada = Number(r.ada) || 0;
+                const lapor = Number(r.lapor) || 0;
+                const jumlahAnggota = Number(r.jumlahAnggota) || 0;
+                const jumlahHadir = Number(r.jumlahHadir) || 0;
+
+                await detail.update({
+
+                    ada,
+                    lapor,
+                    pctLapor: ada > 0 ? (lapor / ada) * 100 : 0,
+
+                    jumlahAnggota,
+                    jumlahHadir,
+                    pctHadir: jumlahAnggota > 0 ? (jumlahHadir / jumlahAnggota) * 100 : 0,
+
+                });
+
+            }
+
+            // Setelah semua baris diupdate, hitung ulang rata-rata capaian
+            // periode ini dari SELURUH baris (bukan cuma yang baru diedit)
+            const semuaDetail = await BkrDetail.findAll({ where: { periodeId: id } });
+
+            const rataCapaian = semuaDetail.reduce((sum, d) => {
+                return sum + (Number(d.pctLapor) + Number(d.pctHadir)) / 2;
+            }, 0) / semuaDetail.length;
+
+            await periode.update({ rataCapaian: Number(rataCapaian.toFixed(2)) });
+
+            return res.status(200).json({
+
+                success: true,
+                message: "Data berhasil diperbarui.",
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            return res.status(500).json({
+
+                success: false,
+                message: "Terjadi kesalahan server.",
+
+            });
+
+        }
+
+    }
+
 }
 
 module.exports = BkrController;

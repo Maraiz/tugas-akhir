@@ -60,6 +60,7 @@ const upload = multer({
 router.get("/", PikrController.index);
 router.get("/:id", PikrController.show);
 router.post("/", upload.single("file"), PikrController.store);
+router.put("/:id", PikrController.update);
 router.delete("/:id", PikrController.destroy);
 
 module.exports = router;

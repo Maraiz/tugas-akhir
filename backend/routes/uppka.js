@@ -60,6 +60,7 @@ const upload = multer({
 router.get("/", UppkaController.index);
 router.get("/:id", UppkaController.show);
 router.post("/", upload.single("file"), UppkaController.store);
+router.put("/:id", UppkaController.update);
 router.delete("/:id", UppkaController.destroy);
 
 module.exports = router;

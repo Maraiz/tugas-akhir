@@ -329,6 +329,103 @@ class UppkaController {
 
     }
 
+    // ===========================
+    // PUT /uppka/:id - update data per-kecamatan yang sudah tersimpan
+    //
+    // Body JSON:
+    // - rows : array baris yang diedit, tiap elemen:
+    //          { id, ada, lapor, jumlahAnggota, jumlahHadir }
+    // ===========================
+    static async update(req, res) {
+
+        try {
+
+            const { id } = req.params;
+            const { rows } = req.body;
+
+            const periode = await UppkaPeriode.findByPk(id);
+
+            if (!periode) {
+
+                return res.status(404).json({
+
+                    success: false,
+                    message: "Data periode tidak ditemukan.",
+
+                });
+
+            }
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+
+                return res.status(400).json({
+
+                    success: false,
+                    message: "Data rows tidak boleh kosong.",
+
+                });
+
+            }
+
+            for (const r of rows) {
+
+                const detail = await UppkaDetail.findOne({
+
+                    where: { id: r.id, periodeId: id },
+
+                });
+
+                if (!detail) continue;
+
+                const ada = Number(r.ada) || 0;
+                const lapor = Number(r.lapor) || 0;
+                const jumlahAnggota = Number(r.jumlahAnggota) || 0;
+                const jumlahHadir = Number(r.jumlahHadir) || 0;
+
+                await detail.update({
+
+                    ada,
+                    lapor,
+                    pctLapor: ada > 0 ? (lapor / ada) * 100 : 0,
+
+                    jumlahAnggota,
+                    jumlahHadir,
+                    pctHadir: jumlahAnggota > 0 ? (jumlahHadir / jumlahAnggota) * 100 : 0,
+
+                });
+
+            }
+
+            const semuaDetail = await UppkaDetail.findAll({ where: { periodeId: id } });
+
+            const rataCapaian = semuaDetail.reduce((sum, d) => {
+                return sum + (Number(d.pctLapor) + Number(d.pctHadir)) / 2;
+            }, 0) / semuaDetail.length;
+
+            await periode.update({ rataCapaian: Number(rataCapaian.toFixed(2)) });
+
+            return res.status(200).json({
+
+                success: true,
+                message: "Data berhasil diperbarui.",
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            return res.status(500).json({
+
+                success: false,
+                message: "Terjadi kesalahan server.",
+
+            });
+
+        }
+
+    }
+
 }
 
 module.exports = UppkaController;

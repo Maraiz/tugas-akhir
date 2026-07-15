@@ -47,6 +47,13 @@ function PikrTable() {
     const [viewLoading, setViewLoading] = useState(false);
     const [viewError, setViewError] = useState("");
 
+    // ===== Modal Edit =====
+    const [editTarget, setEditTarget] = useState(null);
+    const [editRows, setEditRows] = useState([]);
+    const [editLoading, setEditLoading] = useState(false);
+    const [editError, setEditError] = useState("");
+    const [saving, setSaving] = useState(false);
+
     async function fetchPeriods() {
         setLoading(true);
         setLoadError("");
@@ -136,6 +143,67 @@ function PikrTable() {
         setViewDetails([]);
         setViewError("");
     }
+
+    // ===== Edit =====
+    async function openEditModal(period) {
+        setEditTarget(period);
+        setEditRows([]);
+        setEditError("");
+        setEditLoading(true);
+        try {
+            const response = await api.get(`/pikr/${period.id}`);
+            setEditRows(response.data.data.details || []);
+        } catch (error) {
+            console.error(error);
+            setEditError(error.response?.data?.message || "Gagal memuat detail periode.");
+        } finally {
+            setEditLoading(false);
+        }
+    }
+
+    function closeEditModal() {
+        if (saving) return;
+        setEditTarget(null);
+        setEditRows([]);
+        setEditError("");
+    }
+
+    function updateEditField(rowId, field, value) {
+        setEditRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, [field]: value } : r)));
+    }
+
+    async function saveEdit() {
+        setSaving(true);
+        setEditError("");
+        try {
+            const rowsPayload = editRows.map((r) => ({
+                id: r.id,
+                ada: r.ada,
+                lapor: r.lapor,
+                jumlahPkbr: r.jumlahPkbr,
+            }));
+
+            await api.put(`/pikr/${editTarget.id}`, { rows: rowsPayload });
+
+            closeEditModal();
+            fetchPeriods();
+        } catch (error) {
+            console.error(error);
+            setEditError(error.response?.data?.message || "Gagal menyimpan perubahan.");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    const editTotals = editRows.length > 0 ? (() => {
+        const totalAda = editRows.reduce((s, d) => s + (Number(d.ada) || 0), 0);
+        const totalLapor = editRows.reduce((s, d) => s + (Number(d.lapor) || 0), 0);
+        const totalPkbr = editRows.reduce((s, d) => s + (Number(d.jumlahPkbr) || 0), 0);
+        return {
+            totalAda, totalLapor, totalPkbr,
+            totalPctLapor: totalAda > 0 ? (totalLapor / totalAda) * 100 : 0,
+        };
+    })() : null;
 
     return (
         <>
@@ -278,7 +346,7 @@ function PikrTable() {
                                     <td className="col-actions">
                                         <div className="action-buttons">
                                             <button className="btn-icon btn-view" title="Lihat" onClick={() => openViewModal(p)}>👁️</button>
-                                            <button className="btn-icon btn-edit" title="Edit (segera hadir)" disabled>✏️</button>
+                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(p)}>✏️</button>
                                             <button className="btn-icon btn-delete" title="Hapus" onClick={() => openDeleteModal(p)}>🗑️</button>
                                         </div>
                                     </td>
@@ -380,6 +448,98 @@ function PikrTable() {
                         </div>
                         <div className="modal-footer">
                             <button className="btn-cancel" onClick={closeViewModal}>Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL EDIT */}
+            {editTarget && (
+                <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeEditModal()}>
+                    <div className="modal-box modal-wide">
+                        <div className="modal-header">
+                            <h3>Edit Data — {editTarget.periode}</h3>
+                            <button className="modal-close" onClick={closeEditModal}>✕</button>
+                        </div>
+                        <div className="modal-body">
+                            {editLoading && (
+                                <div style={{ textAlign: "center", padding: 24, color: "#9090a8" }}>Memuat detail...</div>
+                            )}
+
+                            {!editLoading && editError && (
+                                <div style={{ textAlign: "center", padding: 12, color: "#e53935", marginBottom: 12 }}>⚠ {editError}</div>
+                            )}
+
+                            {!editLoading && editRows.length > 0 && (
+                                <div className="calc-table-wrap" style={{ maxHeight: 420 }}>
+                                    <table className="calc-table">
+                                        <thead>
+                                            <tr>
+                                                <th rowSpan="2">Kode</th>
+                                                <th rowSpan="2" style={{ textAlign: "left" }}>Kecamatan</th>
+                                                <th colSpan="3">Jumlah Poktan</th>
+                                                <th rowSpan="2">Jumlah Remaja Hadir<br />Pertemuan Sosialisasi PKBR</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Ada</th>
+                                                <th>Lapor</th>
+                                                <th>%</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {editRows.map((d) => {
+                                                const ada = Number(d.ada) || 0;
+                                                const lapor = Number(d.lapor) || 0;
+                                                const pctLapor = ada > 0 ? (lapor / ada) * 100 : 0;
+                                                return (
+                                                    <tr key={d.id}>
+                                                        <td>{d.kode ?? "-"}</td>
+                                                        <td className="text-left"><b>{d.kecamatan}</b></td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.ada}
+                                                                onChange={(e) => updateEditField(d.id, "ada", e.target.value)}
+                                                                style={{ width: 55, padding: "5px 7px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12.5 }} />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.lapor}
+                                                                onChange={(e) => updateEditField(d.id, "lapor", e.target.value)}
+                                                                style={{ width: 55, padding: "5px 7px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12.5 }} />
+                                                        </td>
+                                                        <td>{pctLapor.toFixed(2)}</td>
+                                                        <td>
+                                                            <input type="number" min="0" value={d.jumlahPkbr}
+                                                                onChange={(e) => updateEditField(d.id, "jumlahPkbr", e.target.value)}
+                                                                style={{ width: 65, padding: "5px 7px", border: "1px solid #e0e4ee", borderRadius: 6, fontSize: 12.5 }} />
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                        {editTotals && (
+                                            <tfoot>
+                                                <tr>
+                                                    <td colSpan="2" className="text-left">Jumlah Total</td>
+                                                    <td>{editTotals.totalAda}</td>
+                                                    <td>{editTotals.totalLapor}</td>
+                                                    <td>{editTotals.totalPctLapor.toFixed(2)}</td>
+                                                    <td>{editTotals.totalPkbr}</td>
+                                                </tr>
+                                            </tfoot>
+                                        )}
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-cancel" onClick={closeEditModal} disabled={saving}>Batal</button>
+                            <button
+                                className="btn-modal-delete"
+                                style={{ background: "linear-gradient(135deg, #2e7d32, #43a047)" }}
+                                onClick={saveEdit}
+                                disabled={saving || editLoading}
+                            >
+                                {saving ? "Menyimpan..." : "💾 Simpan Perubahan"}
+                            </button>
                         </div>
                     </div>
                 </div>
