@@ -1,5 +1,5 @@
 /* ========================= */
-/* SIDEBAR - PROFESSIONAL    */
+/* SIDEBAR - Self-contained CSS (bukan Bootstrap framework, cuma icon font-nya) */
 /* ========================= */
 
 .sidebar {
@@ -18,14 +18,8 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.sidebar::-webkit-scrollbar {
-    width: 5px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
-}
+.sidebar::-webkit-scrollbar { width: 5px; }
+.sidebar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
 /* ===== Brand ===== */
 .sidebar-brand {
@@ -34,22 +28,13 @@
     background: linear-gradient(135deg, #14467d 0%, #1565c0 55%, #1976d2 100%);
     display: flex;
     align-items: center;
-    gap: 13px;
+    gap: 12px;
     flex-shrink: 0;
-    position: relative;
-}
-
-.sidebar-brand::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
-    pointer-events: none;
+    overflow: hidden;
 }
 
 .sidebar-brand-icon {
-    font-size: 20px;
-    flex-shrink: 0;
+    font-size: 18px;
     width: 36px;
     height: 36px;
     display: flex;
@@ -57,21 +42,25 @@
     justify-content: center;
     background: rgba(255, 255, 255, 0.16);
     border-radius: 9px;
+    color: #fff;
+    flex-shrink: 0;
 }
+
+.sidebar-brand-text { min-width: 0; }
 
 .sidebar-brand-text h3 {
     color: #ffffff;
     font-size: 14.5px;
     font-weight: 700;
-    line-height: 1.3;
-    margin: 0;
     letter-spacing: -0.1px;
+    margin: 0;
+    white-space: nowrap;
 }
 
 .sidebar-brand-text span {
     color: rgba(255, 255, 255, 0.72);
     font-size: 11px;
-    font-weight: 400;
+    white-space: nowrap;
 }
 
 /* ===== Profile ===== */
@@ -81,6 +70,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .profile-avatar {
@@ -89,34 +79,22 @@
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #42a5f5);
     color: white;
+    font-weight: 700;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
     flex-shrink: 0;
     box-shadow: 0 2px 6px rgba(21, 101, 192, 0.3);
 }
 
-.profile-info h4 {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1a1a2e;
-    line-height: 1.3;
-    margin: 0;
-}
-
-.profile-info span {
-    font-size: 11px;
-    color: #1565c0;
-    font-weight: 600;
-}
+.profile-info h4 { font-size: 13px; font-weight: 700; color: #1a1a2e; margin: 0; }
+.profile-info span { font-size: 11px; color: #1565c0; font-weight: 600; }
 
 /* ===== Navigation ===== */
-.sidebar-nav {
-    flex: 1;
-    padding: 14px 12px 8px;
-}
+.sidebar-nav { flex: 1; padding: 14px 12px 8px; }
+
+.nav-list { list-style: none; margin: 0; padding: 0; }
 
 .nav-section-label {
     font-size: 10px;
@@ -125,12 +103,16 @@
     text-transform: uppercase;
     color: #a3aabb;
     padding: 14px 10px 7px;
+    list-style: none;
 }
 
-.nav-item {
+.nav-list > li { margin-bottom: 2px; }
+
+.nav-link {
     display: flex;
     align-items: center;
     gap: 12px;
+    width: 100%;
     padding: 10px 12px;
     border-radius: 8px;
     cursor: pointer;
@@ -138,16 +120,16 @@
     color: #54596b;
     font-size: 13.5px;
     font-weight: 500;
-    margin-bottom: 2px;
-    user-select: none;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    text-align: left;
 }
 
-.nav-item:hover {
-    background: #f0f5fc;
-    color: #1565c0;
-}
+.nav-link:hover { background: #f0f5fc; color: #1565c0; }
 
-.nav-item.active {
+.nav-link.active {
     background: #e6f0fb;
     color: #1565c0;
     font-weight: 600;
@@ -155,39 +137,35 @@
     padding-left: 9px;
 }
 
-.nav-item .nav-icon {
-    font-size: 16.5px;
-    width: 24px;
+.nav-icon {
+    font-size: 15.5px;
+    width: 22px;
     text-align: center;
     flex-shrink: 0;
     opacity: 0.95;
 }
 
-.nav-item.has-sub .nav-arrow {
-    margin-left: auto;
-    font-size: 12px;
+.nav-link-collapsible { text-align: left; }
+
+.nav-arrow {
+    font-size: 11px;
     color: #b3b9c9;
+    margin-left: auto;
     transition: transform 0.2s ease;
 }
 
-.nav-item.has-sub.open .nav-arrow {
-    transform: rotate(90deg);
-    color: #1565c0;
-}
-
-.nav-item.has-sub.open {
-    background: #f0f5fc;
-    color: #1565c0;
-}
+.nav-arrow.rotated { transform: rotate(90deg); color: #1565c0; }
 
 /* ===== Submenu ===== */
-.nav-submenu {
+.sidebar-submenu {
+    list-style: none;
+    margin: 2px 0 4px;
     padding-left: 17px;
-    margin-bottom: 4px;
-    overflow: hidden;
 }
 
-.nav-subitem {
+.sidebar-submenu > li { margin-bottom: 1px; }
+
+.nav-sublink {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -197,33 +175,32 @@
     color: #6b7280;
     font-size: 12.8px;
     font-weight: 400;
-    margin-bottom: 1px;
+    text-decoration: none;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
-.nav-subitem::before {
-    content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #cbd3e3;
-    flex-shrink: 0;
-    transition: background 0.15s ease;
-}
+.nav-sublink:hover { background: #f0f5fc; color: #1565c0; }
 
-.nav-subitem:hover {
+.nav-sublink.active {
     background: #f0f5fc;
     color: #1565c0;
+    font-weight: 600;
 }
 
-.nav-subitem:hover::before {
-    background: #1565c0;
+.sub-icon {
+    font-size: 10px;
+    color: #cbd3e3;
+    transition: color 0.15s ease;
 }
+
+.nav-sublink:hover .sub-icon,
+.nav-sublink.active .sub-icon { color: #1565c0; }
 
 .nav-divider {
     height: 1px;
     background: #eef0f6;
     margin: 10px 4px;
+    list-style: none;
 }
 
 /* ===== Logout ===== */
@@ -253,11 +230,5 @@
     box-shadow: 0 3px 10px rgba(217, 57, 57, 0.3);
 }
 
-.btn-logout:hover {
-    opacity: 0.93;
-    box-shadow: 0 5px 16px rgba(217, 57, 57, 0.4);
-}
-
-.btn-logout:active {
-    transform: scale(0.98);
-}
+.btn-logout:hover { opacity: 0.93; box-shadow: 0 5px 16px rgba(217, 57, 57, 0.4); }
+.btn-logout:active { transform: scale(0.98); }

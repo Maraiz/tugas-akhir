@@ -48,6 +48,28 @@ function parseCsvLine(line) {
 
 const EMPTY_FORM = { nama: "", username: "", nip: "", password: "", role: "petugas", kecamatan: "" };
 
+/* ===================== INLINE STYLE BUAT KARTU STATISTIK =====================
+   Sengaja ditulis inline (bukan class CSS eksternal) buat sementara,
+   biar kebal dari konflik/override CSS apapun di project. Inline style di
+   React punya prioritas render paling tinggi, jadi kalau ini MASIH juga
+   berantakan, berarti masalahnya bukan di CSS sama sekali (kemungkinan
+   ada cache build lama / komponen ke-render dobel / dll). */
+const S = {
+    row: { display: "flex", gap: 16, marginBottom: 20, flexWrap: "wrap" },
+    card: {
+        flex: 1, minWidth: 180, background: "#ffffff", borderRadius: 14,
+        boxShadow: "0 2px 10px rgba(0,0,0,0.05)", padding: "18px 20px",
+        display: "flex", alignItems: "center", gap: 14,
+    },
+    icon: (bg, color) => ({
+        width: 44, height: 44, borderRadius: 12, background: bg, color,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 19, flexShrink: 0,
+    }),
+    value: { fontSize: 20, fontWeight: 700, color: "#1a1a2e" },
+    label: { fontSize: 11.5, color: "#9090a8", marginTop: 2 },
+};
+
 function UserTable() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -70,13 +92,12 @@ function UserTable() {
     const [importing, setImporting] = useState(false);
     const csvInputRef = useRef(null);
 
-    // ===== Ambil data dari backend =====
+    // ===== Ambil data dari backend (selalu semua role, biar statistik akurat) =====
     async function fetchUsers() {
         setLoading(true);
         setLoadError("");
         try {
-            const params = roleFilter ? { role: roleFilter } : {};
-            const response = await api.get("/users", { params });
+            const response = await api.get("/users");
             setUsers(response.data.data);
         } catch (error) {
             console.error(error);
@@ -90,18 +111,26 @@ function UserTable() {
 
     useEffect(() => {
         fetchUsers();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [roleFilter]);
+    }, []);
 
-    // ===== Filter pencarian (di sisi client, tambahan dari filter role) =====
+    // ===== Statistik ringkas (dihitung dari seluruh data, independen dari filter) =====
+    const stats = {
+        total: users.length,
+        admin: users.filter((u) => u.role === "admin").length,
+        petugas: users.filter((u) => u.role === "petugas").length,
+        user: users.filter((u) => u.role === "user").length,
+    };
+
+    // ===== Filter role + pencarian (di sisi client) =====
     const filteredUsers = users.filter((u) => {
+        const matchRole = roleFilter ? u.role === roleFilter : true;
         const q = searchTerm.toLowerCase();
-        return (
+        const matchSearch =
             u.nama.toLowerCase().includes(q) ||
             (u.nip || "").includes(q) ||
             (u.username || "").toLowerCase().includes(q) ||
-            (u.kecamatan || "").toLowerCase().includes(q)
-        );
+            (u.kecamatan || "").toLowerCase().includes(q);
+        return matchRole && matchSearch;
     });
 
     // ===== Modal Tambah/Edit handlers =====
@@ -336,10 +365,42 @@ function UserTable() {
 
     return (
         <>
+            {/* KARTU STATISTIK — inline style, kebal dari konflik CSS eksternal */}
+            <div style={S.row}>
+                <div style={S.card}>
+                    <div style={S.icon("#eef3fb", "#1565c0")}><i className="bi bi-people-fill"></i></div>
+                    <div>
+                        <div style={S.value}>{stats.total}</div>
+                        <div style={S.label}>Total Pengguna</div>
+                    </div>
+                </div>
+                <div style={S.card}>
+                    <div style={S.icon("#fdecea", "#e53935")}><i className="bi bi-shield-lock-fill"></i></div>
+                    <div>
+                        <div style={S.value}>{stats.admin}</div>
+                        <div style={S.label}>Admin</div>
+                    </div>
+                </div>
+                <div style={S.card}>
+                    <div style={S.icon("#e3f4e5", "#2e7d32")}><i className="bi bi-person-badge-fill"></i></div>
+                    <div>
+                        <div style={S.value}>{stats.petugas}</div>
+                        <div style={S.label}>Petugas</div>
+                    </div>
+                </div>
+                <div style={S.card}>
+                    <div style={S.icon("#f3e5f5", "#8e24aa")}><i className="bi bi-person-vcard-fill"></i></div>
+                    <div>
+                        <div style={S.value}>{stats.user}</div>
+                        <div style={S.label}>User / Pimpinan</div>
+                    </div>
+                </div>
+            </div>
+
             <div className="content-toolbar">
                 <div className="toolbar-left">
                     <div className="toolbar-search">
-                        <span className="search-icon">🔍</span>
+                        <i className="bi bi-search search-icon"></i>
                         <input
                             type="text"
                             placeholder="Cari nama, NIP/username, atau kecamatan..."
@@ -363,10 +424,11 @@ function UserTable() {
                 <div className="toolbar-actions">
 
                     <button className="btn-import-csv" onClick={openImportModal}>
-                        📥 Import CSV
+                        <i className="bi bi-file-earmark-arrow-up-fill"></i>
+                        Import CSV
                     </button>
                     <button className="btn-add-user" onClick={openAddModal}>
-                        <span className="plus-icon">+</span>
+                        <i className="bi bi-person-plus-fill"></i>
                         Add User
                     </button>
                 </div>
@@ -429,8 +491,8 @@ function UserTable() {
                                     <td>{u.kecamatan ? <span className="badge-kecamatan">{u.kecamatan}</span> : <span style={{ color: "#c7cbd6" }}>-</span>}</td>
                                     <td className="col-actions">
                                         <div className="action-buttons">
-                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(u)}>✏️</button>
-                                            <button className="btn-icon btn-delete" title="Hapus" onClick={() => deleteUser(u)}>🗑️</button>
+                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(u)}><i className="bi bi-pencil-fill"></i></button>
+                                            <button className="btn-icon btn-delete" title="Hapus" onClick={() => deleteUser(u)}><i className="bi bi-trash-fill"></i></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -454,8 +516,8 @@ function UserTable() {
                 <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeModal()}>
                     <div className="modal-box">
                         <div className="modal-header">
-                            <h3>{editingUser ? "Edit Pengguna" : "Tambah Pengguna"}</h3>
-                            <button className="modal-close" onClick={closeModal}>✕</button>
+                            <h3><i className="bi bi-person-plus-fill"></i>{editingUser ? "Edit Pengguna" : "Tambah Pengguna"}</h3>
+                            <button className="modal-close" onClick={closeModal}><i className="bi bi-x-lg"></i></button>
                         </div>
                         <div className="modal-body">
                             {formError && (
@@ -463,12 +525,12 @@ function UserTable() {
                                     background: "#fdecea", color: "#c62828", padding: "10px 14px",
                                     borderRadius: 8, fontSize: 12.5, marginBottom: 14,
                                 }}>
-                                    ⚠ {formError}
+                                    <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{formError}
                                 </div>
                             )}
 
                             <div className="form-group">
-                                <label>Role</label>
+                                <label><i className="bi bi-person-badge-fill"></i>Role</label>
                                 <select
                                     value={form.role}
                                     onChange={(e) => setForm({ ...form, role: e.target.value })}
@@ -480,7 +542,7 @@ function UserTable() {
                             </div>
 
                             <div className="form-group">
-                                <label>Nama</label>
+                                <label><i className="bi bi-person-fill"></i>Nama</label>
                                 <input
                                     type="text"
                                     placeholder="Masukkan nama lengkap"
@@ -491,7 +553,7 @@ function UserTable() {
 
                             {form.role === "admin" ? (
                                 <div className="form-group">
-                                    <label>Username</label>
+                                    <label><i className="bi bi-at"></i>Username</label>
                                     <input
                                         type="text"
                                         placeholder="Masukkan username"
@@ -501,7 +563,7 @@ function UserTable() {
                                 </div>
                             ) : (
                                 <div className="form-group">
-                                    <label>NIP</label>
+                                    <label><i className="bi bi-credit-card-2-front-fill"></i>NIP</label>
                                     <input
                                         type="text"
                                         placeholder="Masukkan NIP"
@@ -512,7 +574,9 @@ function UserTable() {
                             )}
 
                             <div className="form-group">
-                                <label>Kata Sandi {editingUser && <span style={{ fontWeight: 400, color: "#9090a8" }}>(kosongkan jika tidak diubah)</span>}</label>
+                                <label>
+                                    <i className="bi bi-key-fill"></i>Kata Sandi {editingUser && <span style={{ fontWeight: 400, color: "#9090a8" }}>(kosongkan jika tidak diubah)</span>}
+                                </label>
                                 <input
                                     type="password"
                                     placeholder={editingUser ? "Biarkan kosong jika tidak diganti" : "Masukkan kata sandi"}
@@ -523,7 +587,7 @@ function UserTable() {
 
                             {form.role === "petugas" && (
                                 <div className="form-group">
-                                    <label>Kecamatan</label>
+                                    <label><i className="bi bi-geo-alt-fill"></i>Kecamatan</label>
                                     <select
                                         value={form.kecamatan}
                                         onChange={(e) => setForm({ ...form, kecamatan: e.target.value })}
@@ -537,9 +601,15 @@ function UserTable() {
                             )}
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={closeModal} disabled={saving}>Batal</button>
+                            <button className="btn-cancel" onClick={closeModal} disabled={saving}>
+                                <i className="bi bi-x-circle"></i> Batal
+                            </button>
                             <button className="btn-save" onClick={saveUser} disabled={saving}>
-                                {saving ? "Menyimpan..." : "Simpan"}
+                                {saving ? (
+                                    <>Menyimpan...</>
+                                ) : (
+                                    <><i className="bi bi-check-circle-fill"></i> Simpan</>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -551,12 +621,12 @@ function UserTable() {
                 <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeImportModal()}>
                     <div className="modal-box modal-wide">
                         <div className="modal-header">
-                            <h3>Import Data Petugas (CSV)</h3>
-                            <button className="modal-close" onClick={closeImportModal}>✕</button>
+                            <h3><i className="bi bi-file-earmark-arrow-up-fill"></i>Import Data Petugas (CSV)</h3>
+                            <button className="modal-close" onClick={closeImportModal}><i className="bi bi-x-lg"></i></button>
                         </div>
                         <div className="modal-body">
                             <div className="upload-hint-note">
-                                ℹ️ Import CSV cuma buat nambah pengguna dengan role <b>Petugas</b> sekaligus banyak. Buat Admin/User, tambahkan satu-satu lewat tombol "Add User".
+                                <i className="bi bi-info-circle-fill" style={{ marginRight: 6 }}></i>Import CSV cuma buat nambah pengguna dengan role <b>Petugas</b> sekaligus banyak. Buat Admin/User, tambahkan satu-satu lewat tombol "Add User".
                             </div>
 
                             <div
@@ -572,7 +642,7 @@ function UserTable() {
                                     if (file) handleCsvFile(file);
                                 }}
                             >
-                                <div className="dz-icon">📄</div>
+                                <div className="dz-icon"><i className="bi bi-cloud-arrow-up-fill"></i></div>
                                 <p>Klik atau seret file CSV ke sini</p>
                                 <small>Format kolom: nip, nama, kata_sandi, kecamatan</small>
                             </div>
@@ -584,12 +654,12 @@ function UserTable() {
                                 onChange={(e) => handleCsvFile(e.target.files[0])}
                             />
 
-                            <a className="import-template-link" onClick={downloadTemplate}>⬇ Unduh template CSV</a>
+                            <a className="import-template-link" onClick={downloadTemplate}><i className="bi bi-download"></i> Unduh template CSV</a>
 
                             {csvFileName && (
                                 <div className="import-file-name">
-                                    <span>📄 {csvFileName}</span>
-                                    <button onClick={() => { setCsvFileName(""); setParsedRows([]); }} title="Hapus file">✕</button>
+                                    <span><i className="bi bi-file-earmark-text-fill" style={{ marginRight: 6 }}></i>{csvFileName}</span>
+                                    <button onClick={() => { setCsvFileName(""); setParsedRows([]); }} title="Hapus file"><i className="bi bi-x-lg"></i></button>
                                 </div>
                             )}
 
@@ -611,7 +681,7 @@ function UserTable() {
                                                         <td>{r.nip || "-"}</td>
                                                         <td>{r.nama || "-"}</td>
                                                         <td>{r.kecamatan || "-"}</td>
-                                                        <td>{r.error ? `⚠ ${r.error}` : "✓ Valid"}</td>
+                                                        <td>{r.error ? (<><i className="bi bi-exclamation-triangle-fill"></i> {r.error}</>) : (<><i className="bi bi-check-circle-fill"></i> Valid</>)}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -619,18 +689,24 @@ function UserTable() {
                                     </div>
 
                                     <div className="import-status-bar">
-                                        <span className="status-ok">✓ {validCount} data valid</span>
+                                        <span className="status-ok"><i className="bi bi-check-circle-fill"></i> {validCount} data valid</span>
                                         {errorCount > 0 && (
-                                            <span className="status-err">⚠ {errorCount} data bermasalah (akan dilewati)</span>
+                                            <span className="status-err"><i className="bi bi-exclamation-triangle-fill"></i> {errorCount} data bermasalah (akan dilewati)</span>
                                         )}
                                     </div>
                                 </>
                             )}
                         </div>
                         <div className="modal-footer">
-                            <button className="btn-cancel" onClick={closeImportModal} disabled={importing}>Batal</button>
+                            <button className="btn-cancel" onClick={closeImportModal} disabled={importing}>
+                                <i className="bi bi-x-circle"></i> Batal
+                            </button>
                             <button className="btn-save" disabled={validCount === 0 || importing} onClick={confirmImport}>
-                                {importing ? "Mengimport..." : "Import Data"}
+                                {importing ? (
+                                    <>Mengimport...</>
+                                ) : (
+                                    <><i className="bi bi-upload"></i> Import Data</>
+                                )}
                             </button>
                         </div>
                     </div>

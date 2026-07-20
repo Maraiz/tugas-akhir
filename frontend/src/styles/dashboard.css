@@ -7,11 +7,40 @@
     font-weight: 700;
     color: #1a1a2e;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
+
+.greeting-icon { color: #f9a825; font-size: 19px; }
 
 .greeting p {
     font-size: 13px;
     color: #9090a8;
+}
+
+/* ===== LOADING STATE ===== */
+.dash-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px;
+    color: #9090a8;
+    gap: 14px;
+}
+
+.dash-spinner {
+    width: 34px;
+    height: 34px;
+    border: 3px solid #e5e8f0;
+    border-top-color: #1565c0;
+    border-radius: 50%;
+    animation: dash-spin 0.8s linear infinite;
+}
+
+@keyframes dash-spin {
+    to { transform: rotate(360deg); }
 }
 
 /* ===== REMINDER BANNER ===== */
@@ -34,7 +63,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 19px;
+    color: #ef6c00;
     flex-shrink: 0;
 }
 
@@ -69,6 +99,8 @@
     font-weight: 700;
     font-family: inherit;
     white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn-reminder-action:hover {
@@ -93,6 +125,12 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .kpi-icon {
@@ -102,25 +140,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 21px;
     flex-shrink: 0;
 }
 
-.kpi-icon.blue {
-    background: #eef3fb;
-}
-
-.kpi-icon.green {
-    background: #e3f4e5;
-}
-
-.kpi-icon.orange {
-    background: #fff4e5;
-}
-
-.kpi-icon.purple {
-    background: #f3e5f5;
-}
+.kpi-icon.blue { background: #eef3fb; color: #1565c0; }
+.kpi-icon.green { background: #e3f4e5; color: #2e7d32; }
+.kpi-icon.orange { background: #fff4e5; color: #ef6c00; }
+.kpi-icon.purple { background: #f3e5f5; color: #8e24aa; }
 
 .kpi-value {
     font-size: 22px;
@@ -148,6 +175,12 @@
     }
 }
 
+.dash-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .panel-card {
     background: #ffffff;
     border-radius: 14px;
@@ -173,9 +206,28 @@
     color: #1565c0;
     font-weight: 600;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/* Status upload list */
+.panel-head a i { font-size: 11px; }
+
+/* ===== Empty state (dipakai di beberapa panel) ===== */
+.empty-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 10px;
+    text-align: center;
+    color: #9090a8;
+    font-size: 12.5px;
+}
+
+.empty-hint i { font-size: 26px; opacity: 0.5; }
+
+/* ===== Status upload list ===== */
 .status-list {
     display: flex;
     flex-direction: column;
@@ -199,34 +251,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 17px;
     color: #fff;
     flex-shrink: 0;
 }
 
-.status-program-badge.bkb {
-    background: #1565c0;
-}
-
-.status-program-badge.bkr {
-    background: #2e7d32;
-}
-
-.status-program-badge.bkl {
-    background: #ef6c00;
-}
-
-.status-program-badge.pikr {
-    background: #8e24aa;
-}
-
-.status-program-badge.uppka {
-    background: #c2185b;
-}
+.status-program-badge.bkb { background: #1565c0; }
+.status-program-badge.bkr { background: #2e7d32; }
+.status-program-badge.bkl { background: #ef6c00; }
+.status-program-badge.pikr { background: #8e24aa; }
+.status-program-badge.uppka { background: #c2185b; }
 
 .status-info {
     flex: 1;
+    min-width: 0;
 }
 
 .status-info .s-name {
@@ -242,6 +280,9 @@
 }
 
 .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     padding: 5px 12px;
     border-radius: 20px;
     font-size: 11px;
@@ -249,17 +290,10 @@
     white-space: nowrap;
 }
 
-.status-pill.done {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
+.status-pill.done { background: #e8f5e9; color: #2e7d32; }
+.status-pill.pending { background: #fdecea; color: #c62828; }
 
-.status-pill.pending {
-    background: #fdecea;
-    color: #c62828;
-}
-
-/* Kecamatan perlu perhatian */
+/* ===== Kecamatan perlu perhatian ===== */
 .attention-list {
     display: flex;
     flex-direction: column;
@@ -269,13 +303,27 @@
 .attention-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
     padding: 12px 14px;
     border-radius: 10px;
     background: #fdf6f6;
     border: 1px solid #f7dede;
 }
+
+.attention-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #fdecea;
+    color: #e53935;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.attention-info { flex: 1; min-width: 0; }
 
 .attention-info .a-kec {
     font-size: 13.5px;
@@ -295,7 +343,7 @@
     color: #c62828;
 }
 
-/* Aktivitas terbaru */
+/* ===== Aktivitas terbaru ===== */
 .activity-list {
     display: flex;
     flex-direction: column;
@@ -323,8 +371,6 @@
     align-items: center;
     justify-content: center;
     font-size: 14px;
-    background: #eef3fb;
-    color: #1565c0;
 }
 
 .activity-text {
@@ -345,20 +391,80 @@
     margin-top: 2px;
 }
 
-/* Shortcut actions */
-.shortcut-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+/* ===== Donut chart (Rasio Kepatuhan Upload) ===== */
+.donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.donut-canvas-holder {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+}
+
+.donut-center-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.donut-center-value {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.donut-center-caption {
+    font-size: 10.5px;
+    color: #9090a8;
+}
+
+.donut-legend {
+    display: flex;
+    flex-direction: column;
     gap: 12px;
 }
 
-@media (max-width: 700px) {
-    .shortcut-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.donut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #555668;
+    font-weight: 500;
+}
+
+.donut-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* ===== Shortcut actions ===== */
+.shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .shortcut-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 500px) {
+    .shortcut-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .shortcut-btn {
+    --sc-color: #1565c0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -370,16 +476,18 @@
     background: #f8faff;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
 }
 
 .shortcut-btn:hover {
-    background: #eef3fb;
-    border-color: #1565c0;
+    background: color-mix(in srgb, var(--sc-color) 8%, white);
+    border-color: var(--sc-color);
+    transform: translateY(-2px);
 }
 
 .shortcut-btn .sc-icon {
     font-size: 22px;
+    color: var(--sc-color);
 }
 
 .shortcut-btn .sc-label {
@@ -388,7 +496,7 @@
     color: #1a1a2e;
 }
 
-/* Chart card */
+/* ===== Chart card ===== */
 .chart-card {
     background: #ffffff;
     border-radius: 14px;

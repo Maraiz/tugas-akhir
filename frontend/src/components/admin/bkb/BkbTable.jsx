@@ -223,21 +223,21 @@ function BkbTable() {
             {/* SUMMARY CARDS */}
             <div className="summary-row">
                 <div className="summary-card">
-                    <div className="summary-card-icon blue">🗂️</div>
+                    <div className="summary-card-icon blue"><i className="bi bi-folder2-open"></i></div>
                     <div>
                         <div className="summary-card-value">{periods.length}</div>
                         <div className="summary-card-label">Total Periode Terekam</div>
                     </div>
                 </div>
                 <div className="summary-card">
-                    <div className="summary-card-icon green">📈</div>
+                    <div className="summary-card-icon green"><i className="bi bi-graph-up-arrow"></i></div>
                     <div>
                         <div className="summary-card-value">{avgCapaianAll}%</div>
                         <div className="summary-card-label">Rata-rata % Terhadap Target Terbaru</div>
                     </div>
                 </div>
                 <div className="summary-card">
-                    <div className="summary-card-icon orange">🕓</div>
+                    <div className="summary-card-icon orange"><i className="bi bi-clock-history"></i></div>
                     <div>
                         <div className="summary-card-value">{latestPeriod?.periode || "-"}</div>
                         <div className="summary-card-label">Periode Terakhir Diupdate</div>
@@ -249,7 +249,7 @@ function BkbTable() {
             <div className="content-toolbar">
                 <div className="toolbar-left">
                     <div className="toolbar-search">
-                        <span className="search-icon">🔍</span>
+                        <i className="bi bi-search search-icon"></i>
                         <input
                             type="text"
                             placeholder="Cari periode..."
@@ -269,7 +269,7 @@ function BkbTable() {
                     </select>
                 </div>
                 <Link to="/admin/monitoring/bkb/tambah" className="btn-add-data">
-                    <span className="plus-icon">+</span>
+                    <i className="bi bi-plus-circle-fill"></i>
                     Tambah Data BKB
                 </Link>
             </div>
@@ -314,7 +314,7 @@ function BkbTable() {
                                 <tr>
                                     <td colSpan="6">
                                         <div className="empty-state">
-                                            <div className="es-icon">🗂️</div>
+                                            <div className="es-icon"><i className="bi bi-inbox"></i></div>
                                             <p>Belum ada data periode</p>
                                             <small>Coba ubah kata kunci pencarian atau filter tahun, atau tambah data baru</small>
                                         </div>
@@ -326,7 +326,7 @@ function BkbTable() {
                                 <tr key={p.id}>
                                     <td>
                                         <div className="periode-cell">
-                                            <div className="periode-icon">📅</div>
+                                            <div className="periode-icon"><i className="bi bi-calendar3"></i></div>
                                             <div>
                                                 <div className="periode-name">{p.periode}</div>
                                                 <div className="periode-sub">{p.fileName}</div>
@@ -357,9 +357,9 @@ function BkbTable() {
                                     </td>
                                     <td className="col-actions">
                                         <div className="action-buttons">
-                                            <button className="btn-icon btn-view" title="Lihat" onClick={() => openViewModal(p)}>👁️</button>
-                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(p)}>✏️</button>
-                                            <button className="btn-icon btn-delete" title="Hapus" onClick={() => openDeleteModal(p)}>🗑️</button>
+                                            <button className="btn-icon btn-view" title="Lihat" onClick={() => openViewModal(p)}><i className="bi bi-eye-fill"></i></button>
+                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(p)}><i className="bi bi-pencil-fill"></i></button>
+                                            <button className="btn-icon btn-delete" title="Hapus" onClick={() => openDeleteModal(p)}><i className="bi bi-trash-fill"></i></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -382,7 +382,7 @@ function BkbTable() {
             {deleteTarget && (
                 <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeDeleteModal()}>
                     <div className="modal-box">
-                        <div className="modal-warn-icon">⚠️</div>
+                        <div className="modal-warn-icon"><i className="bi bi-exclamation-triangle-fill"></i></div>
                         <h3>Hapus Data Periode Ini?</h3>
                         <p>
                             Seluruh data monitoring BKB untuk periode <b>{deleteTarget.periode}</b> ({deleteTarget.jumlahKecamatan} kecamatan)
@@ -404,7 +404,7 @@ function BkbTable() {
                     <div className="modal-box modal-wide">
                         <div className="modal-header">
                             <h3>Detail Periode — {viewTarget.periode}</h3>
-                            <button className="modal-close" onClick={closeViewModal}>✕</button>
+                            <button className="modal-close" onClick={closeViewModal}><i className="bi bi-x-lg"></i></button>
                         </div>
                         <div className="modal-body">
                             {viewLoading && (
@@ -498,7 +498,7 @@ function BkbTable() {
                     <div className="modal-box modal-wide">
                         <div className="modal-header">
                             <h3>Edit Data — {editTarget.periode}</h3>
-                            <button className="modal-close" onClick={closeEditModal}>✕</button>
+                            <button className="modal-close" onClick={closeEditModal}><i className="bi bi-x-lg"></i></button>
                         </div>
                         <div className="modal-body">
                             {editLoading && (
@@ -506,7 +506,7 @@ function BkbTable() {
                             )}
 
                             {!editLoading && editError && (
-                                <div style={{ textAlign: "center", padding: 12, color: "#e53935", marginBottom: 12 }}>⚠ {editError}</div>
+                                <div style={{ textAlign: "center", padding: 12, color: "#e53935", marginBottom: 12 }}><i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{editError}</div>
                             )}
 
                             {!editLoading && editRows.length > 0 && (
@@ -616,7 +616,7 @@ function BkbTable() {
                                 onClick={saveEdit}
                                 disabled={saving || editLoading}
                             >
-                                {saving ? "Menyimpan..." : "💾 Simpan Perubahan"}
+                                {saving ? "Menyimpan..." : (<><i className="bi bi-check-circle-fill"></i> Simpan Perubahan</>)}
                             </button>
                         </div>
                     </div>

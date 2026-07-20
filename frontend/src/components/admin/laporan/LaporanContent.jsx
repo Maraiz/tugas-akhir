@@ -24,10 +24,26 @@ function fmtPct(v) {
 }
 
 const TABS = [
-    { key: "tren", label: "📈 Tren Waktu" },
-    { key: "ranking", label: "🏆 Perbandingan Kecamatan" },
-    { key: "program", label: "🧩 Perbandingan Program" },
+    { key: "tren", label: "Tren Waktu", icon: "bi-graph-up" },
+    { key: "ranking", label: "Perbandingan Kecamatan", icon: "bi-bar-chart-line-fill" },
+    { key: "program", label: "Perbandingan Program", icon: "bi-diagram-3-fill" },
 ];
+
+// Bikin gradasi vertikal buat chart batang — biar nggak flat 1 warna doang
+function makeGradient(ctx, chartArea, hex) {
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, hex);
+    gradient.addColorStop(1, hex + "55");
+    return gradient;
+}
+
+const TOOLTIP_STYLE = {
+    backgroundColor: "#1a1a2e",
+    padding: 12,
+    cornerRadius: 8,
+    titleFont: { size: 12.5, weight: "600" },
+    bodyFont: { size: 12.5 },
+};
 
 function LaporanContent() {
     const [activeTab, setActiveTab] = useState("tren");
@@ -42,7 +58,8 @@ function LaporanContent() {
                         className={`report-tab ${activeTab === t.key ? "active" : ""}`}
                         onClick={() => setActiveTab(t.key)}
                     >
-                        {t.label}
+                        <i className={`bi ${t.icon}`}></i>
+                        <span>{t.label}</span>
                     </div>
                 ))}
             </div>
@@ -117,6 +134,8 @@ function TabTren() {
         if (chartRef.current) chartRef.current.destroy();
         if (!canvasRef.current) return;
 
+        const ctx = canvasRef.current.getContext("2d");
+
         chartRef.current = new Chart(canvasRef.current, {
             type: "line",
             data: {
@@ -125,10 +144,20 @@ function TabTren() {
                     label: "% Capaian",
                     data: rows.map((d) => Number(d.pctCapaian) || 0),
                     borderColor: "#1565c0",
-                    backgroundColor: "rgba(21, 101, 192, 0.08)",
+                    backgroundColor: (context) => {
+                        const { chart } = context;
+                        const { chartArea } = chart;
+                        if (!chartArea) return "rgba(21, 101, 192, 0.08)";
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, "rgba(21, 101, 192, 0.28)");
+                        gradient.addColorStop(1, "rgba(21, 101, 192, 0.02)");
+                        return gradient;
+                    },
                     fill: true,
                     tension: 0.35,
                     pointBackgroundColor: "#1565c0",
+                    pointBorderColor: "#fff",
+                    pointBorderWidth: 2,
                     pointRadius: 5,
                     pointHoverRadius: 7,
                     borderWidth: 3,
@@ -137,11 +166,15 @@ function TabTren() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { ...TOOLTIP_STYLE, callbacks: { label: (c) => `Capaian: ${c.parsed.y.toFixed(1)}%` } },
+                },
                 scales: {
                     y: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + "%" }, grid: { color: "#f0f2f8" } },
                     x: { grid: { display: false } },
                 },
+                animation: { duration: 650, easing: "easeOutQuart" },
             },
         });
     }
@@ -192,12 +225,12 @@ function TabTren() {
                 <button className="btn-terapkan" onClick={fetchData} disabled={loading || !kecamatan}>
                     {loading ? "Memuat..." : "Terapkan"}
                 </button>
-                <button className="btn-export-pdf">⬇ Ekspor PDF</button>
+                <button className="btn-export-pdf"><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
             </div>
 
             {error && (
                 <div className="table-card" style={{ padding: 20, marginBottom: 22, color: "#c62828", textAlign: "center" }}>
-                    ⚠ {error}
+                    <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{error}
                 </div>
             )}
 
@@ -205,21 +238,21 @@ function TabTren() {
                 <>
                     <div className="insight-row">
                         <div className="insight-card">
-                            <div className="insight-icon blue">📊</div>
+                            <div className="insight-icon blue"><i className="bi bi-bar-chart-fill"></i></div>
                             <div>
                                 <div className="insight-value">{fmtPct(avgPct)}</div>
                                 <div className="insight-label">Capaian Rata-rata Periode Ini</div>
                             </div>
                         </div>
                         <div className="insight-card">
-                            <div className="insight-icon blue">📈</div>
+                            <div className="insight-icon blue"><i className="bi bi-graph-up-arrow"></i></div>
                             <div>
                                 <div className="insight-value">{deltaPct >= 0 ? "+" : ""}{deltaPct.toFixed(1)}%</div>
                                 <div className="insight-label">Tren dari Awal ke Akhir Rentang</div>
                             </div>
                         </div>
                         <div className="insight-card">
-                            <div className="insight-icon blue">🕓</div>
+                            <div className="insight-icon blue"><i className="bi bi-clock-history"></i></div>
                             <div>
                                 <div className="insight-value">{tertinggi ? tertinggi.periode : "-"}</div>
                                 <div className="insight-label">Capaian Tertinggi Tercatat</div>
@@ -345,6 +378,8 @@ function TabRanking() {
         if (chartRef.current) chartRef.current.destroy();
         if (!canvasRef.current) return;
 
+        const ctx = canvasRef.current.getContext("2d");
+
         chartRef.current = new Chart(canvasRef.current, {
             type: "bar",
             data: {
@@ -352,10 +387,17 @@ function TabRanking() {
                 datasets: [{
                     label: "% Capaian",
                     data: data.map((d) => Number(d.pctCapaian) || 0),
-                    backgroundColor: data.map((d) => {
-                        const v = Number(d.pctCapaian) || 0;
-                        return v >= 85 ? "#2e7d32" : v >= 60 ? "#f9a825" : "#e53935";
-                    }),
+                    backgroundColor: (context) => {
+                        const { chart, dataIndex } = context;
+                        const { chartArea } = chart;
+                        const v = Number(data[dataIndex]?.pctCapaian) || 0;
+                        const hex = v >= 85 ? "#2e7d32" : v >= 60 ? "#f9a825" : "#e53935";
+                        if (!chartArea) return hex;
+                        const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+                        gradient.addColorStop(0, hex + "55");
+                        gradient.addColorStop(1, hex);
+                        return gradient;
+                    },
                     borderRadius: 6,
                 }],
             },
@@ -363,7 +405,11 @@ function TabRanking() {
                 indexAxis: "y",
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { ...TOOLTIP_STYLE, callbacks: { label: (c) => `Capaian: ${c.parsed.x.toFixed(1)}%` } },
+                },
+                animation: { duration: 650, easing: "easeOutQuart" },
                 scales: {
                     x: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + "%" }, grid: { color: "#f0f2f8" } },
                     y: { grid: { display: false } },
@@ -408,12 +454,12 @@ function TabRanking() {
                 <button className="btn-terapkan" onClick={fetchData} disabled={loading || !periodeValue}>
                     {loading ? "Memuat..." : "Terapkan"}
                 </button>
-                <button className="btn-export-pdf">⬇ Ekspor PDF</button>
+                <button className="btn-export-pdf"><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
             </div>
 
             {error && (
                 <div className="table-card" style={{ padding: 20, marginBottom: 22, color: "#c62828", textAlign: "center" }}>
-                    ⚠ {error}
+                    <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{error}
                 </div>
             )}
 
@@ -421,21 +467,21 @@ function TabRanking() {
                 <>
                     <div className="insight-row">
                         <div className="insight-card">
-                            <div className="insight-icon green">🥇</div>
+                            <div className="insight-icon green"><i className="bi bi-trophy-fill"></i></div>
                             <div>
                                 <div className="insight-value">{terbaik ? terbaik.kecamatan : "-"}</div>
                                 <div className="insight-label">Capaian Tertinggi ({terbaik ? fmtPct(terbaik.pctCapaian) : "-"})</div>
                             </div>
                         </div>
                         <div className="insight-card">
-                            <div className="insight-icon red">⚠️</div>
+                            <div className="insight-icon red"><i className="bi bi-exclamation-triangle-fill"></i></div>
                             <div>
                                 <div className="insight-value">{terendah ? terendah.kecamatan : "-"}</div>
                                 <div className="insight-label">Perlu Perhatian ({terendah ? fmtPct(terendah.pctCapaian) : "-"})</div>
                             </div>
                         </div>
                         <div className="insight-card">
-                            <div className="insight-icon blue">📊</div>
+                            <div className="insight-icon blue"><i className="bi bi-bar-chart-fill"></i></div>
                             <div>
                                 <div className="insight-value">{fmtPct(rataRata)}</div>
                                 <div className="insight-label">Rata-rata Kabupaten</div>
@@ -574,6 +620,7 @@ function TabProgram() {
         if (!canvasRef.current) return;
 
         const colors = { bkb: "#1565c0", bkr: "#2e7d32", bkl: "#ef6c00", pikr: "#8e24aa", uppka: "#c2185b" };
+        const ctx = canvasRef.current.getContext("2d");
 
         chartRef.current = new Chart(canvasRef.current, {
             type: "bar",
@@ -582,7 +629,13 @@ function TabProgram() {
                 datasets: [{
                     label: "% Capaian",
                     data: data.map((d) => (d.tersedia ? Number(d.pctCapaian) || 0 : 0)),
-                    backgroundColor: data.map((d) => colors[d.program] || "#9090a8"),
+                    backgroundColor: (context) => {
+                        const { chart, dataIndex } = context;
+                        const { chartArea } = chart;
+                        const hex = colors[data[dataIndex]?.program] || "#9090a8";
+                        if (!chartArea) return hex;
+                        return makeGradient(ctx, chartArea, hex);
+                    },
                     borderRadius: 8,
                     maxBarThickness: 60,
                 }],
@@ -590,7 +643,16 @@ function TabProgram() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        ...TOOLTIP_STYLE,
+                        callbacks: {
+                            label: (c) => data[c.dataIndex]?.tersedia ? `Capaian: ${c.parsed.y.toFixed(1)}%` : "Belum ada data",
+                        },
+                    },
+                },
+                animation: { duration: 650, easing: "easeOutQuart" },
                 scales: {
                     y: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + "%" }, grid: { color: "#f0f2f8" } },
                     x: { grid: { display: false } },
@@ -637,12 +699,12 @@ function TabProgram() {
                 <button className="btn-terapkan" onClick={fetchData} disabled={loading || !kecamatan || !periodeValue}>
                     {loading ? "Memuat..." : "Terapkan"}
                 </button>
-                <button className="btn-export-pdf">⬇ Ekspor PDF</button>
+                <button className="btn-export-pdf"><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
             </div>
 
             {error && (
                 <div className="table-card" style={{ padding: 20, marginBottom: 22, color: "#c62828", textAlign: "center" }}>
-                    ⚠ {error}
+                    <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{error}
                 </div>
             )}
 
@@ -650,21 +712,21 @@ function TabProgram() {
                 <>
                     <div className="insight-row">
                         <div className="insight-card">
-                            <div className="insight-icon green">🏆</div>
+                            <div className="insight-icon green"><i className="bi bi-trophy-fill"></i></div>
                             <div>
                                 <div className="insight-value">{terbaik ? terbaik.label : "-"}</div>
                                 <div className="insight-label">Program Terbaik di Kecamatan Ini</div>
                             </div>
                         </div>
                         <div className="insight-card">
-                            <div className="insight-icon red">📉</div>
+                            <div className="insight-icon red"><i className="bi bi-graph-down-arrow"></i></div>
                             <div>
                                 <div className="insight-value">{terendah ? terendah.label : "-"}</div>
                                 <div className="insight-label">Program Perlu Perhatian</div>
                             </div>
                         </div>
                         <div className="insight-card">
-                            <div className="insight-icon blue">📊</div>
+                            <div className="insight-icon blue"><i className="bi bi-bar-chart-fill"></i></div>
                             <div>
                                 <div className="insight-value">{fmtPct(rataRata)}</div>
                                 <div className="insight-label">Rata-rata Kecamatan ({tersediaRows.length} Program)</div>

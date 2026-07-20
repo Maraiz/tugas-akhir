@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../../services/api";
 import "../../styles/header.css";
 
 const ROLE_LABEL = {
@@ -15,8 +16,14 @@ function initials(name) {
 
 function Header({ title, breadcrumb }) {
     const navigate = useNavigate();
+
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
+
+    const [notifOpen, setNotifOpen] = useState(false);
+    const notifRef = useRef(null);
+    const [notifications, setNotifications] = useState([]);
+    const [notifLoading, setNotifLoading] = useState(true);
 
     const storedUser = JSON.parse(localStorage.getItem("user") || "null");
     const displayName = storedUser?.nama || "Pengguna";
@@ -35,11 +42,57 @@ function Header({ title, breadcrumb }) {
         navigate("/");
     }
 
-    // Tutup dropdown kalau klik di luar area profil
+    // ===== Ambil notifikasi — reuse endpoint Dashboard, disusun ulang
+    // jadi daftar notifikasi (program belum upload + kecamatan bermasalah) =====
+    async function fetchNotifications() {
+        setNotifLoading(true);
+        try {
+            const res = await api.get("/dashboard");
+            const data = res.data.data;
+
+            const list = [];
+
+            (data.statusUpload || []).filter((p) => !p.done).forEach((p) => {
+                list.push({
+                    id: `upload-${p.program}`,
+                    type: "warning",
+                    icon: "bi-cloud-arrow-up-fill",
+                    text: <><b>{p.label}</b> belum upload data periode {data.periodeBerjalan}</>,
+                    to: "/admin/riwayat-upload",
+                });
+            });
+
+            (data.kecamatanPerluPerhatian || []).forEach((a, i) => {
+                list.push({
+                    id: `attention-${i}`,
+                    type: "danger",
+                    icon: "bi-exclamation-triangle-fill",
+                    text: <>Kecamatan <b>{a.kecamatan}</b> capaian {a.programLabel} cuma {a.pct}%</>,
+                    to: "/admin/laporan",
+                });
+            });
+
+            setNotifications(list);
+        } catch (err) {
+            console.error(err);
+            setNotifications([]);
+        } finally {
+            setNotifLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    // Tutup dropdown profil / notifikasi kalau klik di luar
     useEffect(() => {
         function handleClickOutside(e) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setDropdownOpen(false);
+            }
+            if (notifRef.current && !notifRef.current.contains(e.target)) {
+                setNotifOpen(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -51,18 +104,61 @@ function Header({ title, breadcrumb }) {
             <div className="header-left">
                 <h2>{title}</h2>
                 <div className="breadcrumb">
-                    Beranda › <span>{breadcrumb}</span>
+                    Beranda <i className="bi bi-chevron-right"></i> <span>{breadcrumb}</span>
                 </div>
             </div>
 
             <div className="header-right">
-                <div className="header-date">{today}</div>
+                <div className="header-date"><i className="bi bi-calendar3"></i>{today}</div>
 
-                <button className="btn-notif">
-                    🔔
-                    <span className="notif-badge"></span>
-                </button>
+                {/* ===== NOTIFIKASI ===== */}
+                <div className="notif-wrap" ref={notifRef}>
+                    <button className="btn-notif" onClick={() => setNotifOpen((o) => !o)}>
+                        <i className="bi bi-bell-fill"></i>
+                        {notifications.length > 0 && <span className="notif-badge"></span>}
+                    </button>
 
+                    {notifOpen && (
+                        <div className="notif-dropdown">
+                            <div className="notif-dropdown-head">
+                                <h4>Notifikasi</h4>
+                                {notifications.length > 0 && <span className="notif-count">{notifications.length}</span>}
+                            </div>
+
+                            <div className="notif-list">
+                                {notifLoading && (
+                                    <div className="notif-empty">
+                                        <i className="bi bi-hourglass-split"></i>
+                                        <span>Memuat notifikasi...</span>
+                                    </div>
+                                )}
+
+                                {!notifLoading && notifications.length === 0 && (
+                                    <div className="notif-empty">
+                                        <i className="bi bi-check2-circle"></i>
+                                        <span>Semua aman, tidak ada notifikasi baru</span>
+                                    </div>
+                                )}
+
+                                {!notifLoading && notifications.map((n) => (
+                                    <Link
+                                        to={n.to}
+                                        key={n.id}
+                                        className="notif-item"
+                                        onClick={() => setNotifOpen(false)}
+                                    >
+                                        <div className={`notif-item-icon ${n.type}`}>
+                                            <i className={`bi ${n.icon}`}></i>
+                                        </div>
+                                        <div className="notif-item-text">{n.text}</div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* ===== PROFIL ===== */}
                 <div className="header-profile-wrap" ref={dropdownRef}>
                     <div className="header-profile" onClick={() => setDropdownOpen((o) => !o)}>
                         <div className="h-avatar">{initials(displayName)}</div>
@@ -70,6 +166,7 @@ function Header({ title, breadcrumb }) {
                             <h4>{displayName}</h4>
                             <span>{displayRole}</span>
                         </div>
+                        <i className={`bi bi-chevron-down profile-chevron ${dropdownOpen ? "open" : ""}`}></i>
                     </div>
 
                     {dropdownOpen && (
@@ -83,7 +180,7 @@ function Header({ title, breadcrumb }) {
                             </div>
                             <div className="dropdown-divider"></div>
                             <button className="dropdown-logout-btn" onClick={handleLogout}>
-                                🚪 Logout
+                                <i className="bi bi-box-arrow-right"></i> Logout
                             </button>
                         </div>
                     )}
