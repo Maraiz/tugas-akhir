@@ -9,6 +9,10 @@ function LoginForm() {
     const [nip, setNip] = useState("");
     const [password, setPassword] = useState("");
     const [remember, setRemember] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -17,6 +21,9 @@ function LoginForm() {
     const handleSubmit = async (e) => {
 
         e.preventDefault();
+
+        setErrorMessage("");
+        setLoading(true);
 
         try {
 
@@ -27,17 +34,8 @@ function LoginForm() {
 
             });
 
-            console.log(response.data);
-
-            localStorage.setItem(
-                "token",
-                response.data.token
-            );
-
-            localStorage.setItem(
-                "user",
-                JSON.stringify(response.data.user)
-            );
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
 
             const role = response.data.user.role;
 
@@ -56,19 +54,21 @@ function LoginForm() {
                     break;
 
                 default:
-                    alert("Role tidak dikenali.");
+                    setErrorMessage("Role tidak dikenali. Hubungi administrator.");
+                    setLoading(false);
                     break;
 
             }
 
         } catch (error) {
 
-            console.log(error);
+            console.error(error);
 
-            alert(
-                error.response?.data?.message ||
-                "Login gagal."
+            setErrorMessage(
+                error.response?.data?.message || "Login gagal. Periksa koneksi internet Anda."
             );
+
+            setLoading(false);
 
         }
 
@@ -90,7 +90,15 @@ function LoginForm() {
 
                     {warningMessage && (
                         <div className="login-warning">
-                            ⚠ {warningMessage}
+                            <i className="bi bi-exclamation-triangle-fill"></i>
+                            {warningMessage}
+                        </div>
+                    )}
+
+                    {errorMessage && (
+                        <div className="login-error">
+                            <i className="bi bi-x-circle-fill"></i>
+                            {errorMessage}
                         </div>
                     )}
 
@@ -114,15 +122,17 @@ function LoginForm() {
                                 NIP atau Username
                             </label>
 
-                            <input
-                                type="text"
-                                id="nip"
-                                placeholder="Masukkan NIP atau Username"
-                                value={nip}
-                                onChange={(e) =>
-                                    setNip(e.target.value)
-                                }
-                            />
+                            <div className="input-with-icon">
+                                <i className="bi bi-person-fill"></i>
+                                <input
+                                    type="text"
+                                    id="nip"
+                                    placeholder="Masukkan NIP atau Username"
+                                    value={nip}
+                                    disabled={loading}
+                                    onChange={(e) => setNip(e.target.value)}
+                                />
+                            </div>
 
                         </div>
 
@@ -132,15 +142,25 @@ function LoginForm() {
                                 Password
                             </label>
 
-                            <input
-                                type="password"
-                                id="password"
-                                placeholder="Masukkan password"
-                                value={password}
-                                onChange={(e) =>
-                                    setPassword(e.target.value)
-                                }
-                            />
+                            <div className="input-with-icon">
+                                <i className="bi bi-lock-fill"></i>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    placeholder="Masukkan password"
+                                    value={password}
+                                    disabled={loading}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    className="toggle-password"
+                                    onClick={() => setShowPassword((s) => !s)}
+                                    tabIndex={-1}
+                                >
+                                    <i className={`bi ${showPassword ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+                                </button>
+                            </div>
 
                         </div>
 
@@ -151,9 +171,8 @@ function LoginForm() {
                                 <input
                                     type="checkbox"
                                     checked={remember}
-                                    onChange={(e) =>
-                                        setRemember(e.target.checked)
-                                    }
+                                    disabled={loading}
+                                    onChange={(e) => setRemember(e.target.checked)}
                                 />
 
                                 Remember Me
@@ -172,8 +191,16 @@ function LoginForm() {
                         <button
                             type="submit"
                             className="btn-login"
+                            disabled={loading}
                         >
-                            Login
+                            {loading ? (
+                                <>
+                                    <span className="btn-spinner"></span>
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Login"
+                            )}
                         </button>
 
                     </form>

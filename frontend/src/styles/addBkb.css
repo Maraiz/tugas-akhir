@@ -172,7 +172,8 @@
 }
 
 .upload-dropzone .dz-icon {
-    font-size: 30px;
+    font-size: 28px;
+    color: #1565c0;
     margin-bottom: 8px;
 }
 
@@ -246,6 +247,10 @@
     letter-spacing: 0.5px;
 }
 
+.validate-group-title i {
+    margin-right: 6px;
+}
+
 .validate-group-title:first-child {
     margin-top: 0;
 }
@@ -304,6 +309,10 @@
     margin: 20px 0 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.colselect-group-title i {
+    margin-right: 6px;
 }
 
 .colselect-group-title:first-child {
@@ -626,6 +635,9 @@
     font-weight: 600;
     font-family: inherit;
     border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-nav.back {

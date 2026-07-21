@@ -1,4 +1,4 @@
-    * {
+* {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
@@ -113,6 +113,74 @@
         outline: none;
     }
 
+    /* ===== Input dengan icon — pakai flexbox, bukan absolute positioning
+       (lebih tahan dari masalah alignment/klik lintas browser) ===== */
+    .input-with-icon {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 0 14px;
+        border: 1.5px solid #e4e4f0;
+        border-radius: 10px;
+        background-color: #fafafe;
+        transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    }
+
+    .input-with-icon:focus-within {
+        border-color: #4f3cc9;
+        box-shadow: 0 0 0 3px rgba(79, 60, 201, 0.1);
+        background-color: #fff;
+    }
+
+    .input-with-icon > i:first-child {
+        font-size: 14px;
+        color: #b0b0c8;
+        flex-shrink: 0;
+    }
+
+    .input-with-icon input {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 13px 0;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .toggle-password {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #b0b0c8;
+        font-size: 15px;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+    }
+
+    /* Matikan ikon "reveal password" bawaan browser (Edge kadang nambahin
+       ini otomatis di input type="password") */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
+    }
+
+    .toggle-password:hover {
+        color: #4f3cc9;
+    }
+
+    .form-group input:disabled {
+        background-color: #f2f2f6;
+        cursor: not-allowed;
+    }
+
     .form-group input::placeholder {
         color: #c8c8d8;
     }
@@ -121,6 +189,16 @@
         border-color: #4f3cc9;
         box-shadow: 0 0 0 3px rgba(79, 60, 201, 0.1);
         background-color: #fff;
+    }
+
+    /* Matiin border+shadow bawaan ".form-group input:focus" khusus buat
+       input yang ada di dalam kotak ber-icon — soalnya kotaknya sendiri
+       (.input-with-icon) yang udah nampilin border+shadow pas fokus,
+       kalau kedua-duanya jalan jadi keliatan dobel/dempet aneh */
+    .input-with-icon input:focus {
+        border: none !important;
+        box-shadow: none !important;
+        background-color: transparent !important;
     }
 
     .form-options {
@@ -171,6 +249,28 @@
         letter-spacing: 0.5px;
         transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
         box-shadow: 0 4px 14px rgba(79, 60, 201, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-login:disabled {
+        opacity: 0.75;
+        cursor: not-allowed;
+    }
+
+    .btn-spinner {
+        width: 15px;
+        height: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: btn-spin 0.7s linear infinite;
+    }
+
+    @keyframes btn-spin {
+        to { transform: rotate(360deg); }
     }
 
     .btn-login:hover {
@@ -210,9 +310,25 @@
     }
 
     .login-warning {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         background: #fff8e1;
         border: 1px solid #ffe082;
         color: #7a5c00;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        margin-bottom: 16px;
+    }
+
+    .login-error {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fdecea;
+        border: 1px solid #f5c6c2;
+        color: #c62828;
         padding: 10px 14px;
         border-radius: 8px;
         font-size: 12.5px;

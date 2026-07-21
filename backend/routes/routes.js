@@ -23,6 +23,14 @@ router.get("/", (req, res) => {
 router.use("/auth", require("./auth"));
 
 // ==============================
+// Proteksi login — semua route DI BAWAH baris ini wajib kirim token
+// JWT valid di header "Authorization: Bearer <token>"
+// ==============================
+
+const { verifyToken } = require("../middleware/auth");
+router.use(verifyToken);
+
+// ==============================
 // User Management
 // ==============================
 

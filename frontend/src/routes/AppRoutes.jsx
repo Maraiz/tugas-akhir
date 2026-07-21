@@ -35,7 +35,8 @@ function AppRoutes() {
                     element={<Login />}
                 />
 
-                <Route element={<ProtectedRoute />}>
+                {/* ===== ADMIN — cuma role "admin" yang boleh masuk ===== */}
+                <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
 
                     <Route path="/admin" element={<Layout />}>
                         <Route index element={<DashboardAdmin />} />
@@ -56,15 +57,25 @@ function AppRoutes() {
 
                 </Route>
 
-                <Route
-                    path="/petugas"
-                    element={<DashboardPetugas />}
-                />
+                {/* ===== PETUGAS — cuma role "petugas" yang boleh masuk =====
+                    Sebelumnya route ini SAMA SEKALI TIDAK DIBUNGKUS ProtectedRoute,
+                    jadi siapapun (bahkan yang belum login) bisa langsung akses
+                    /petugas lewat URL. Sekarang dikunci. */}
+                <Route element={<ProtectedRoute allowedRoles={["petugas"]} />}>
+                    <Route
+                        path="/petugas"
+                        element={<DashboardPetugas />}
+                    />
+                </Route>
 
-                <Route
-                    path="/user"
-                    element={<DashboardUser />}
-                />
+                {/* ===== USER/PIMPINAN — cuma role "user" yang boleh masuk =====
+                    Sama kayak /petugas, sebelumnya juga tidak terlindungi. */}
+                <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
+                    <Route
+                        path="/user"
+                        element={<DashboardUser />}
+                    />
+                </Route>
 
             </Routes>
 

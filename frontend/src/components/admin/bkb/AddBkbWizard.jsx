@@ -192,7 +192,7 @@ function AddBkbWizard() {
                 updateFileState(slot, {
                     rawHeaders,
                     rawRows,
-                    fileName: `📄 ${file.name} — ${rawRows.length} baris`,
+                    fileName: `${file.name} — ${rawRows.length} baris`,
                 });
             } catch (err) {
                 alert("Gagal membaca file. Pastikan format file benar (.xlsx/.xls/.csv).");
@@ -547,7 +547,7 @@ function AddBkbWizard() {
                                     if (file) handleFile(1, file);
                                 }}
                             >
-                                <div className="dz-icon">📁</div>
+                                <div className="dz-icon"><i className="bi bi-cloud-arrow-up-fill"></i></div>
                                 <p>Klik atau seret file Tabel 3A</p>
                                 <small>.xlsx, .xls, .csv — maks. 10MB</small>
                             </div>
@@ -561,8 +561,8 @@ function AddBkbWizard() {
 
                             {files[1].fileName && (
                                 <div className="file-loaded-box" style={{ display: "flex" }}>
-                                    <span>{files[1].fileName}</span>
-                                    <button onClick={() => resetUpload(1)} title="Hapus file">✕</button>
+                                    <span><i className="bi bi-file-earmark-text-fill" style={{ marginRight: 6 }}></i>{files[1].fileName}</span>
+                                    <button onClick={() => resetUpload(1)} title="Hapus file"><i className="bi bi-x-lg"></i></button>
                                 </div>
                             )}
                         </div>
@@ -585,7 +585,7 @@ function AddBkbWizard() {
                                     if (file) handleFile(2, file);
                                 }}
                             >
-                                <div className="dz-icon">📁</div>
+                                <div className="dz-icon"><i className="bi bi-cloud-arrow-up-fill"></i></div>
                                 <p>Klik atau seret file Tabel 3B</p>
                                 <small>.xlsx, .xls, .csv — maks. 10MB</small>
                             </div>
@@ -599,21 +599,21 @@ function AddBkbWizard() {
 
                             {files[2].fileName && (
                                 <div className="file-loaded-box" style={{ display: "flex" }}>
-                                    <span>{files[2].fileName}</span>
-                                    <button onClick={() => resetUpload(2)} title="Hapus file">✕</button>
+                                    <span><i className="bi bi-file-earmark-text-fill" style={{ marginRight: 6 }}></i>{files[2].fileName}</span>
+                                    <button onClick={() => resetUpload(2)} title="Hapus file"><i className="bi bi-x-lg"></i></button>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     <div className="upload-hint-box">
-                        ⚠️ Pastikan kedua file adalah hasil unduhan langsung dari SIGA untuk <b>periode (bulan) yang sama</b>, tanpa diubah struktur kolomnya.
+                        <i className="bi bi-info-circle-fill" style={{ marginRight: 6 }}></i>Pastikan kedua file adalah hasil unduhan langsung dari SIGA untuk <b>periode (bulan) yang sama</b>, tanpa diubah struktur kolomnya.
                     </div>
 
                     <div className="panel-footer">
                         <span></span>
                         <button className="btn-nav next" disabled={!step1Ready} onClick={() => goToStep(2)}>
-                            Lanjut ke Validasi →
+                            Lanjut ke Validasi <i className="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -627,34 +627,34 @@ function AddBkbWizard() {
                         <p>Sistem memeriksa format dan kelengkapan kolom wajib pada kedua file yang diunggah</p>
                     </div>
 
-                    <div className="validate-group-title">📄 Tabel 3A BKB</div>
+                    <div className="validate-group-title"><i className="bi bi-file-earmark-spreadsheet-fill"></i> Tabel 3A BKB</div>
                     <div className="validate-list">
                         {validation1.map((it, i) => (
                             <div key={i} className={`validate-item ${it.ok ? "ok" : "err"}`}>
-                                <div className="v-icon">{it.ok ? "✓" : "✕"}</div>
+                                <div className="v-icon">{it.ok ? <i className="bi bi-check-lg"></i> : <i className="bi bi-x-lg"></i>}</div>
                                 <div className="v-text">{it.text}</div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="validate-group-title">📄 Tabel 3B BKB</div>
+                    <div className="validate-group-title"><i className="bi bi-file-earmark-spreadsheet-fill"></i> Tabel 3B BKB</div>
                     <div className="validate-list">
                         {validation2.map((it, i) => (
                             <div key={i} className={`validate-item ${it.ok ? "ok" : "err"}`}>
-                                <div className="v-icon">{it.ok ? "✓" : "✕"}</div>
+                                <div className="v-icon">{it.ok ? <i className="bi bi-check-lg"></i> : <i className="bi bi-x-lg"></i>}</div>
                                 <div className="v-text">{it.text}</div>
                             </div>
                         ))}
                     </div>
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(1)}>← Kembali</button>
+                        <button className="btn-nav back" onClick={() => goToStep(1)}><i className="bi bi-arrow-left"></i> Kembali</button>
                         <button
                             className="btn-nav next"
                             disabled={!validationAllOk}
                             onClick={() => { initColumnSelection(); goToStep(3); }}
                         >
-                            Lanjut ke Seleksi Kolom →
+                            Lanjut ke Seleksi Kolom <i className="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -668,7 +668,7 @@ function AddBkbWizard() {
                         <p>Sistem otomatis mendeteksi dan mencentang kolom yang dibutuhkan dari masing-masing file. Sesuaikan pemetaan kolom jika diperlukan.</p>
                     </div>
 
-                    <div className="colselect-group-title">📄 Tabel 3A BKB (kolom 1,2,3,4)</div>
+                    <div className="colselect-group-title"><i className="bi bi-file-earmark-spreadsheet-fill"></i> Tabel 3A BKB (kolom 1,2,3,4)</div>
                     <div style={{ overflowX: "auto" }}>
                         <table className="col-select-table">
                             <thead>
@@ -716,7 +716,7 @@ function AddBkbWizard() {
                         </table>
                     </div>
 
-                    <div className="colselect-group-title">📄 Tabel 3B BKB (kolom 1,2,6,7)</div>
+                    <div className="colselect-group-title"><i className="bi bi-file-earmark-spreadsheet-fill"></i> Tabel 3B BKB (kolom 1,2,6,7)</div>
                     <div style={{ overflowX: "auto" }}>
                         <table className="col-select-table">
                             <thead>
@@ -765,13 +765,13 @@ function AddBkbWizard() {
                     </div>
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(2)}>← Kembali</button>
+                        <button className="btn-nav back" onClick={() => goToStep(2)}><i className="bi bi-arrow-left"></i> Kembali</button>
                         <button
                             className="btn-nav next"
                             disabled={!columnSelectionOk}
                             onClick={() => { buildPreview(); goToStep(4); }}
                         >
-                            Lanjut ke Preview →
+                            Lanjut ke Preview <i className="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -821,8 +821,8 @@ function AddBkbWizard() {
                                         <td>{row.ada}</td>
                                         <td>{row.lapor}</td>
                                         <td>{row.pctLapor.toFixed(2)}</td>
-                                        <td className={row.matched ? "" : "warn-mismatch"}>{row.jumlah_anggota}{row.matched ? "" : " ⚠"}</td>
-                                        <td className={row.matched ? "" : "warn-mismatch"}>{row.jumlah_hadir}{row.matched ? "" : " ⚠"}</td>
+                                        <td className={row.matched ? "" : "warn-mismatch"}>{row.jumlah_anggota}{!row.matched && <i className="bi bi-exclamation-triangle-fill" style={{ marginLeft: 4 }}></i>}</td>
+                                        <td className={row.matched ? "" : "warn-mismatch"}>{row.jumlah_hadir}{!row.matched && <i className="bi bi-exclamation-triangle-fill" style={{ marginLeft: 4 }}></i>}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -838,8 +838,8 @@ function AddBkbWizard() {
                     )}
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(3)}>← Kembali</button>
-                        <button className="btn-nav next" onClick={() => goToStep(5)}>Lanjut Input Target →</button>
+                        <button className="btn-nav back" onClick={() => goToStep(3)}><i className="bi bi-arrow-left"></i> Kembali</button>
+                        <button className="btn-nav next" onClick={() => goToStep(5)}>Lanjut Input Target <i className="bi bi-arrow-right"></i></button>
                     </div>
                 </div>
             )}
@@ -870,7 +870,7 @@ function AddBkbWizard() {
                             style={{ background: "#fff8e1", color: "#7a5c00", border: "1px solid #ffe082" }}
                             onClick={applyTestTarget}
                         >
-                            🧪 Isi Target Testing
+                            <i className="bi bi-flask-fill"></i> Isi Target Testing
                         </button>
                     </div>
 
@@ -916,8 +916,8 @@ function AddBkbWizard() {
                     </div>
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(4)}>← Kembali</button>
-                        <button className="btn-nav next" onClick={() => goToStep(6)}>Hitung Capaian →</button>
+                        <button className="btn-nav back" onClick={() => goToStep(4)}><i className="bi bi-arrow-left"></i> Kembali</button>
+                        <button className="btn-nav next" onClick={() => goToStep(6)}>Hitung Capaian <i className="bi bi-arrow-right"></i></button>
                     </div>
                 </div>
             )}
@@ -1013,14 +1013,14 @@ function AddBkbWizard() {
 
                     {saveError && (
                         <div className="upload-hint-box" style={{ background: "#fdecea", borderColor: "#f5c6c2", color: "#c62828", marginBottom: 16 }}>
-                            ⚠ {saveError}
+                            <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{saveError}
                         </div>
                     )}
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(5)} disabled={saving}>← Kembali</button>
+                        <button className="btn-nav back" onClick={() => goToStep(5)} disabled={saving}><i className="bi bi-arrow-left"></i> Kembali</button>
                         <button className="btn-nav save" onClick={saveMonitoring} disabled={saving}>
-                            {saving ? "Menyimpan..." : "💾 Simpan Data Monitoring"}
+                            {saving ? "Menyimpan..." : (<><i className="bi bi-save-fill"></i> Simpan Data Monitoring</>)}
                         </button>
                     </div>
                 </div>
@@ -1030,7 +1030,7 @@ function AddBkbWizard() {
             {successOpen && (
                 <div className="success-overlay open">
                     <div className="success-box">
-                        <div className="success-icon">✓</div>
+                        <div className="success-icon"><i className="bi bi-check-lg"></i></div>
                         <h3>Data Monitoring BKB Tersimpan</h3>
                         <p>Data hasil upload, target, dan perhitungan capaian program BKB telah berhasil disimpan ke sistem.</p>
                         <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
