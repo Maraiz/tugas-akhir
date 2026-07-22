@@ -65,7 +65,7 @@ class AuthController {
 
                     success: false,
 
-                    message: "Password salah."
+                    message: "NIP atau Password salah."
 
                 });
 

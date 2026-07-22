@@ -1,0 +1,204 @@
+.user-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    box-shadow: 1px 0 0 rgba(0, 0, 0, 0.04), 4px 0 24px rgba(15, 23, 42, 0.06);
+    overflow-y: auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.user-sidebar-brand {
+    padding: 0 22px;
+    height: 70px;
+    background: linear-gradient(135deg, #4a1268 0%, #6a1b9a 55%, #8e24aa 100%);
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    flex-shrink: 0;
+}
+
+.user-sidebar-brand-icon {
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 9px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.user-sidebar-brand-text h3 {
+    color: #ffffff;
+    font-size: 14.5px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.user-sidebar-brand-text span {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 11px;
+}
+
+.user-sidebar-profile {
+    padding: 18px 20px 16px;
+    border-bottom: 1px solid #eef0f6;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-profile-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6a1b9a, #ab47bc);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(106, 27, 154, 0.3);
+}
+
+.user-profile-info h4 { font-size: 13px; font-weight: 700; color: #1a1a2e; margin: 0; }
+.user-profile-info span { font-size: 11px; color: #6a1b9a; font-weight: 600; }
+
+.user-sidebar-nav { flex: 1; padding: 14px 12px 8px; }
+
+.user-nav-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: #a3aabb;
+    padding: 14px 10px 7px;
+}
+
+.user-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, padding-left 0.18s;
+    color: #54596b;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    text-decoration: none;
+    user-select: none;
+}
+
+.user-nav-item:hover { background: #f7effb; color: #6a1b9a; }
+
+.user-nav-item.active {
+    background: #f3e5f9;
+    color: #6a1b9a;
+    font-weight: 600;
+    border-left: 3px solid #6a1b9a;
+    padding-left: 9px;
+}
+
+.user-nav-item.has-sub.open { background: #f7effb; color: #6a1b9a; }
+
+.user-nav-icon {
+    font-size: 15.5px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.user-nav-arrow {
+    margin-left: auto;
+    font-size: 11px;
+    color: #b3b9c9;
+    transition: transform 0.2s;
+}
+
+.user-nav-arrow.rotated { transform: rotate(90deg); color: #6a1b9a; }
+
+.user-nav-submenu {
+    padding-left: 17px;
+    margin-bottom: 4px;
+}
+
+.user-nav-sublink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 12.8px;
+    font-weight: 400;
+    margin-bottom: 1px;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.user-nav-sublink::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #cbd3e3;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.user-nav-sublink:hover { background: #f7effb; color: #6a1b9a; }
+.user-nav-sublink:hover::before { background: #6a1b9a; }
+
+.user-nav-sublink.active {
+    background: #f7effb;
+    color: #6a1b9a;
+    font-weight: 600;
+}
+.user-nav-sublink.active::before { background: #6a1b9a; }
+
+.user-nav-divider {
+    height: 1px;
+    background: #eef0f6;
+    margin: 10px 4px;
+}
+
+.user-sidebar-footer {
+    padding: 14px 12px;
+    border-top: 1px solid #eef0f6;
+    flex-shrink: 0;
+}
+
+.user-btn-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    background: linear-gradient(135deg, #d93939, #ef5350);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+    box-shadow: 0 3px 10px rgba(217, 57, 57, 0.3);
+    transition: opacity 0.2s, box-shadow 0.2s;
+}
+
+.user-btn-logout:hover { opacity: 0.93; box-shadow: 0 5px 16px rgba(217, 57, 57, 0.4); }

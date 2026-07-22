@@ -2,6 +2,40 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../services/api";
 import "../../../styles/dataBkl.css";
+import { exportMonevExcel, exportMonevPDF } from "../../../utils/exportMonev";
+
+// Config kolom buat export Excel/PDF — struktur BKL sama persis kayak BKB
+// (Keanggotaan & Kehadiran sama-sama nunjukkin Target & Anggota Yg Ada).
+const BKL_COLUMNS = [
+    { label: "KODE", key: "kode" },
+    { label: "KECAMATAN", key: "kecamatan", align: "left" },
+    {
+        label: "JUMLAH POKTAN",
+        children: [
+            { label: "ADA", key: "ada" },
+            { label: "LAPOR", key: "lapor" },
+        ],
+    },
+    { label: "%", key: "pctLapor", highlight: true, decimal: 2 },
+    {
+        label: "KEANGGOTAAN",
+        children: [
+            { label: "TARGET", key: "target" },
+            { label: "ANGGOTA YG ADA", key: "jumlahAnggota", totalKey: "totalAnggota" },
+        ],
+    },
+    { label: "SELISIH (LEBIH/KURANG)", key: "selisih" },
+    {
+        label: "KEHADIRAN",
+        children: [
+            { label: "TARGET", key: "target" },
+            { label: "ANGGOTA YG ADA", key: "jumlahAnggota", totalKey: "totalAnggota" },
+            { label: "CAPAIAN", key: "jumlahHadir", totalKey: "totalHadir" },
+        ],
+    },
+    { label: "% TERHADAP TARGET", key: "pctThdTarget", highlight: true, decimal: 0 },
+    { label: "% TERHADAP ANGGOTA YG ADA", key: "pctThdAnggota", highlight: true, decimal: 0 },
+];
 
 function initials(name) {
     if (!name) return "??";
@@ -149,6 +183,26 @@ function BklTable() {
         setViewError("");
     }
 
+    function handleExportExcel() {
+        exportMonevExcel({
+            programLabel: "BKL",
+            periodeLabel: viewTarget.periode,
+            columnGroups: BKL_COLUMNS,
+            rows: viewDetails,
+            totals: viewTotals,
+        });
+    }
+
+    function handleExportPDF() {
+        exportMonevPDF({
+            programLabel: "BKL",
+            periodeLabel: viewTarget.periode,
+            columnGroups: BKL_COLUMNS,
+            rows: viewDetails,
+            totals: viewTotals,
+        });
+    }
+
     // ===== Edit =====
     async function openEditModal(period) {
         setEditTarget(period);
@@ -223,21 +277,21 @@ function BklTable() {
             {/* SUMMARY CARDS */}
             <div className="summary-row">
                 <div className="summary-card">
-                    <div className="summary-card-icon blue">🗂️</div>
+                    <div className="summary-card-icon blue"><i className="bi bi-folder2-open"></i></div>
                     <div>
                         <div className="summary-card-value">{periods.length}</div>
                         <div className="summary-card-label">Total Periode Terekam</div>
                     </div>
                 </div>
                 <div className="summary-card">
-                    <div className="summary-card-icon green">📈</div>
+                    <div className="summary-card-icon green"><i className="bi bi-graph-up-arrow"></i></div>
                     <div>
                         <div className="summary-card-value">{avgCapaianAll}%</div>
                         <div className="summary-card-label">Rata-rata % Terhadap Target Terbaru</div>
                     </div>
                 </div>
                 <div className="summary-card">
-                    <div className="summary-card-icon orange">🕓</div>
+                    <div className="summary-card-icon orange"><i className="bi bi-clock-history"></i></div>
                     <div>
                         <div className="summary-card-value">{latestPeriod?.periode || "-"}</div>
                         <div className="summary-card-label">Periode Terakhir Diupdate</div>
@@ -249,7 +303,7 @@ function BklTable() {
             <div className="content-toolbar">
                 <div className="toolbar-left">
                     <div className="toolbar-search">
-                        <span className="search-icon">🔍</span>
+                        <i className="bi bi-search search-icon"></i>
                         <input
                             type="text"
                             placeholder="Cari periode..."
@@ -269,7 +323,7 @@ function BklTable() {
                     </select>
                 </div>
                 <Link to="/admin/monitoring/bkl/tambah" className="btn-add-data">
-                    <span className="plus-icon">+</span>
+                    <i className="bi bi-plus-circle-fill"></i>
                     Tambah Data BKL
                 </Link>
             </div>
@@ -314,7 +368,7 @@ function BklTable() {
                                 <tr>
                                     <td colSpan="6">
                                         <div className="empty-state">
-                                            <div className="es-icon">🗂️</div>
+                                            <div className="es-icon"><i className="bi bi-inbox"></i></div>
                                             <p>Belum ada data periode</p>
                                             <small>Coba ubah kata kunci pencarian atau filter tahun, atau tambah data baru</small>
                                         </div>
@@ -326,7 +380,7 @@ function BklTable() {
                                 <tr key={p.id}>
                                     <td>
                                         <div className="periode-cell">
-                                            <div className="periode-icon">📅</div>
+                                            <div className="periode-icon"><i className="bi bi-calendar3"></i></div>
                                             <div>
                                                 <div className="periode-name">{p.periode}</div>
                                                 <div className="periode-sub">{p.fileName}</div>
@@ -357,9 +411,9 @@ function BklTable() {
                                     </td>
                                     <td className="col-actions">
                                         <div className="action-buttons">
-                                            <button className="btn-icon btn-view" title="Lihat" onClick={() => openViewModal(p)}>👁️</button>
-                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(p)}>✏️</button>
-                                            <button className="btn-icon btn-delete" title="Hapus" onClick={() => openDeleteModal(p)}>🗑️</button>
+                                            <button className="btn-icon btn-view" title="Lihat" onClick={() => openViewModal(p)}><i className="bi bi-eye-fill"></i></button>
+                                            <button className="btn-icon btn-edit" title="Edit" onClick={() => openEditModal(p)}><i className="bi bi-pencil-fill"></i></button>
+                                            <button className="btn-icon btn-delete" title="Hapus" onClick={() => openDeleteModal(p)}><i className="bi bi-trash-fill"></i></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -382,7 +436,7 @@ function BklTable() {
             {deleteTarget && (
                 <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && closeDeleteModal()}>
                     <div className="modal-box">
-                        <div className="modal-warn-icon">⚠️</div>
+                        <div className="modal-warn-icon"><i className="bi bi-exclamation-triangle-fill"></i></div>
                         <h3>Hapus Data Periode Ini?</h3>
                         <p>
                             Seluruh data monitoring BKL untuk periode <b>{deleteTarget.periode}</b> ({deleteTarget.jumlahKecamatan} kecamatan)
@@ -404,7 +458,7 @@ function BklTable() {
                     <div className="modal-box modal-wide">
                         <div className="modal-header">
                             <h3>Detail Periode — {viewTarget.periode}</h3>
-                            <button className="modal-close" onClick={closeViewModal}>✕</button>
+                            <button className="modal-close" onClick={closeViewModal}><i className="bi bi-x-lg"></i></button>
                         </div>
                         <div className="modal-body">
                             {viewLoading && (
@@ -486,6 +540,12 @@ function BklTable() {
                             )}
                         </div>
                         <div className="modal-footer">
+                            <button className="btn-cancel" style={{ background: "#e3f4e5", color: "#2e7d32" }} onClick={handleExportExcel}>
+                                <i className="bi bi-file-earmark-excel-fill"></i> Excel
+                            </button>
+                            <button className="btn-cancel" style={{ background: "#fdecea", color: "#e53935" }} onClick={handleExportPDF}>
+                                <i className="bi bi-file-earmark-pdf-fill"></i> PDF
+                            </button>
                             <button className="btn-cancel" onClick={closeViewModal}>Tutup</button>
                         </div>
                     </div>
@@ -498,7 +558,7 @@ function BklTable() {
                     <div className="modal-box modal-wide">
                         <div className="modal-header">
                             <h3>Edit Data — {editTarget.periode}</h3>
-                            <button className="modal-close" onClick={closeEditModal}>✕</button>
+                            <button className="modal-close" onClick={closeEditModal}><i className="bi bi-x-lg"></i></button>
                         </div>
                         <div className="modal-body">
                             {editLoading && (
@@ -506,7 +566,7 @@ function BklTable() {
                             )}
 
                             {!editLoading && editError && (
-                                <div style={{ textAlign: "center", padding: 12, color: "#e53935", marginBottom: 12 }}>⚠ {editError}</div>
+                                <div style={{ textAlign: "center", padding: 12, color: "#e53935", marginBottom: 12 }}><i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{editError}</div>
                             )}
 
                             {!editLoading && editRows.length > 0 && (
@@ -616,7 +676,7 @@ function BklTable() {
                                 onClick={saveEdit}
                                 disabled={saving || editLoading}
                             >
-                                {saving ? "Menyimpan..." : "💾 Simpan Perubahan"}
+                                {saving ? "Menyimpan..." : (<><i className="bi bi-check-circle-fill"></i> Simpan Perubahan</>)}
                             </button>
                         </div>
                     </div>

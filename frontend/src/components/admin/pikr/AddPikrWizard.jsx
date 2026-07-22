@@ -36,10 +36,6 @@ function matchesKeyword(header, keyword) {
     return new RegExp("\\b" + escaped + "\\b", "i").test(header);
 }
 
-/* Deteksi baris header sebenarnya + pengaman ganda: kalau cek pertama
-   (baris nomor urut kolom) gagal ke-skip karena struktur file agak beda,
-   sistem terus maju sampai ketemu baris yang kolom Kecamatan-nya beneran
-   berisi teks (bukan kosong/angka doang). */
 function findHeaderRows(json) {
     let mainIdx = -1;
     let kecColIdx = -1;
@@ -180,7 +176,7 @@ function AddPikrWizard() {
                 setSelectedFile(file);
                 setRawHeaders(headers);
                 setRawRows(rows);
-                setFileName(`📄 ${file.name} — ${rows.length} baris data terdeteksi`);
+                setFileName(`${file.name} — ${rows.length} baris data terdeteksi`);
                 setDebugText("Header terdeteksi: " + headers.map((h, i) => `[${i}] "${h || "(kosong)"}"`).join("   "));
             } catch (err) {
                 alert("Gagal membaca file. Pastikan format file benar (.xlsx/.xls/.csv).");
@@ -381,7 +377,7 @@ function AddPikrWizard() {
                             if (file) handleFile(file);
                         }}
                     >
-                        <div className="dz-icon">📁</div>
+                        <div className="dz-icon"><i className="bi bi-cloud-arrow-up-fill"></i></div>
                         <p>Klik atau seret file Excel ke sini</p>
                         <small>Format didukung: .xlsx, .xls, .csv — maks. 10MB</small>
                     </div>
@@ -394,13 +390,13 @@ function AddPikrWizard() {
                     />
 
                     <div className="upload-hint-box">
-                        ⚠️ Pastikan file yang diunggah adalah hasil unduhan langsung dari SIGA (Tabel 7A) tanpa diubah struktur kolomnya.
+                        <i className="bi bi-info-circle-fill" style={{ marginRight: 6 }}></i>Pastikan file yang diunggah adalah hasil unduhan langsung dari SIGA (Tabel 7A) tanpa diubah struktur kolomnya.
                     </div>
 
                     {fileName && (
                         <div className="file-loaded-box" style={{ display: "flex" }}>
-                            <span>{fileName}</span>
-                            <button onClick={resetUpload} title="Hapus file">✕</button>
+                            <span><i className="bi bi-file-earmark-text-fill" style={{ marginRight: 6 }}></i>{fileName}</span>
+                            <button onClick={resetUpload} title="Hapus file"><i className="bi bi-x-lg"></i></button>
                         </div>
                     )}
 
@@ -411,7 +407,7 @@ function AddPikrWizard() {
                     <div className="panel-footer">
                         <span></span>
                         <button className="btn-nav next" disabled={!fileName || !bulan || !tahun} onClick={() => goToStep(2)}>
-                            Lanjut ke Validasi →
+                            Lanjut ke Validasi <i className="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -428,7 +424,7 @@ function AddPikrWizard() {
                     <div className="validate-list">
                         {validationItems.map((it, i) => (
                             <div key={i} className={`validate-item ${it.ok ? "ok" : "err"}`}>
-                                <div className="v-icon">{it.ok ? "✓" : "✕"}</div>
+                                <div className="v-icon">{it.ok ? <i className="bi bi-check-lg"></i> : <i className="bi bi-x-lg"></i>}</div>
                                 <div className="v-text">{it.text}</div>
                             </div>
                         ))}
@@ -436,7 +432,7 @@ function AddPikrWizard() {
                         {!validationAllOk && (
                             <>
                                 <div className="upload-hint-box" style={{ marginTop: 14 }}>
-                                    ⚠️ File tidak lolos validasi. Silakan kembali dan unggah ulang file Excel SIGA yang sesuai format.
+                                    <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>File tidak lolos validasi. Silakan kembali dan unggah ulang file Excel SIGA yang sesuai format.
                                 </div>
                                 <div className="debug-box">
                                     Header yang terbaca dari file: {rawHeaders.map((h, i) => `[${i}] "${h || "(kosong)"}"`).join("   ")}
@@ -446,13 +442,13 @@ function AddPikrWizard() {
                     </div>
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(1)}>← Kembali</button>
+                        <button className="btn-nav back" onClick={() => goToStep(1)}><i className="bi bi-arrow-left"></i> Kembali</button>
                         <button
                             className="btn-nav next"
                             disabled={!validationAllOk}
                             onClick={() => { initColumnSelection(); goToStep(3); }}
                         >
-                            Lanjut ke Seleksi Kolom →
+                            Lanjut ke Seleksi Kolom <i className="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -514,13 +510,13 @@ function AddPikrWizard() {
                     </div>
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(2)}>← Kembali</button>
+                        <button className="btn-nav back" onClick={() => goToStep(2)}><i className="bi bi-arrow-left"></i> Kembali</button>
                         <button
                             className="btn-nav next"
                             disabled={!columnSelectionOk}
                             onClick={() => { buildPreview(); goToStep(4); }}
                         >
-                            Lanjut ke Preview →
+                            Lanjut ke Preview <i className="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -592,14 +588,14 @@ function AddPikrWizard() {
 
                     {saveError && (
                         <div className="upload-hint-box" style={{ background: "#fdecea", borderColor: "#f5c6c2", color: "#c62828", marginBottom: 16 }}>
-                            ⚠ {saveError}
+                            <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: 6 }}></i>{saveError}
                         </div>
                     )}
 
                     <div className="panel-footer">
-                        <button className="btn-nav back" onClick={() => goToStep(3)} disabled={saving}>← Kembali</button>
+                        <button className="btn-nav back" onClick={() => goToStep(3)} disabled={saving}><i className="bi bi-arrow-left"></i> Kembali</button>
                         <button className="btn-nav save" onClick={saveMonitoring} disabled={saving}>
-                            {saving ? "Menyimpan..." : "💾 Simpan Data Monitoring"}
+                            {saving ? "Menyimpan..." : (<><i className="bi bi-save-fill"></i> Simpan Data Monitoring</>)}
                         </button>
                     </div>
                 </div>
@@ -609,7 +605,7 @@ function AddPikrWizard() {
             {successOpen && (
                 <div className="success-overlay open">
                     <div className="success-box">
-                        <div className="success-icon">✓</div>
+                        <div className="success-icon"><i className="bi bi-check-lg"></i></div>
                         <h3>Data Monitoring PIK-R Tersimpan</h3>
                         <p>Data hasil upload dan perhitungan capaian program PIK-R telah berhasil disimpan ke sistem.</p>
                         <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>

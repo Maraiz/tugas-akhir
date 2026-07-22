@@ -164,6 +164,7 @@
     flex-shrink: 0;
 }
 
+.notif-item-icon.info { background: #eef3fb; color: #1565c0; }
 .notif-item-icon.warning { background: #fff4e5; color: #ef6c00; }
 .notif-item-icon.danger { background: #fdecea; color: #e53935; }
 

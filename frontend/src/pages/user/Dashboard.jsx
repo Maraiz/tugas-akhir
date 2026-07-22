@@ -1,7 +1,7 @@
-function DashboardUser() {
-    return (
-        <h1>Ini Halaman User</h1>
-    );
+import DashboardContent from "../../components/user/dashboard/DashboardContent";
+
+function Dashboard() {
+    return <DashboardContent />;
 }
 
-export default DashboardUser;
+export default Dashboard;

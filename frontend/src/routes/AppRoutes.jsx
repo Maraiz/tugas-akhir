@@ -20,7 +20,10 @@ import RiwayatUpload from "../pages/admin/RiwayatUpload";
 import Laporan from "../pages/admin/Laporan";
 
 import DashboardPetugas from "../pages/petugas/Dashboard";
+
+import UserLayout from "../components/layout/user/UserLayout";
 import DashboardUser from "../pages/user/Dashboard";
+import MonitoringProgram from "../pages/user/MonitoringProgram";
 
 function AppRoutes() {
 
@@ -57,10 +60,7 @@ function AppRoutes() {
 
                 </Route>
 
-                {/* ===== PETUGAS — cuma role "petugas" yang boleh masuk =====
-                    Sebelumnya route ini SAMA SEKALI TIDAK DIBUNGKUS ProtectedRoute,
-                    jadi siapapun (bahkan yang belum login) bisa langsung akses
-                    /petugas lewat URL. Sekarang dikunci. */}
+                {/* ===== PETUGAS — cuma role "petugas" yang boleh masuk ===== */}
                 <Route element={<ProtectedRoute allowedRoles={["petugas"]} />}>
                     <Route
                         path="/petugas"
@@ -68,13 +68,12 @@ function AppRoutes() {
                     />
                 </Route>
 
-                {/* ===== USER/PIMPINAN — cuma role "user" yang boleh masuk =====
-                    Sama kayak /petugas, sebelumnya juga tidak terlindungi. */}
+                {/* ===== USER/PIMPINAN — cuma role "user" yang boleh masuk ===== */}
                 <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
-                    <Route
-                        path="/user"
-                        element={<DashboardUser />}
-                    />
+                    <Route path="/user" element={<UserLayout />}>
+                        <Route index element={<DashboardUser />} />
+                        <Route path="monitoring/:program" element={<MonitoringProgram />} />
+                    </Route>
                 </Route>
 
             </Routes>

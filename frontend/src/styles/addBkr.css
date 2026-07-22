@@ -119,7 +119,7 @@
     transition: border-color 0.15s, background 0.15s;
 }
 .upload-dropzone:hover, .upload-dropzone.drag-over { border-color: #1565c0; background: #eef3fb; }
-.upload-dropzone .dz-icon { font-size: 40px; margin-bottom: 10px; }
+.upload-dropzone .dz-icon { font-size: 36px; color: #1565c0; margin-bottom: 10px; }
 .upload-dropzone p { font-size: 14.5px; font-weight: 600; color: #2d2d3a; margin-bottom: 5px; }
 .upload-dropzone small { font-size: 12px; color: #9090a8; }
 
@@ -241,6 +241,7 @@
 .btn-nav {
     padding: 11px 24px; border-radius: 10px; cursor: pointer;
     font-size: 13.5px; font-weight: 600; font-family: inherit; border: none;
+    display: inline-flex; align-items: center; gap: 8px;
 }
 .btn-nav.back { background: #f0f2f8; color: #555668; }
 .btn-nav.back:hover { background: #e5e8f0; }

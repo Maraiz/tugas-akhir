@@ -43,32 +43,53 @@ function Header({ title, breadcrumb }) {
     }
 
     // ===== Ambil notifikasi — reuse endpoint Dashboard, disusun ulang
-    // jadi daftar notifikasi (program belum upload + kecamatan bermasalah) =====
+    // jadi daftar notifikasi (aktivitas terbaru + program belum upload +
+    // kecamatan bermasalah). Link tiap notifikasi disesuaikan sama role
+    // yang lagi login — Admin diarahin ke halaman kerja (Riwayat Upload/
+    // Laporan), User/Pimpinan diarahin ke halaman Monitoring per-Program
+    // yang relevan, soalnya dia nggak punya akses ke halaman Admin. =====
     async function fetchNotifications() {
         setNotifLoading(true);
         try {
             const res = await api.get("/dashboard");
             const data = res.data.data;
 
+            const role = storedUser?.role;
+            const isAdmin = role === "admin";
+
             const list = [];
 
+            // 1. Aktivitas terbaru (data baru diupload/diperbarui) — max 3,
+            // paling relevan buat "apa yang baru berubah"
+            (data.aktivitasTerbaru || []).slice(0, 3).forEach((a, i) => {
+                list.push({
+                    id: `activity-${i}`,
+                    type: "info",
+                    icon: "bi-cloud-check-fill",
+                    text: <><b>{a.programLabel}</b> diperbarui oleh {a.diuploadOleh} — periode {a.periode}</>,
+                    to: isAdmin ? "/admin/riwayat-upload" : `/user/monitoring/${a.program}`,
+                });
+            });
+
+            // 2. Program yang belum upload periode berjalan
             (data.statusUpload || []).filter((p) => !p.done).forEach((p) => {
                 list.push({
                     id: `upload-${p.program}`,
                     type: "warning",
                     icon: "bi-cloud-arrow-up-fill",
                     text: <><b>{p.label}</b> belum upload data periode {data.periodeBerjalan}</>,
-                    to: "/admin/riwayat-upload",
+                    to: isAdmin ? "/admin/riwayat-upload" : `/user/monitoring/${p.program}`,
                 });
             });
 
+            // 3. Kecamatan perlu perhatian
             (data.kecamatanPerluPerhatian || []).forEach((a, i) => {
                 list.push({
                     id: `attention-${i}`,
                     type: "danger",
                     icon: "bi-exclamation-triangle-fill",
                     text: <>Kecamatan <b>{a.kecamatan}</b> capaian {a.programLabel} cuma {a.pct}%</>,
-                    to: "/admin/laporan",
+                    to: isAdmin ? "/admin/laporan" : `/user/monitoring/${a.program}`,
                 });
             });
 

@@ -2,6 +2,44 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../services/api";
 import "../../../styles/dataBkb.css";
+import { exportMonevExcel, exportMonevPDF } from "../../../utils/exportMonev";
+
+// Config kolom buat export Excel/PDF — struktur BKB paling kompleks:
+// ada kolom "Keanggotaan" & "Kehadiran" yang sama-sama nunjukkin Target &
+// Anggota Yg Ada (dobel), plus kolom Selisih di tengah.
+// totalKey di-override manual soalnya field totals-nya "totalAnggota" /
+// "totalHadir", bukan "totalJumlahAnggota" / "totalJumlahHadir" (nggak
+// ngikutin pola otomatis dari nama key data-nya).
+const BKB_COLUMNS = [
+    { label: "KODE", key: "kode" },
+    { label: "KECAMATAN", key: "kecamatan", align: "left" },
+    {
+        label: "JUMLAH POKTAN",
+        children: [
+            { label: "ADA", key: "ada" },
+            { label: "LAPOR", key: "lapor" },
+        ],
+    },
+    { label: "%", key: "pctLapor", highlight: true, decimal: 2 },
+    {
+        label: "KEANGGOTAAN",
+        children: [
+            { label: "TARGET", key: "target" },
+            { label: "ANGGOTA YG ADA", key: "jumlahAnggota", totalKey: "totalAnggota" },
+        ],
+    },
+    { label: "SELISIH (LEBIH/KURANG)", key: "selisih" },
+    {
+        label: "KEHADIRAN",
+        children: [
+            { label: "TARGET", key: "target" },
+            { label: "ANGGOTA YG ADA", key: "jumlahAnggota", totalKey: "totalAnggota" },
+            { label: "CAPAIAN", key: "jumlahHadir", totalKey: "totalHadir" },
+        ],
+    },
+    { label: "% TERHADAP TARGET", key: "pctThdTarget", highlight: true, decimal: 0 },
+    { label: "% TERHADAP ANGGOTA YG ADA", key: "pctThdAnggota", highlight: true, decimal: 0 },
+];
 
 function initials(name) {
     if (!name) return "??";
@@ -147,6 +185,26 @@ function BkbTable() {
         setViewTarget(null);
         setViewDetails([]);
         setViewError("");
+    }
+
+    function handleExportExcel() {
+        exportMonevExcel({
+            programLabel: "BKB",
+            periodeLabel: viewTarget.periode,
+            columnGroups: BKB_COLUMNS,
+            rows: viewDetails,
+            totals: viewTotals,
+        });
+    }
+
+    function handleExportPDF() {
+        exportMonevPDF({
+            programLabel: "BKB",
+            periodeLabel: viewTarget.periode,
+            columnGroups: BKB_COLUMNS,
+            rows: viewDetails,
+            totals: viewTotals,
+        });
     }
 
     // ===== Edit =====
@@ -486,6 +544,12 @@ function BkbTable() {
                             )}
                         </div>
                         <div className="modal-footer">
+                            <button className="btn-cancel" style={{ background: "#e3f4e5", color: "#2e7d32" }} onClick={handleExportExcel}>
+                                <i className="bi bi-file-earmark-excel-fill"></i> Excel
+                            </button>
+                            <button className="btn-cancel" style={{ background: "#fdecea", color: "#e53935" }} onClick={handleExportPDF}>
+                                <i className="bi bi-file-earmark-pdf-fill"></i> PDF
+                            </button>
                             <button className="btn-cancel" onClick={closeViewModal}>Tutup</button>
                         </div>
                     </div>
