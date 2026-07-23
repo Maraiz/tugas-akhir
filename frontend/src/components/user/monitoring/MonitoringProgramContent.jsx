@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import Chart from "chart.js/auto";
 import api from "../../../services/api";
 import "../../../styles/monitoringProgram.css";
+import { exportMonevExcel, exportMonevPDF } from "../../../utils/exportMonev";
+import { PROGRAM_EXPORT_CONFIG, computeMonevTotals } from "../../../utils/programColumns";
 
 /* ==========================================================================
    PROGRAM_CONFIG — lapisan penyeragam, sama pola kayak PROGRAM_CONFIG di
@@ -271,6 +273,33 @@ function MonitoringProgramContent() {
 
     const rows = detail?.details || [];
 
+    const exportConfig = PROGRAM_EXPORT_CONFIG[program];
+    const monevTotals = computeMonevTotals(program, rows);
+
+    function handleExportExcel() {
+        if (!exportConfig || rows.length === 0) return;
+        exportMonevExcel({
+            programLabel: config.label,
+            periodeLabel: detail.periode,
+            columnGroups: exportConfig.columns,
+            rows,
+            totals: monevTotals,
+            title: exportConfig.title,
+        });
+    }
+
+    function handleExportPDF() {
+        if (!exportConfig || rows.length === 0) return;
+        exportMonevPDF({
+            programLabel: config.label,
+            periodeLabel: detail.periode,
+            columnGroups: exportConfig.columns,
+            rows,
+            totals: monevTotals,
+            title: exportConfig.title,
+        });
+    }
+
     // ===== Opsi dropdown Tahun — gabungan tahun yang ada datanya + tahun sekarang
     // (biar tahun berjalan selalu bisa dipilih walau belum ada data) =====
     const tahunOptions = Array.from(
@@ -410,9 +439,19 @@ function MonitoringProgramContent() {
 
                     {/* TABEL MONEV */}
                     <div className="mp-panel">
-                        <div className="mp-panel-head">
-                            <i className="bi bi-table"></i>
-                            <h3>MONEV POKTAN {config.label} — {detail.periode}</h3>
+                        <div className="mp-panel-head" style={{ justifyContent: "space-between" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <i className="bi bi-table"></i>
+                                <h3>MONEV POKTAN {config.label} — {detail.periode}</h3>
+                            </div>
+                            <div style={{ display: "flex", gap: 8 }}>
+                                <button className="mp-export-btn excel" onClick={handleExportExcel}>
+                                    <i className="bi bi-file-earmark-excel-fill"></i> Excel
+                                </button>
+                                <button className="mp-export-btn pdf" onClick={handleExportPDF}>
+                                    <i className="bi bi-file-earmark-pdf-fill"></i> PDF
+                                </button>
+                            </div>
                         </div>
                         <div className="mp-table-wrap">
                             <table className="mp-table">
