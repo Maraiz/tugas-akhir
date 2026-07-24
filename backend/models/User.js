@@ -27,6 +27,29 @@ const User = sequelize.define(
             unique: true,
         },
 
+        email: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+            // Buat kirim link/OTP reset password ke depannya — opsional
+            // dulu, soalnya banyak akun lama (Petugas via Import CSV)
+            // belum tentu punya email
+        },
+
+        resetPasswordToken: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            // Token acak yang dikirim lewat link email — dicocokkan pas
+            // user klik link "Reset Password". Di-null-in lagi setelah
+            // dipakai (atau kadaluwarsa)
+        },
+
+        resetPasswordExpires: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            // Batas waktu token di atas masih valid (1 jam sejak diminta)
+        },
+
         password: {
             type: DataTypes.STRING,
             allowNull: false,

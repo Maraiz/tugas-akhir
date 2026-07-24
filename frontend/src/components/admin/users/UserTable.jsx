@@ -46,7 +46,7 @@ function parseCsvLine(line) {
     return result;
 }
 
-const EMPTY_FORM = { nama: "", username: "", nip: "", password: "", role: "petugas", kecamatan: "" };
+const EMPTY_FORM = { nama: "", username: "", nip: "", email: "", password: "", role: "user", kecamatan: "" };
 
 /* ===================== INLINE STYLE BUAT KARTU STATISTIK =====================
    Sengaja ditulis inline (bukan class CSS eksternal) buat sementara,
@@ -147,8 +147,9 @@ function UserTable() {
             nama: user.nama || "",
             username: user.username || "",
             nip: user.nip || "",
+            email: user.email || "",
             password: "", // sengaja kosong, backend nggak pernah kirim password
-            role: user.role || "petugas",
+            role: user.role || "user",
             kecamatan: user.kecamatan || "",
         });
         setFormError("");
@@ -161,25 +162,32 @@ function UserTable() {
     }
 
     async function saveUser() {
-        const { nama, username, nip, password, role, kecamatan } = form;
+        const { nama, username, nip, email, password, role, kecamatan } = form;
 
         if (!nama || !role) {
             setFormError("Mohon lengkapi Nama dan Role.");
             return;
         }
 
-        if (role === "admin" && !username) {
-            setFormError("Username wajib diisi untuk role Admin.");
+        if ((role === "admin" || role === "user") && !username) {
+            setFormError(`Username wajib diisi untuk role ${role === "admin" ? "Admin" : "User"}.`);
             return;
         }
 
-        if ((role === "petugas" || role === "user") && !nip) {
-            setFormError("NIP wajib diisi untuk role Petugas/User.");
+        if (role === "petugas" && !nip) {
+            setFormError("NIP wajib diisi untuk role Petugas.");
             return;
         }
 
         if (role === "petugas" && !kecamatan) {
             setFormError("Kecamatan wajib diisi untuk role Petugas.");
+            return;
+        }
+
+        // Email opsional, tapi kalau diisi harus format yang valid — bakal
+        // dipakai buat kirim link/OTP reset password ke depannya
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setFormError("Format email tidak valid.");
             return;
         }
 
@@ -195,8 +203,9 @@ function UserTable() {
         const payload = {
             nama,
             role,
-            username: role === "admin" ? username : null,
-            nip: role === "admin" ? null : nip,
+            username: (role === "admin" || role === "user") ? (username || null) : null,
+            nip: role === "admin" ? null : (nip || null),
+            email: email || null,
             kecamatan: role === "petugas" ? kecamatan : null,
         };
 
@@ -478,7 +487,7 @@ function UserTable() {
 
                             {!loading && !loadError && filteredUsers.map((u) => (
                                 <tr key={u.id}>
-                                    <td className="cell-nip">{u.role === "admin" ? u.username : u.nip}</td>
+                                    <td className="cell-nip">{u.username || u.nip || <span style={{ color: "#c7cbd6" }}>-</span>}</td>
                                     <td>
                                         <div className="user-cell">
                                             <div className="user-avatar">{initials(u.nama)}</div>
@@ -535,7 +544,9 @@ function UserTable() {
                                     value={form.role}
                                     onChange={(e) => setForm({ ...form, role: e.target.value })}
                                 >
-                                    {ROLE_OPTIONS.map((r) => (
+                                    {ROLE_OPTIONS
+                                        .filter((r) => r.value !== "petugas" || editingUser?.role === "petugas")
+                                        .map((r) => (
                                         <option key={r.value} value={r.value}>{r.label}</option>
                                     ))}
                                 </select>
@@ -551,7 +562,7 @@ function UserTable() {
                                 />
                             </div>
 
-                            {form.role === "admin" ? (
+                            {form.role === "admin" && (
                                 <div className="form-group">
                                     <label><i className="bi bi-at"></i>Username</label>
                                     <input
@@ -561,7 +572,37 @@ function UserTable() {
                                         onChange={(e) => setForm({ ...form, username: e.target.value })}
                                     />
                                 </div>
-                            ) : (
+                            )}
+
+                            {form.role === "user" && (
+                                <>
+                                    <div className="form-group">
+                                        <label>
+                                            <i className="bi bi-at"></i>Username
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Masukkan username"
+                                            value={form.username}
+                                            onChange={(e) => setForm({ ...form, username: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>
+                                            <i className="bi bi-credit-card-2-front-fill"></i>NIP
+                                            <span style={{ fontWeight: 400, color: "#9090a8" }}>&nbsp;(opsional)</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Masukkan NIP (kalau ASN/PNS)"
+                                            value={form.nip}
+                                            onChange={(e) => setForm({ ...form, nip: e.target.value })}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {form.role === "petugas" && (
                                 <div className="form-group">
                                     <label><i className="bi bi-credit-card-2-front-fill"></i>NIP</label>
                                     <input
@@ -572,6 +613,19 @@ function UserTable() {
                                     />
                                 </div>
                             )}
+
+                            <div className="form-group">
+                                <label>
+                                    <i className="bi bi-envelope-fill"></i>Email
+                                    <span style={{ fontWeight: 400, color: "#9090a8" }}>&nbsp;(opsional)</span>
+                                </label>
+                                <input
+                                    type="email"
+                                    placeholder="nama@contoh.com"
+                                    value={form.email}
+                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                />
+                            </div>
 
                             <div className="form-group">
                                 <label>

@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
 import Layout from "../components/layout/Layout";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 import DashboardAdmin from "../pages/admin/Dashboard";
 import DataPengguna from "../pages/admin/DataPengguna";
@@ -32,6 +34,9 @@ function AppRoutes() {
         <BrowserRouter>
 
             <Routes>
+
+                <Route path="/lupa-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
                 <Route
                     path="/"

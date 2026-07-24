@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
 // Field yang boleh dikirim balik ke frontend (password TIDAK PERNAH dikirim)
-const SAFE_ATTRIBUTES = ["id", "nama", "username", "nip", "role", "kecamatan", "createdAt", "updatedAt"];
+const SAFE_ATTRIBUTES = ["id", "nama", "username", "nip", "email", "role", "kecamatan", "createdAt", "updatedAt"];
 
 class UserController {
 
@@ -62,6 +62,7 @@ class UserController {
                 nama,
                 username,
                 nip,
+                email,
                 password,
                 role,
                 kecamatan,
@@ -123,19 +124,31 @@ class UserController {
             // Petugas / User
             // ===========================
 
+            if (role === "user" && !username) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message: "Username wajib diisi untuk role User."
+
+                });
+
+            }
+
+            if (role === "petugas" && !nip) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message: "NIP wajib diisi untuk role Petugas."
+
+                });
+
+            }
+
             if (role === "petugas" || role === "user") {
-
-                if (!nip) {
-
-                    return res.status(400).json({
-
-                        success: false,
-
-                        message: "NIP wajib diisi."
-
-                    });
-
-                }
 
                 if (role === "petugas" && !kecamatan) {
 
@@ -149,21 +162,75 @@ class UserController {
 
                 }
 
-                const cekNip = await User.findOne({
+                // Username cuma relevan buat role User (Admin sudah dicek di atas)
+                if (role === "user" && username) {
+
+                    const cekUsername = await User.findOne({
+
+                        where: {
+                            username
+                        }
+
+                    });
+
+                    if (cekUsername) {
+
+                        return res.status(409).json({
+
+                            success: false,
+
+                            message: "Username sudah digunakan."
+
+                        });
+
+                    }
+
+                }
+
+                if (nip) {
+
+                    const cekNip = await User.findOne({
+
+                        where: {
+                            nip
+                        }
+
+                    });
+
+                    if (cekNip) {
+
+                        return res.status(409).json({
+
+                            success: false,
+
+                            message: "NIP sudah digunakan."
+
+                        });
+
+                    }
+
+                }
+
+            }
+
+            // Email opsional buat semua role — kalau diisi, cek duplikatnya
+            if (email) {
+
+                const cekEmail = await User.findOne({
 
                     where: {
-                        nip
+                        email
                     }
 
                 });
 
-                if (cekNip) {
+                if (cekEmail) {
 
                     return res.status(409).json({
 
                         success: false,
 
-                        message: "NIP sudah digunakan."
+                        message: "Email sudah digunakan."
 
                     });
 
@@ -183,9 +250,11 @@ class UserController {
 
                 nama,
 
-                username: role === "admin" ? username : null,
+                username: (role === "admin" || role === "user") ? (username || null) : null,
 
-                nip: role === "admin" ? null : nip,
+                nip: role === "admin" ? null : (nip || null),
+
+                email: email || null,
 
                 password: hashedPassword,
 
@@ -252,6 +321,7 @@ class UserController {
                 nama,
                 username,
                 nip,
+                email,
                 password,
                 role,
                 kecamatan,
@@ -270,12 +340,26 @@ class UserController {
 
             }
 
-            if ((targetRole === "petugas" || targetRole === "user") && !nip) {
+            // NIP sekarang OPSIONAL — nggak wajib diisi lagi buat role User.
+            // (Cek duplikat NIP tetap jalan di bawah, kalau field-nya diisi.)
+
+            if (targetRole === "user" && !username) {
 
                 return res.status(400).json({
 
                     success: false,
-                    message: "NIP wajib diisi.",
+                    message: "Username wajib diisi untuk role User.",
+
+                });
+
+            }
+
+            if (targetRole === "petugas" && !nip) {
+
+                return res.status(400).json({
+
+                    success: false,
+                    message: "NIP wajib diisi untuk role Petugas.",
 
                 });
 
@@ -293,7 +377,7 @@ class UserController {
             }
 
             // Cek duplikasi username/NIP milik user LAIN (bukan dirinya sendiri)
-            if (targetRole === "admin" && username) {
+            if ((targetRole === "admin" || targetRole === "user") && username) {
 
                 const cekUsername = await User.findOne({
                     where: { username },
@@ -327,13 +411,33 @@ class UserController {
 
             }
 
+            // Cek duplikasi email milik user LAIN (bukan dirinya sendiri)
+            if (email) {
+
+                const cekEmail = await User.findOne({
+                    where: { email },
+                });
+
+                if (cekEmail && cekEmail.id !== user.id) {
+
+                    return res.status(409).json({
+                        success: false,
+                        message: "Email sudah digunakan.",
+                    });
+
+                }
+
+            }
+
             const updateData = {
 
                 nama: nama || user.nama,
 
-                username: targetRole === "admin" ? username : null,
+                username: (targetRole === "admin" || targetRole === "user") ? (username || null) : null,
 
-                nip: targetRole === "admin" ? null : nip,
+                nip: targetRole === "admin" ? null : (nip || null),
+
+                email: email || null,
 
                 role: targetRole,
 

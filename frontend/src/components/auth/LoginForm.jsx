@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import logo from "../../assets/images/logodinsos.jpg";
 import "../../styles/login.css";
 import api from "../../services/api";
@@ -179,12 +179,12 @@ function LoginForm() {
 
                             </label>
 
-                            <a
-                                href="#"
+                            <Link
+                                to="/lupa-password"
                                 className="forgot-password"
                             >
                                 Forgot Password?
-                            </a>
+                            </Link>
 
                         </div>
 
