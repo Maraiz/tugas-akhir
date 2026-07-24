@@ -300,3 +300,13 @@
 .dropdown-logout-btn:hover {
     background: #fbd9d5;
 }
+
+
+/* ===== Foto profil di Header (kalau ada) — bentuk & ukuran sama kayak .h-avatar ===== */
+.h-avatar-img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}

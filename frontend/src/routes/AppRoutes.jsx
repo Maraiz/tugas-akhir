@@ -20,12 +20,16 @@ import DataUppka from "../pages/admin/DataUppka";
 import AddUppka from "../pages/admin/AddUppka";
 import RiwayatUpload from "../pages/admin/RiwayatUpload";
 import Laporan from "../pages/admin/Laporan";
+import Profil from "../pages/admin/Profil";
 
 import DashboardPetugas from "../pages/petugas/Dashboard";
 
 import UserLayout from "../components/layout/user/UserLayout";
 import DashboardUser from "../pages/user/Dashboard";
 import MonitoringProgram from "../pages/user/MonitoringProgram";
+import DetailKecamatan from "../pages/user/DetailKecamatan";
+import LaporanUser from "../pages/user/Laporan";
+import ProfilUser from "../pages/user/Profil";
 
 function AppRoutes() {
 
@@ -35,13 +39,10 @@ function AppRoutes() {
 
             <Routes>
 
+                <Route path="/"element={<Login />}/>
+
                 <Route path="/lupa-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-
-                <Route
-                    path="/"
-                    element={<Login />}
-                />
 
                 {/* ===== ADMIN — cuma role "admin" yang boleh masuk ===== */}
                 <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
@@ -61,6 +62,7 @@ function AppRoutes() {
                         <Route path="monitoring/uppka/tambah" element={<AddUppka />} />
                         <Route path="riwayat-upload" element={<RiwayatUpload />} />
                         <Route path="laporan" element={<Laporan />} />
+                        <Route path="profil" element={<Profil />} />
                     </Route>
 
                 </Route>
@@ -78,6 +80,9 @@ function AppRoutes() {
                     <Route path="/user" element={<UserLayout />}>
                         <Route index element={<DashboardUser />} />
                         <Route path="monitoring/:program" element={<MonitoringProgram />} />
+                        <Route path="profil" element={<ProfilUser />} />
+                        <Route path="detail-kecamatan" element={<DetailKecamatan />} />
+                        <Route path="laporan" element={<LaporanUser />} />
                     </Route>
                 </Route>
 

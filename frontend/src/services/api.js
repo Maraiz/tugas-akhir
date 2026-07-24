@@ -22,6 +22,16 @@ api.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // Kalau body-nya FormData (upload file — foto profil, Excel SIGA,
+        // dst), HAPUS header "Content-Type: application/json" yang
+        // nempel dari default instance di atas. Biarin browser yang
+        // otomatis isi "multipart/form-data; boundary=..." sendiri —
+        // kalau dipaksa "application/json", request FormData jadi rusak
+        // (fieldnya berubah jadi objek kosong pas nyampe di server).
+        if (config.data instanceof FormData) {
+            delete config.headers["Content-Type"];
+        }
+
         return config;
 
     },

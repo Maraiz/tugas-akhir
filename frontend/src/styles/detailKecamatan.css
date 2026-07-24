@@ -1,0 +1,205 @@
+.dk-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+}
+
+.dk-title h2 { font-size: 19px; font-weight: 700; color: #1a1a2e; }
+.dk-title p { font-size: 12.5px; color: #9090a8; margin-top: 3px; }
+
+.dk-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dk-filter select {
+    padding: 10px 14px;
+    border: 1px solid #e0e4ee;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #ffffff;
+    color: #2d2d3a;
+    outline: none;
+    cursor: pointer;
+    min-width: 160px;
+}
+
+.dk-filter select:focus { border-color: #6a1b9a; }
+
+.dk-btn-apply {
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #6a1b9a, #8e24aa);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    box-shadow: 0 3px 10px rgba(106, 27, 154, 0.3);
+    white-space: nowrap;
+}
+
+.dk-btn-apply:disabled { opacity: 0.6; cursor: not-allowed; }
+.dk-btn-apply:hover:not(:disabled) { opacity: 0.92; }
+
+/* ===== Kartu ringkasan kecamatan ===== */
+.dk-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: linear-gradient(135deg, #4a1268, #6a1b9a);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.dk-summary-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.dk-summary-card h3 { font-size: 19px; font-weight: 700; }
+.dk-summary-card p { font-size: 12.5px; color: rgba(255, 255, 255, 0.75); margin-top: 2px; }
+
+.dk-summary-score { margin-left: auto; text-align: right; }
+.dk-summary-score-value { font-size: 30px; font-weight: 700; }
+.dk-summary-score-label { font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px; }
+
+/* ===== Insight ===== */
+.dk-insight-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+
+.dk-insight-card {
+    flex: 1;
+    min-width: 190px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dk-insight-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.dk-insight-icon.green { background: #e3f4e5; color: #2e7d32; }
+.dk-insight-icon.red { background: #fdecea; color: #e53935; }
+.dk-insight-icon.blue { background: #f3e5f9; color: #6a1b9a; }
+
+.dk-insight-value { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+.dk-insight-label { font-size: 11.5px; color: #9090a8; margin-top: 2px; }
+
+/* ===== 5 Kartu Program ===== */
+.dk-program-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1100px) { .dk-program-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px) { .dk-program-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.dk-program-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dk-program-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); }
+
+.dk-program-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dk-program-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.dk-program-name { font-size: 12.5px; font-weight: 700; color: #1a1a2e; }
+
+.dk-program-pct { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.dk-program-pct.high { color: #2e7d32; }
+.dk-program-pct.mid { color: #b8860b; }
+.dk-program-pct.low { color: #c62828; }
+
+.dk-program-bar-track {
+    width: 100%;
+    height: 6px;
+    background: #eef1f8;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.dk-program-bar-fill { height: 100%; border-radius: 20px; }
+.dk-program-bar-fill.high { background: #2e7d32; }
+.dk-program-bar-fill.mid { background: #f9a825; }
+.dk-program-bar-fill.low { background: #e53935; }
+
+.dk-program-sub { font-size: 10.5px; color: #9090a8; }
+
+.dk-program-empty {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: #b0b5c5;
+    padding: 12px 0 4px;
+}
+
+/* ===== Panel Grafik ===== */
+.dk-panel {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 22px;
+    margin-bottom: 20px;
+}
+
+.dk-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.dk-panel-head i { color: #6a1b9a; font-size: 15px; }
+.dk-panel-head h3 { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+
+.dk-chart-wrap { position: relative; height: 340px; }

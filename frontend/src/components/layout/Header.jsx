@@ -25,6 +25,8 @@ function Header({ title, breadcrumb }) {
     const [notifications, setNotifications] = useState([]);
     const [notifLoading, setNotifLoading] = useState(true);
 
+    const [photoUrl, setPhotoUrl] = useState(null);
+
     const storedUser = JSON.parse(localStorage.getItem("user") || "null");
     const displayName = storedUser?.nama || "Pengguna";
     const displayRole = ROLE_LABEL[storedUser?.role] || storedUser?.role || "-";
@@ -106,6 +108,31 @@ function Header({ title, breadcrumb }) {
         fetchNotifications();
     }, []);
 
+    // ===== Ambil foto profil — localStorage cuma nyimpen nama/username/role
+    // dari waktu login, foto-nya nggak ikut kesimpen di situ, jadi perlu
+    // di-fetch terpisah dari /profile/me =====
+    useEffect(() => {
+
+        async function fetchPhoto() {
+            try {
+                const res = await api.get("/profile/me");
+                const foto = res.data.data?.foto;
+
+                if (foto) {
+                    // Folder uploads/ di-serve di LUAR prefix /api, jadi
+                    // suffix "/api" di baseURL harus dibuang dulu
+                    const fileServerRoot = api.defaults.baseURL.replace(/\/api\/?$/, "");
+                    setPhotoUrl(`${fileServerRoot}/${foto}`);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        fetchPhoto();
+
+    }, []);
+
     // Tutup dropdown profil / notifikasi kalau klik di luar
     useEffect(() => {
         function handleClickOutside(e) {
@@ -182,7 +209,11 @@ function Header({ title, breadcrumb }) {
                 {/* ===== PROFIL ===== */}
                 <div className="header-profile-wrap" ref={dropdownRef}>
                     <div className="header-profile" onClick={() => setDropdownOpen((o) => !o)}>
-                        <div className="h-avatar">{initials(displayName)}</div>
+                        {photoUrl ? (
+                            <img src={photoUrl} alt="Foto profil" className="h-avatar-img" />
+                        ) : (
+                            <div className="h-avatar">{initials(displayName)}</div>
+                        )}
                         <div className="h-profile-info">
                             <h4>{displayName}</h4>
                             <span>{displayRole}</span>
@@ -193,12 +224,19 @@ function Header({ title, breadcrumb }) {
                     {dropdownOpen && (
                         <div className="header-profile-dropdown">
                             <div className="dropdown-user-info">
-                                <div className="h-avatar">{initials(displayName)}</div>
+                                {photoUrl ? (
+                                    <img src={photoUrl} alt="Foto profil" className="h-avatar-img" />
+                                ) : (
+                                    <div className="h-avatar">{initials(displayName)}</div>
+                                )}
                                 <div>
                                     <h4>{displayName}</h4>
                                     <span>{displayRole}</span>
                                 </div>
                             </div>
+                            <Link to={storedUser?.role === "admin" ? "/admin/profil" : "/user/profil"} className="dropdown-logout-btn" style={{ background: "#eef3fb", color: "#1565c0", marginBottom: 8, textDecoration: "none" }}>
+                                <i className="bi bi-person-fill"></i> Edit Profil
+                            </Link>
                             <div className="dropdown-divider"></div>
                             <button className="dropdown-logout-btn" onClick={handleLogout}>
                                 <i className="bi bi-box-arrow-right"></i> Logout

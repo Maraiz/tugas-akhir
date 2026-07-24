@@ -36,6 +36,12 @@ const User = sequelize.define(
             // belum tentu punya email
         },
 
+        foto: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            // Path relatif ke file foto profil, misal "uploads/profile/xxx.jpg"
+        },
+
         resetPasswordToken: {
             type: DataTypes.STRING,
             allowNull: true,

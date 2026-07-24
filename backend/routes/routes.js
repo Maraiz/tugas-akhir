@@ -30,6 +30,8 @@ router.use("/auth", require("./auth"));
 const { verifyToken } = require("../middleware/auth");
 router.use(verifyToken);
 
+router.use("/profile", require("./profile"));
+
 // ==============================
 // User Management
 // ==============================
