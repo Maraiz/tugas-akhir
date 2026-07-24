@@ -26,7 +26,7 @@ app.use("/uploads", express.static("uploads"));
 // Routes
 // =====================================
 
-app.use("/", routes);
+app.use("/api", routes);
 
 // =====================================
 // Start Server
@@ -47,7 +47,7 @@ const startServer = async () => {
             console.log(`
 ===========================================
 🚀 Monitoring Poktan API
-🌐 Server      : http://localhost:${PORT}
+🌐 Server      : http://localhost:${PORT}/api
 📦 Environment : ${process.env.NODE_ENV || "development"}
 ===========================================
 `);

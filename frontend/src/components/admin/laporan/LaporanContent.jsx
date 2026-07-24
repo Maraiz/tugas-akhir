@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Chart from "chart.js/auto";
 import api from "../../../services/api";
 import "../../../styles/laporan.css";
+import { exportLaporanPDF } from "../../../utils/exportLaporan";
 
 const PROGRAM_OPTIONS = [
     { key: "bkb", label: "BKB" },
@@ -194,6 +195,23 @@ function TabTren() {
 
     const programLabel = PROGRAM_OPTIONS.find((p) => p.key === program)?.label;
 
+    function handleExportPDF() {
+        if (data.length === 0) return;
+        exportLaporanPDF({
+            title: `Tren Capaian — Kecamatan ${kecamatan} (${programLabel})`,
+            subtitle: `Persentase capaian per periode — ${limit === 999 ? "Semua Periode" : `${limit} Bulan Terakhir`}`,
+            canvasEl: canvasRef.current,
+            insights: [
+                { value: fmtPct(avgPct), label: "Capaian Rata-rata Periode Ini" },
+                { value: `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(1)}%`, label: "Tren dari Awal ke Akhir Rentang" },
+                { value: tertinggi ? tertinggi.periode : "-", label: "Capaian Tertinggi Tercatat" },
+            ],
+            tableHead: ["Periode", "Anggota Yg Ada", "Target", "Capaian", "% Capaian"],
+            tableBody: data.map((d) => [d.periode, d.anggota ?? "-", d.target ?? "-", d.capaian ?? "-", fmtPct(d.pctCapaian)]),
+            fileName: `laporan-tren-${program}-${kecamatan}.pdf`,
+        });
+    }
+
     return (
         <>
             <div className="filter-card">
@@ -225,7 +243,7 @@ function TabTren() {
                 <button className="btn-terapkan" onClick={fetchData} disabled={loading || !kecamatan}>
                     {loading ? "Memuat..." : "Terapkan"}
                 </button>
-                <button className="btn-export-pdf"><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
+                <button className="btn-export-pdf" onClick={handleExportPDF} disabled={data.length === 0}><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
             </div>
 
             {error && (
@@ -431,6 +449,24 @@ function TabRanking() {
     const terendah = rows.length > 0 ? rows[rows.length - 1] : null;
     const rataRata = rows.length > 0 ? rows.reduce((s, d) => s + (Number(d.pctCapaian) || 0), 0) / rows.length : 0;
 
+    function handleExportPDF() {
+        if (rows.length === 0) return;
+        const progLabel = PROGRAM_OPTIONS.find((p) => p.key === program)?.label;
+        exportLaporanPDF({
+            title: `Ranking Capaian Kecamatan — ${progLabel}, ${periodeLabel}`,
+            subtitle: "Persentase capaian, diurutkan dari tertinggi",
+            canvasEl: canvasRef.current,
+            insights: [
+                { value: terbaik ? terbaik.kecamatan : "-", label: `Capaian Tertinggi (${terbaik ? fmtPct(terbaik.pctCapaian) : "-"})` },
+                { value: terendah ? terendah.kecamatan : "-", label: `Perlu Perhatian (${terendah ? fmtPct(terendah.pctCapaian) : "-"})` },
+                { value: fmtPct(rataRata), label: "Rata-rata Kabupaten" },
+            ],
+            tableHead: ["Peringkat", "Kecamatan", "Anggota Yg Ada", "Capaian", "% Capaian"],
+            tableBody: rows.map((d, i) => [i + 1, d.kecamatan, d.anggota ?? "-", d.capaian ?? "-", fmtPct(d.pctCapaian)]),
+            fileName: `laporan-ranking-${program}.pdf`,
+        });
+    }
+
     return (
         <>
             <div className="filter-card">
@@ -454,7 +490,7 @@ function TabRanking() {
                 <button className="btn-terapkan" onClick={fetchData} disabled={loading || !periodeValue}>
                     {loading ? "Memuat..." : "Terapkan"}
                 </button>
-                <button className="btn-export-pdf"><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
+                <button className="btn-export-pdf" onClick={handleExportPDF} disabled={rows.length === 0}><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
             </div>
 
             {error && (
@@ -675,6 +711,29 @@ function TabProgram() {
     const terendah = tersediaRows.length > 0 ? tersediaRows.reduce((min, d) => (Number(d.pctCapaian) < Number(min.pctCapaian) ? d : min), tersediaRows[0]) : null;
     const rataRata = tersediaRows.length > 0 ? tersediaRows.reduce((s, d) => s + (Number(d.pctCapaian) || 0), 0) / tersediaRows.length : 0;
 
+    function handleExportPDF() {
+        if (rows.length === 0) return;
+        exportLaporanPDF({
+            title: `Perbandingan Capaian Antar Program — Kecamatan ${kecamatan}, ${periodeLabel}`,
+            subtitle: "Kecamatan bisa unggul di 1 program tapi tertinggal di program lain",
+            canvasEl: canvasRef.current,
+            insights: [
+                { value: terbaik ? terbaik.label : "-", label: "Program Terbaik di Kecamatan Ini" },
+                { value: terendah ? terendah.label : "-", label: "Program Perlu Perhatian" },
+                { value: fmtPct(rataRata), label: `Rata-rata Kecamatan (${tersediaRows.length} Program)` },
+            ],
+            tableHead: ["Program", "Jumlah Poktan", "Anggota Yg Ada", "Capaian", "% Capaian"],
+            tableBody: rows.map((d) => [
+                d.label,
+                d.tersedia ? (d.ada ?? "-") : "-",
+                d.tersedia ? (d.anggota ?? "-") : "-",
+                d.tersedia ? (d.capaian ?? "-") : "-",
+                d.tersedia ? fmtPct(d.pctCapaian) : "Belum ada data",
+            ]),
+            fileName: `laporan-program-${kecamatan}.pdf`,
+        });
+    }
+
     return (
         <>
             <div className="filter-card">
@@ -699,7 +758,7 @@ function TabProgram() {
                 <button className="btn-terapkan" onClick={fetchData} disabled={loading || !kecamatan || !periodeValue}>
                     {loading ? "Memuat..." : "Terapkan"}
                 </button>
-                <button className="btn-export-pdf"><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
+                <button className="btn-export-pdf" onClick={handleExportPDF} disabled={rows.length === 0}><i className="bi bi-file-earmark-pdf-fill"></i> Ekspor PDF</button>
             </div>
 
             {error && (
